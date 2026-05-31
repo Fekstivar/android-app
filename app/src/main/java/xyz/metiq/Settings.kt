@@ -16,14 +16,12 @@ import java.io.IOException
 
 data class Settings(
     val particlesEnabled: Boolean,
-    val defaultColorId: String?,
     val timerPresetsSeconds: List<Long>,
     val languageTag: String?,
 )
 
 val DEFAULT_SETTINGS = Settings(
     particlesEnabled = true,
-    defaultColorId = null,
     timerPresetsSeconds = listOf(
         15L * 60, 30L * 60, 45L * 60, 60L * 60
     ),
@@ -38,7 +36,6 @@ private val Context.dataStore by preferencesDataStore(name = "metiq_settings")
 
 private object Keys {
     val PARTICLES_ENABLED = booleanPreferencesKey("particles_enabled")
-    val DEFAULT_COLOR_ID = stringPreferencesKey("default_color_id")
     val TIMER_PRESETS = stringPreferencesKey("timer_presets")
     val LANGUAGE_TAG = stringPreferencesKey("language_tag")
 }
@@ -52,13 +49,6 @@ class SettingsRepository(context: Context) {
 
     suspend fun setParticlesEnabled(enabled: Boolean) {
         store.edit { it[Keys.PARTICLES_ENABLED] = enabled }
-    }
-
-    suspend fun setDefaultColorId(id: String?) {
-        store.edit {
-            if (id == null) it.remove(Keys.DEFAULT_COLOR_ID)
-            else it[Keys.DEFAULT_COLOR_ID] = id
-        }
     }
 
     suspend fun setTimerPresetsSeconds(presets: List<Long>) {
@@ -76,14 +66,12 @@ class SettingsRepository(context: Context) {
 
     private fun Preferences.toSettings(): Settings {
         val particles = this[Keys.PARTICLES_ENABLED] ?: DEFAULT_SETTINGS.particlesEnabled
-        val defaultColor = this[Keys.DEFAULT_COLOR_ID]
         val presets = this[Keys.TIMER_PRESETS]?.split(',')?.mapNotNull { it.toLongOrNull() }
             ?.filter { it > 0L }?.take(MAX_TIMER_PRESETS)?.ifEmpty { null }
             ?: DEFAULT_SETTINGS.timerPresetsSeconds
         val languageTag = this[Keys.LANGUAGE_TAG]?.takeIf { it in SUPPORTED_LANGUAGE_TAGS }
         return Settings(
             particlesEnabled = particles,
-            defaultColorId = defaultColor,
             timerPresetsSeconds = presets,
             languageTag = languageTag,
         )

@@ -32,12 +32,6 @@
     <string name="settings_language_label">Lingua</string>
     <string name="settings_language_system">Predefinita del sistema</string>
 
-    <string name="settings_section_default_color">Colore predefinito all\'avvio</string>
-    <string name="settings_default_color_label">Colore</string>
-    <string name="settings_default_color_description">Se impostato, il colore scelto parte automaticamente all\'apertura dell\'app.</string>
-    <string name="settings_default_color_none">Nessuno</string>
-    <string name="settings_default_color_selected">Selezionato</string>
-
     <string name="settings_section_timer_presets">Preimpostazioni timer (minuti)</string>
     <string name="settings_timer_unit_min">min</string>
     <string name="settings_timer_save">Salva preimpostazioni</string>

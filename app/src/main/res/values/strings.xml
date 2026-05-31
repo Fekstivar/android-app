@@ -50,13 +50,6 @@
     <string name="settings_language_french" translatable="false">Français</string>
     <string name="settings_language_portuguese" translatable="false">Português</string>
 
-    <!-- Settings: default color section -->
-    <string name="settings_section_default_color">Default color on launch</string>
-    <string name="settings_default_color_label">Color</string>
-    <string name="settings_default_color_description">If set, the chosen color starts playing automatically when you open the app.</string>
-    <string name="settings_default_color_none">None</string>
-    <string name="settings_default_color_selected">Selected</string>
-
     <!-- Settings: timer presets section -->
     <string name="settings_section_timer_presets">Timer presets (minutes)</string>
     <string name="settings_timer_unit_min">min</string>

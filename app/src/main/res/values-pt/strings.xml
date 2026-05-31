@@ -32,12 +32,6 @@
     <string name="settings_language_label">Idioma</string>
     <string name="settings_language_system">Padrão do sistema</string>
 
-    <string name="settings_section_default_color">Cor padrão ao iniciar</string>
-    <string name="settings_default_color_label">Cor</string>
-    <string name="settings_default_color_description">Se definido, a cor escolhida começa a tocar automaticamente ao abrir o app.</string>
-    <string name="settings_default_color_none">Nenhuma</string>
-    <string name="settings_default_color_selected">Selecionada</string>
-
     <string name="settings_section_timer_presets">Predefinições do temporizador (minutos)</string>
     <string name="settings_timer_unit_min">min</string>
     <string name="settings_timer_save">Salvar predefinições</string>

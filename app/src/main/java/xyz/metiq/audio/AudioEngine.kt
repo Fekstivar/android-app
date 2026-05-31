@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -104,46 +103,14 @@ class AudioEngine(private val context: Context) {
 
     fun activeLayerIds(): Set<String> = layers.keys.toSet()
 
-    suspend fun crossfadeTo(
-        newId: String,
-        newAssetPath: String,
-        fadeDurationMs: Long = CROSSFADE_MS,
-    ) {
-        val outgoing = layers.keys.filter { it != newId }
-        val outgoingInitials = outgoing.associateWith { layers[it]?.volume ?: 0f }
-        try {
-            if (!layers.containsKey(newId)) startLayer(newId, newAssetPath, volume = 0f)
-            val stepMs = (fadeDurationMs / FADE_STEPS).coerceAtLeast(1L)
-            for (i in 1..FADE_STEPS) {
-                val t = i.toFloat() / FADE_STEPS
-                setLayerVolume(newId, t)
-                outgoing.forEach { id ->
-                    setLayerVolume(id, (1f - t) * (outgoingInitials[id] ?: 0f))
-                }
-                delay(stepMs)
-            }
-            setLayerVolume(newId, 1f)
-        } finally {
-            outgoing.forEach { stopLayer(it) }
-        }
+    suspend fun switchTo(newId: String, newAssetPath: String) {
+        layers.keys.filter { it != newId }.forEach { stopLayer(it) }
+        if (!layers.containsKey(newId)) startLayer(newId, newAssetPath, volume = 1f)
+        else setLayerVolume(newId, 1f)
     }
 
-    suspend fun fadeOutAllAndStop(fadeDurationMs: Long = CROSSFADE_MS) {
-        val targets = layers.keys.toList()
-        if (targets.isEmpty()) return
-        val initials = targets.associateWith { layers[it]?.volume ?: 0f }
-        try {
-            val stepMs = (fadeDurationMs / FADE_STEPS).coerceAtLeast(1L)
-            for (i in 1..FADE_STEPS) {
-                val t = i.toFloat() / FADE_STEPS
-                targets.forEach { id ->
-                    setLayerVolume(id, (1f - t) * (initials[id] ?: 0f))
-                }
-                delay(stepMs)
-            }
-        } finally {
-            targets.forEach { stopLayer(it) }
-        }
+    fun stopAll() {
+        layers.keys.toList().forEach { stopLayer(it) }
     }
 
     private fun buildTrack(sampleRate: Int, channelMask: Int, bufferBytes: Int): AudioTrack {
@@ -229,8 +196,4 @@ class AudioEngine(private val context: Context) {
         )
     }
 
-    companion object {
-        const val CROSSFADE_MS: Long = 500L
-        private const val FADE_STEPS = 20
-    }
 }

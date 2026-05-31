@@ -77,7 +77,6 @@ class MainActivity : AppCompatActivity() {
                         Route.Settings -> SettingsScreen(
                             settings = settings,
                             onParticlesEnabled = { scope.launch { repo.setParticlesEnabled(it) } },
-                            onDefaultColorId = { scope.launch { repo.setDefaultColorId(it) } },
                             onTimerPresets = { scope.launch { repo.setTimerPresetsSeconds(it) } },
                             onLanguageTag = { scope.launch { repo.setLanguageTag(it) } },
                             onBack = { route = Route.Home },

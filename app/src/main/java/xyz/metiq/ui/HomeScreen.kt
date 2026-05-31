@@ -130,8 +130,6 @@ private enum class TimerField {
     HOURS, MINUTES, SECONDS
 }
 
-private const val TIMER_FADE_DURATION_MS = 500L
-
 private fun formatDecimal(n: Int): String = n.toString().padStart(2, '0')
 private fun hoursFor(seconds: Long): Int = (seconds / 3600L).toInt()
 private fun minutesFor(seconds: Long): Int = ((seconds / 60L) % 60L).toInt()
@@ -161,7 +159,6 @@ fun HomeScreen(
     var activeId by remember { mutableStateOf<String?>(null) }
     var playing by remember { mutableStateOf(false) }
     var startJob by remember { mutableStateOf<Job?>(null) }
-    var autoplayed by remember { mutableStateOf(false) }
 
     var timerRemaining by remember { mutableLongStateOf(0L) }
     var timerRunning by remember { mutableStateOf(false) }
@@ -232,7 +229,6 @@ fun HomeScreen(
                 val existing = bound.engine.activeLayerIds().firstOrNull()
                 if (existing != null && activeId == null) {
                     activeId = existing
-                    autoplayed = true
                 }
             }
 
@@ -269,25 +265,6 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(settings.defaultColorId) {
-        if (autoplayed) return@LaunchedEffect
-        val targetId = settings.defaultColorId ?: return@LaunchedEffect
-        while (binder == null || controller == null) {
-            delay(50L)
-            if (autoplayed) return@LaunchedEffect
-        }
-        if (activeId != null) return@LaunchedEffect
-        val title = noiseTitleById[targetId] ?: return@LaunchedEffect
-        val argb = noiseArgbById[targetId] ?: return@LaunchedEffect
-        autoplayed = true
-        startJob?.cancel()
-        startJob = scope.launch {
-            selectColor(
-                targetId, title, argb, null, binder, controller, resetTimer,
-            ) { activeId = it }
-        }
-    }
-
     LaunchedEffect(timerRunning) {
         if (!timerRunning) return@LaunchedEffect
         while (timerRunning && timerRemaining > 0L) {
@@ -297,7 +274,7 @@ fun HomeScreen(
         if (timerRunning && timerRemaining == 0L) {
             val c = controller ?: return@LaunchedEffect
             val b = binder ?: return@LaunchedEffect
-            b.engine.fadeOutAllAndStop(TIMER_FADE_DURATION_MS)
+            b.engine.stopAll()
             b.setActiveColor(null, null)
             c.stop()
             activeId = null
@@ -755,7 +732,7 @@ private suspend fun selectColor(
         b.setActiveColor(null, null)
         setActive(null)
         resetTimer()
-        b.engine.fadeOutAllAndStop()
+        b.engine.stopAll()
         c.stop()
         return
     }
@@ -764,7 +741,7 @@ private suspend fun selectColor(
     resetTimer()
     b.requestAudioFocusNow()
     c.play()
-    b.engine.crossfadeTo(id, "audio/$id.ogg")
+    b.engine.switchTo(id, "audio/$id.ogg")
 }
 
 @Preview(name = "Home", showBackground = true, backgroundColor = 0xFF111010)

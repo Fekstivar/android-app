@@ -69,19 +69,6 @@ import xyz.metiq.ui.theme.MetiqColors
 import xyz.metiq.ui.theme.MetiqTheme
 import xyz.metiq.ui.theme.Satoshi
 
-private data class DefaultColorOption(
-    val id: String?,
-    @param:StringRes val labelRes: Int,
-)
-
-private val DEFAULT_COLOR_OPTIONS = listOf(
-    DefaultColorOption(null, R.string.settings_default_color_none),
-    DefaultColorOption("pink", R.string.color_pink),
-    DefaultColorOption("brown", R.string.color_brown),
-    DefaultColorOption("white", R.string.color_white),
-    DefaultColorOption("grey", R.string.color_grey),
-)
-
 private data class LanguageOption(
     val tag: String?,
     @param:StringRes val labelRes: Int,
@@ -104,7 +91,6 @@ private const val GH_SPONSORS_URL = "https://github.com/sponsors/metiq-xyz"
 fun SettingsScreen(
     settings: Settings,
     onParticlesEnabled: (Boolean) -> Unit,
-    onDefaultColorId: (String?) -> Unit,
     onTimerPresets: (List<Long>) -> Unit,
     onLanguageTag: (String?) -> Unit,
     onBack: () -> Unit,
@@ -161,22 +147,6 @@ fun SettingsScreen(
                     description = stringResource(R.string.settings_particles_description),
                     checked = settings.particlesEnabled,
                     onToggle = onParticlesEnabled,
-                )
-            }
-            Section(stringResource(R.string.settings_section_default_color)) {
-                Text(
-                    stringResource(R.string.settings_default_color_description),
-                    color = tokens.textPrimary.copy(alpha = 0.7f),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                    style = TextStyle(fontFamily = Satoshi, fontSize = 14.sp, lineHeight = 18.sp),
-                )
-                DropdownPickerRow(
-                    label = stringResource(R.string.settings_default_color_label),
-                    options = DEFAULT_COLOR_OPTIONS,
-                    current = DEFAULT_COLOR_OPTIONS.first { it.id == settings.defaultColorId },
-                    labelFor = { stringResource(it.labelRes) },
-                    leadingFor = { DefaultColorSwatch(it) },
-                    onPick = { onDefaultColorId(it.id) },
                 )
             }
             Section(stringResource(R.string.settings_section_language)) {
@@ -271,36 +241,6 @@ private fun Section(title: String, content: @Composable () -> Unit) {
 }
 
 private val SECTION_HORIZONTAL_PADDING = 16.dp
-
-@Composable
-private fun DefaultColorSwatch(opt: DefaultColorOption) {
-    val tokens = LocalMetiqColors.current
-    if (opt.id == null) {
-        Box(modifier = Modifier.size(20.dp), contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = Icons.Outlined.Block,
-                contentDescription = null,
-                tint = tokens.textPrimary.copy(alpha = 0.5f),
-                modifier = Modifier.size(16.dp),
-            )
-        }
-    } else {
-        val palette = when (opt.id) {
-            "pink" -> tokens.noisePink
-            "brown" -> tokens.noiseBrown
-            "white" -> tokens.noiseWhite
-            "grey" -> tokens.noiseGrey
-            else -> tokens.noiseGrey
-        }
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(palette.fill)
-                .border(1.dp, tokens.textPrimary.copy(alpha = 0.12f), RoundedCornerShape(6.dp)),
-        )
-    }
-}
 
 @Composable
 private fun <T> DropdownPickerRow(
@@ -584,7 +524,6 @@ private fun SettingsScreenPreview() {
         SettingsScreen(
             settings = DEFAULT_SETTINGS,
             onParticlesEnabled = {},
-            onDefaultColorId = {},
             onTimerPresets = {},
             onLanguageTag = {},
             onBack = {},
