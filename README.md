@@ -1,7 +1,7 @@
 <br />
 
 <p align="center">
-    <img src=".github/static/logo.svg" alt="Metiq logo" width="60%" />
+    <img src=".github/static/logo.svg" alt="Metiq logo" width="40%" />
 </p>
 
 <br />
