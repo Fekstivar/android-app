@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_helper">Toque numa cor de ruído para reproduzi-lo ou pará-lo.\nDefina um temporizador se quiser que se desligue automaticamente.</string>
+    <string name="home_playing_on">Reproduzindo em: %1$s</string>
+    <string name="home_settings_cd">Configurações</string>
+
+    <string name="color_pink">Rosa</string>
+    <string name="color_brown">Marrom</string>
+    <string name="color_white">Branco</string>
+    <string name="color_grey">Cinza</string>
+
+    <string name="noise_title_pink">Ruído rosa</string>
+    <string name="noise_title_brown">Ruído marrom</string>
+    <string name="noise_title_white">Ruído branco</string>
+    <string name="noise_title_grey">Ruído cinza</string>
+
+    <string name="timer_label">Temporizador</string>
+    <string name="timer_start">Iniciar temporizador</string>
+    <string name="timer_stop">Parar temporizador</string>
+    <string name="timer_hours">Horas</string>
+    <string name="timer_minutes">Minutos</string>
+    <string name="timer_seconds">Segundos</string>
+
+    <string name="settings_title">Configurações</string>
+    <string name="settings_back_cd">Voltar</string>
+
+    <string name="settings_section_appearance">Aparência</string>
+    <string name="settings_particles_label">Partículas de fundo</string>
+    <string name="settings_particles_description">Pontos animados atrás da cor ativa</string>
+
+    <string name="settings_section_language">Idioma</string>
+    <string name="settings_language_label">Idioma</string>
+    <string name="settings_language_system">Padrão do sistema</string>
+
+    <string name="settings_section_default_color">Cor padrão ao iniciar</string>
+    <string name="settings_default_color_label">Cor</string>
+    <string name="settings_default_color_description">Se definido, a cor escolhida começa a tocar automaticamente ao abrir o app.</string>
+    <string name="settings_default_color_none">Nenhuma</string>
+    <string name="settings_default_color_selected">Selecionada</string>
+
+    <string name="settings_section_timer_presets">Predefinições do temporizador (minutos)</string>
+    <string name="settings_timer_unit_min">min</string>
+    <string name="settings_timer_save">Salvar predefinições</string>
+
+    <string name="settings_section_support">Apoio</string>
+    <string name="settings_rate_label">Avalie o Metiq em %1$s</string>
+    <string name="settings_donate_description">Metiq é grátis para sempre. Uma pequena gorjeta ajuda a mantê-lo assim.</string>
+    <string name="settings_donate_kofi_label">Pague-nos um café no Ko-fi</string>
+    <string name="settings_donate_github_label">Patrocine-nos no GitHub</string>
+
+    <string name="settings_section_about">Sobre</string>
+    <string name="settings_about_version">Versão</string>
+    <string name="settings_about_made_with">Feito com ❤️ por %1$s</string>
+    <string name="settings_about_open_licenses">Licenças de código aberto</string>
+    <string name="licenses_title">Licenças de código aberto</string>
+    <string name="licenses_intro">Metiq é construído com o trabalho de outros. As suas licenças seguem.</string>
+</resources>

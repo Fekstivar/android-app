@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_helper">Touchez une couleur de bruit pour le lire ou l\'arrêter.\nDéfinissez une minuterie si vous voulez qu\'il s\'arrête automatiquement.</string>
+    <string name="home_playing_on">Lecture sur : %1$s</string>
+    <string name="home_settings_cd">Paramètres</string>
+
+    <string name="color_pink">Rose</string>
+    <string name="color_brown">Marron</string>
+    <string name="color_white">Blanc</string>
+    <string name="color_grey">Gris</string>
+
+    <string name="noise_title_pink">Bruit rose</string>
+    <string name="noise_title_brown">Bruit marron</string>
+    <string name="noise_title_white">Bruit blanc</string>
+    <string name="noise_title_grey">Bruit gris</string>
+
+    <string name="timer_label">Minuteur</string>
+    <string name="timer_start">Démarrer minuteur</string>
+    <string name="timer_stop">Arrêter minuteur</string>
+    <string name="timer_hours">Heures</string>
+    <string name="timer_minutes">Minutes</string>
+    <string name="timer_seconds">Secondes</string>
+
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_back_cd">Retour</string>
+
+    <string name="settings_section_appearance">Apparence</string>
+    <string name="settings_particles_label">Particules d\'arrière-plan</string>
+    <string name="settings_particles_description">Points animés derrière la couleur active</string>
+
+    <string name="settings_section_language">Langue</string>
+    <string name="settings_language_label">Langue</string>
+    <string name="settings_language_system">Par défaut du système</string>
+
+    <string name="settings_section_default_color">Couleur par défaut au lancement</string>
+    <string name="settings_default_color_label">Couleur</string>
+    <string name="settings_default_color_description">Si défini, la couleur choisie est lue automatiquement à l\'ouverture de l\'app.</string>
+    <string name="settings_default_color_none">Aucune</string>
+    <string name="settings_default_color_selected">Sélectionnée</string>
+
+    <string name="settings_section_timer_presets">Préréglages de minuterie (minutes)</string>
+    <string name="settings_timer_unit_min">min</string>
+    <string name="settings_timer_save">Enregistrer les préréglages</string>
+
+    <string name="settings_section_support">Support</string>
+    <string name="settings_rate_label">Évaluer Metiq sur %1$s</string>
+    <string name="settings_donate_description">Metiq est gratuit pour toujours. Un petit don nous aide à le maintenir ainsi.</string>
+    <string name="settings_donate_kofi_label">Offrez-nous un café sur Ko-fi</string>
+    <string name="settings_donate_github_label">Sponsorisez-nous sur GitHub</string>
+
+    <string name="settings_section_about">À propos</string>
+    <string name="settings_about_version">Version</string>
+    <string name="settings_about_made_with">Réalisé avec ❤️ par %1$s</string>
+    <string name="settings_about_open_licenses">Licences open-source</string>
+    <string name="licenses_title">Licences open-source</string>
+    <string name="licenses_intro">Metiq est construit sur le travail des autres. Leurs licences suivent.</string>
+</resources>

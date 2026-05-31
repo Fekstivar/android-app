@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Metiq</string>
+
+    <!-- Home screen -->
+    <string name="home_helper">Tap a noise color to play or stop it.\nSet a timer if you want it to turn off automatically.</string>
+    <string name="home_playing_on">Playing on: %1$s</string>
+    <string name="home_settings_cd">Settings</string>
+
+    <!-- Noise colors (used in UI labels and default-color picker) -->
+    <string name="color_pink">Pink</string>
+    <string name="color_brown">Brown</string>
+    <string name="color_white">White</string>
+    <string name="color_grey">Grey</string>
+
+    <!-- Notification / lock-screen title per color (full localized phrase, not "%s noise") -->
+    <string name="noise_title_pink">Pink noise</string>
+    <string name="noise_title_brown">Brown noise</string>
+    <string name="noise_title_white">White noise</string>
+    <string name="noise_title_grey">Grey noise</string>
+    <string name="noise_title_idle" translatable="false">Metiq</string>
+
+    <!-- Timer cells + preset chip formatters -->
+    <string name="timer_label">Timer</string>
+    <string name="timer_start">Start timer</string>
+    <string name="timer_stop">Stop timer</string>
+    <string name="timer_hours">Hours</string>
+    <string name="timer_minutes">Minutes</string>
+    <string name="timer_seconds">Seconds</string>
+    <string name="timer_preset_minutes" translatable="false">%1$dm</string>
+    <string name="timer_preset_hours" translatable="false">%1$dh</string>
+    <string name="timer_preset_hours_minutes" translatable="false">%1$dh %2$dm</string>
+
+    <!-- Settings: top bar -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_back_cd">Back</string>
+
+    <!-- Settings: appearance section -->
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_particles_label">Background particles</string>
+    <string name="settings_particles_description">Animated dots behind the active color</string>
+
+    <!-- Settings: language section -->
+    <string name="settings_section_language">Language</string>
+    <string name="settings_language_label">Language</string>
+    <string name="settings_language_system">System default</string>
+    <string name="settings_language_english" translatable="false">English</string>
+    <string name="settings_language_italian" translatable="false">Italiano</string>
+    <string name="settings_language_spanish" translatable="false">Español</string>
+    <string name="settings_language_french" translatable="false">Français</string>
+    <string name="settings_language_portuguese" translatable="false">Português</string>
+
+    <!-- Settings: default color section -->
+    <string name="settings_section_default_color">Default color on launch</string>
+    <string name="settings_default_color_label">Color</string>
+    <string name="settings_default_color_description">If set, the chosen color starts playing automatically when you open the app.</string>
+    <string name="settings_default_color_none">None</string>
+    <string name="settings_default_color_selected">Selected</string>
+
+    <!-- Settings: timer presets section -->
+    <string name="settings_section_timer_presets">Timer presets (minutes)</string>
+    <string name="settings_timer_unit_min">min</string>
+    <string name="settings_timer_save">Save presets</string>
+
+    <!-- Settings: support section -->
+    <string name="settings_section_support">Support</string>
+    <string name="settings_rate_label">Rate Metiq on %1$s</string>
+    <string name="settings_donate_description">Metiq is free forever. A small tip keeps it that way.</string>
+    <string name="settings_donate_kofi_label">Buy us a coffee on Ko-fi</string>
+    <string name="settings_donate_github_label">Sponsor us on GitHub</string>
+
+    <!-- Settings: about section -->
+    <string name="settings_section_about">About</string>
+    <string name="settings_about_version">Version</string>
+    <string name="settings_about_made_with">Made with ❤️ by %1$s</string>
+    <string name="settings_about_authors_value" translatable="false">Federico Luzzi and Cristina Gatti</string>
+    <string name="settings_about_open_licenses">Open-source licenses</string>
+
+    <!-- Licenses screen -->
+    <string name="licenses_title">Open-source licenses</string>
+    <string name="licenses_intro">Metiq is built on the work of others. Their licenses follow.</string>
+    <string name="licenses_satoshi_title" translatable="false">Satoshi</string>
+    <string name="licenses_satoshi_body" translatable="false">Variable font by Indian Type Foundry, used as the app\'s display + body typeface. Licensed under the Indian Type Foundry Free Font License — free to use in personal and commercial projects, no attribution required, redistribution of the source font file outside the app is not permitted.</string>
+    <string name="licenses_apache2_title" translatable="false">Apache License 2.0</string>
+    <string name="licenses_apache2_body" translatable="false">Used by Jetpack Compose, Material 3, AndroidX Lifecycle, AndroidX DataStore, AndroidX AppCompat and AndroidX Media3. Full license text: https://www.apache.org/licenses/LICENSE-2.0</string>
+    <string name="licenses_kotlin_title" translatable="false">Kotlin standard library</string>
+    <string name="licenses_kotlin_body" translatable="false">Apache License 2.0. © JetBrains s.r.o. and Kotlin Programming Language contributors.</string>
+</resources>
