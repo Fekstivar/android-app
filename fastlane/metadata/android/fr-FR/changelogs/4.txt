@@ -1,0 +1,1 @@
+Correctif de build pour F-Droid : désactivation du bloc de signature des métadonnées de dépendances d'AGP.

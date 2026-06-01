@@ -1,0 +1,1 @@
+Correzione build per F-Droid: disabilitato il blocco di firma dei metadati delle dipendenze di AGP.
