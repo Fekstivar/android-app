@@ -15,9 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -29,8 +27,7 @@ import kotlin.random.Random
 @Composable
 fun WaveRings(
     color: Color,
-    buttonWidth: Dp,
-    buttonHeight: Dp,
+    diameter: Dp,
     modifier: Modifier = Modifier,
 ) {
     val infinite = rememberInfiniteTransition(label = "wave")
@@ -45,20 +42,16 @@ fun WaveRings(
     )
     Canvas(modifier = modifier) {
         val center = Offset(size.width / 2f, size.height / 2f)
-        val bw = buttonWidth.toPx()
-        val bh = buttonHeight.toPx()
+        val baseRadius = diameter.toPx() / 2f
         val ringCount = 3
         repeat(ringCount) { i ->
             val p = (phase + i.toFloat() / ringCount) % 1f
-            val scale = 1f + p * 0.25f
+            val scale = 1f + p * 0.6f
             val alpha = (1f - p) * 0.9f
-            val w = bw * scale
-            val h = bh * scale
-            drawRoundRect(
+            drawCircle(
                 color = color.copy(alpha = alpha),
-                topLeft = Offset(center.x - w / 2f, center.y - h / 2f),
-                size = Size(w, h),
-                cornerRadius = CornerRadius(h / 2f),
+                radius = baseRadius * scale,
+                center = center,
             )
         }
     }
