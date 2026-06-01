@@ -30,13 +30,13 @@ import androidx.compose.ui.unit.sp
 import xyz.metiq.R
 import xyz.metiq.ui.theme.LocalMetiqColors
 import xyz.metiq.ui.theme.MetiqTheme
-import xyz.metiq.ui.theme.Satoshi
+import xyz.metiq.ui.theme.Inter
 import androidx.compose.ui.tooling.preview.Preview
 
 private data class LicenseEntry(val titleRes: Int, val bodyRes: Int)
 
 private val LICENSES = listOf(
-    LicenseEntry(R.string.licenses_satoshi_title, R.string.licenses_satoshi_body),
+    LicenseEntry(R.string.licenses_inter_title, R.string.licenses_inter_body),
     LicenseEntry(R.string.licenses_apache2_title, R.string.licenses_apache2_body),
     LicenseEntry(R.string.licenses_kotlin_title, R.string.licenses_kotlin_body),
 )
@@ -53,7 +53,7 @@ fun LicensesScreen(onBack: () -> Unit) {
                     Text(
                         stringResource(R.string.licenses_title),
                         style = TextStyle(
-                            fontFamily = Satoshi,
+                            fontFamily = Inter,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = tokens.textPrimary,
@@ -85,7 +85,7 @@ fun LicensesScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.licenses_intro),
                 color = tokens.textPrimary.copy(alpha = 0.7f),
-                style = TextStyle(fontFamily = Satoshi, fontSize = 16.sp, lineHeight = 18.sp),
+                style = TextStyle(fontFamily = Inter, fontSize = 16.sp, lineHeight = 18.sp),
             )
             Spacer(Modifier.height(4.dp))
             LICENSES.forEach { entry ->
@@ -109,7 +109,7 @@ private fun LicenseCard(entry: LicenseEntry) {
             text = stringResource(entry.titleRes),
             color = tokens.textPrimary,
             style = TextStyle(
-                fontFamily = Satoshi,
+                fontFamily = Inter,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
             ),
@@ -118,7 +118,7 @@ private fun LicenseCard(entry: LicenseEntry) {
         Text(
             text = stringResource(entry.bodyRes),
             color = tokens.textPrimary.copy(alpha = 0.75f),
-            style = TextStyle(fontFamily = Satoshi, fontSize = 14.sp, lineHeight = 18.sp),
+            style = TextStyle(fontFamily = Inter, fontSize = 14.sp, lineHeight = 18.sp),
         )
     }
 }

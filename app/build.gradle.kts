@@ -100,28 +100,6 @@ kotlin {
     }
 }
 
-val audioAssetsRelease: String = (project.findProperty("audioAssetsRelease") as String?) ?: "v1.0.0"
-val audioAssetsBaseUrl = "https://github.com/metiq-xyz/colored-noise-generator/releases/download/$audioAssetsRelease"
-val audioAssetsFiles = listOf("pink", "brown", "white", "grey")
-
-val downloadAudioAssets = tasks.register("downloadAudioAssets") {
-    val outDir = layout.projectDirectory.dir("src/main/assets/audio").asFile
-    outputs.dir(outDir)
-    doLast {
-        outDir.mkdirs()
-        audioAssetsFiles.forEach { name ->
-            val target = outDir.resolve("$name.ogg")
-            if (!target.exists()) {
-                logger.lifecycle("Downloading $name.ogg from $audioAssetsBaseUrl")
-                uri("$audioAssetsBaseUrl/$name.ogg").toURL().openStream().use { input ->
-                    target.outputStream().use { input.copyTo(it) }
-                }
-            }
-        }
-    }
-}
-tasks.named("preBuild") { dependsOn(downloadAudioAssets) }
-
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

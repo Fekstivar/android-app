@@ -19,7 +19,6 @@ captures/
 keystore.properties
 *.jks
 *.keystore
-app/src/main/assets/audio/
 
 # Node / JS tooling
 node_modules/

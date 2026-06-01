@@ -9,36 +9,36 @@ import androidx.compose.ui.text.font.FontWeight
 import xyz.metiq.R
 
 @OptIn(ExperimentalTextApi::class)
-private fun satoshi(weight: Int) = Font(
-    resId = R.font.satoshi_variable,
+private fun inter(weight: Int) = Font(
+    resId = R.font.inter_variable,
     weight = FontWeight(weight),
     variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
 )
 
-val Satoshi = FontFamily(
-    satoshi(300),
-    satoshi(400),
-    satoshi(500),
-    satoshi(600),
-    satoshi(700),
+val Inter = FontFamily(
+    inter(300),
+    inter(400),
+    inter(500),
+    inter(600),
+    inter(700),
 )
 
 private val Base = Typography()
 
 val MetiqTypography = Typography(
-    displayLarge = Base.displayLarge.copy(fontFamily = Satoshi),
-    displayMedium = Base.displayMedium.copy(fontFamily = Satoshi),
-    displaySmall = Base.displaySmall.copy(fontFamily = Satoshi),
-    headlineLarge = Base.headlineLarge.copy(fontFamily = Satoshi),
-    headlineMedium = Base.headlineMedium.copy(fontFamily = Satoshi),
-    headlineSmall = Base.headlineSmall.copy(fontFamily = Satoshi),
-    titleLarge = Base.titleLarge.copy(fontFamily = Satoshi),
-    titleMedium = Base.titleMedium.copy(fontFamily = Satoshi),
-    titleSmall = Base.titleSmall.copy(fontFamily = Satoshi),
-    bodyLarge = Base.bodyLarge.copy(fontFamily = Satoshi),
-    bodyMedium = Base.bodyMedium.copy(fontFamily = Satoshi),
-    bodySmall = Base.bodySmall.copy(fontFamily = Satoshi),
-    labelLarge = Base.labelLarge.copy(fontFamily = Satoshi),
-    labelMedium = Base.labelMedium.copy(fontFamily = Satoshi),
-    labelSmall = Base.labelSmall.copy(fontFamily = Satoshi),
+    displayLarge = Base.displayLarge.copy(fontFamily = Inter),
+    displayMedium = Base.displayMedium.copy(fontFamily = Inter),
+    displaySmall = Base.displaySmall.copy(fontFamily = Inter),
+    headlineLarge = Base.headlineLarge.copy(fontFamily = Inter),
+    headlineMedium = Base.headlineMedium.copy(fontFamily = Inter),
+    headlineSmall = Base.headlineSmall.copy(fontFamily = Inter),
+    titleLarge = Base.titleLarge.copy(fontFamily = Inter),
+    titleMedium = Base.titleMedium.copy(fontFamily = Inter),
+    titleSmall = Base.titleSmall.copy(fontFamily = Inter),
+    bodyLarge = Base.bodyLarge.copy(fontFamily = Inter),
+    bodyMedium = Base.bodyMedium.copy(fontFamily = Inter),
+    bodySmall = Base.bodySmall.copy(fontFamily = Inter),
+    labelLarge = Base.labelLarge.copy(fontFamily = Inter),
+    labelMedium = Base.labelMedium.copy(fontFamily = Inter),
+    labelSmall = Base.labelSmall.copy(fontFamily = Inter),
 )

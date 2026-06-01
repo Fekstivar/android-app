@@ -67,7 +67,7 @@ import xyz.metiq.Settings
 import xyz.metiq.ui.theme.LocalMetiqColors
 import xyz.metiq.ui.theme.MetiqColors
 import xyz.metiq.ui.theme.MetiqTheme
-import xyz.metiq.ui.theme.Satoshi
+import xyz.metiq.ui.theme.Inter
 
 private data class LanguageOption(
     val tag: String?,
@@ -111,7 +111,7 @@ fun SettingsScreen(
                     Text(
                         stringResource(R.string.settings_title),
                         style = TextStyle(
-                            fontFamily = Satoshi,
+                            fontFamily = Inter,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = tokens.textPrimary,
@@ -207,7 +207,7 @@ fun SettingsScreen(
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     style = TextStyle(
                         fontSize = 14.sp,
-                        fontFamily = Satoshi,
+                        fontFamily = Inter,
                         fontWeight = FontWeight.SemiBold
                     ),
                 )
@@ -231,7 +231,7 @@ private fun Section(title: String, content: @Composable () -> Unit) {
             color = tokens.textPrimary,
             modifier = Modifier.padding(horizontal = SECTION_HORIZONTAL_PADDING, vertical = 8.dp),
             style = TextStyle(
-                fontFamily = Satoshi,
+                fontFamily = Inter,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
             ),
@@ -264,7 +264,7 @@ private fun <T> DropdownPickerRow(
             text = label,
             color = tokens.textPrimary,
             modifier = Modifier.weight(1f),
-            style = TextStyle(fontFamily = Satoshi, fontSize = 16.sp),
+            style = TextStyle(fontFamily = Inter, fontSize = 16.sp),
         )
         Box {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -275,7 +275,7 @@ private fun <T> DropdownPickerRow(
                 Text(
                     text = labelFor(current),
                     color = tokens.textPrimary.copy(alpha = 0.7f),
-                    style = TextStyle(fontFamily = Satoshi, fontSize = 16.sp),
+                    style = TextStyle(fontFamily = Inter, fontSize = 16.sp),
                 )
                 Spacer(Modifier.width(4.dp))
                 Icon(
@@ -295,7 +295,7 @@ private fun <T> DropdownPickerRow(
                         text = {
                             Text(
                                 text = labelFor(opt),
-                                style = TextStyle(fontFamily = Satoshi, fontSize = 16.sp),
+                                style = TextStyle(fontFamily = Inter, fontSize = 16.sp),
                             )
                         },
                         leadingIcon = leadingFor?.let { { it(opt) } },
@@ -330,13 +330,13 @@ private fun ToggleRow(
             Text(
                 text = label,
                 color = tokens.textPrimary,
-                style = TextStyle(fontFamily = Satoshi, fontSize = 16.sp),
+                style = TextStyle(fontFamily = Inter, fontSize = 16.sp),
             )
             if (description != null) {
                 Text(
                     text = description,
                     color = tokens.textPrimary.copy(alpha = 0.6f),
-                    style = TextStyle(fontFamily = Satoshi, fontSize = 14.sp, lineHeight = 16.sp),
+                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp, lineHeight = 16.sp),
                 )
             }
         }
@@ -386,7 +386,7 @@ private fun TimerPresetsEditor(
                 Text(
                     text = "#${idx + 1}",
                     color = tokens.textPrimary.copy(alpha = 0.5f),
-                    style = TextStyle(fontFamily = Satoshi, fontSize = 14.sp),
+                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
                     modifier = Modifier.width(28.dp),
                 )
                 Box(
@@ -410,7 +410,7 @@ private fun TimerPresetsEditor(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         textStyle = TextStyle(
-                            fontFamily = Satoshi,
+                            fontFamily = Inter,
                             fontSize = 16.sp,
                             color = tokens.textPrimary,
                         ),
@@ -421,7 +421,7 @@ private fun TimerPresetsEditor(
                 Text(
                     text = stringResource(R.string.settings_timer_unit_min),
                     color = tokens.textPrimary.copy(alpha = 0.6f),
-                    style = TextStyle(fontFamily = Satoshi, fontSize = 14.sp),
+                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
                 )
             }
         }
@@ -437,7 +437,7 @@ private fun TimerPresetsEditor(
                 text = stringResource(R.string.settings_timer_save),
                 color = tokens.textPrimary,
                 style = TextStyle(
-                    fontFamily = Satoshi,
+                    fontFamily = Inter,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 ),
@@ -463,7 +463,7 @@ private fun LinkRow(
             text = label,
             color = tokens.textPrimary,
             style = TextStyle(
-                fontFamily = Satoshi,
+                fontFamily = Inter,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold
             ),
@@ -472,7 +472,7 @@ private fun LinkRow(
             Text(
                 text = description,
                 color = tokens.textPrimary.copy(alpha = 0.6f),
-                style = TextStyle(fontFamily = Satoshi, fontSize = 12.sp, lineHeight = 16.sp),
+                style = TextStyle(fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp),
             )
         }
     }
@@ -491,12 +491,12 @@ private fun LabeledValue(label: String, value: String) {
             text = label,
             color = tokens.textPrimary.copy(alpha = 0.6f),
             modifier = Modifier.weight(1f),
-            style = TextStyle(fontFamily = Satoshi, fontSize = 16.sp),
+            style = TextStyle(fontFamily = Inter, fontSize = 16.sp),
         )
         Text(
             text = value,
             color = tokens.textPrimary,
-            style = TextStyle(fontFamily = Satoshi, fontSize = 16.sp, textAlign = TextAlign.End),
+            style = TextStyle(fontFamily = Inter, fontSize = 16.sp, textAlign = TextAlign.End),
         )
     }
 }

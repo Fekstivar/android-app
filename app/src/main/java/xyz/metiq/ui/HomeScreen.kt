@@ -96,7 +96,7 @@ import xyz.metiq.ui.theme.LocalMetiqColors
 import xyz.metiq.ui.theme.MetiqColors
 import xyz.metiq.ui.theme.MetiqTheme
 import xyz.metiq.ui.theme.NoisePalette
-import xyz.metiq.ui.theme.Satoshi
+import xyz.metiq.ui.theme.Inter
 
 private data class NoiseColor(
     val id: String,
@@ -401,7 +401,7 @@ fun HomeScreen(
                 Text(
                     text = stringResource(R.string.home_playing_on, r.displayName),
                     color = tokens.textPrimary.copy(alpha = 0.5f),
-                    style = TextStyle(fontFamily = Satoshi, fontSize = 14.sp),
+                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 14.dp)
@@ -418,7 +418,7 @@ private fun HelperText() {
         text = stringResource(R.string.home_helper),
         color = LocalMetiqColors.current.textPrimary,
         textAlign = TextAlign.Center,
-        style = TextStyle(fontFamily = Satoshi, fontSize = 16.sp, lineHeight = 20.sp),
+        style = TextStyle(fontFamily = Inter, fontSize = 16.sp, lineHeight = 20.sp),
     )
 }
 
@@ -595,7 +595,7 @@ private fun StartStopButton(running: Boolean, enabled: Boolean, onClick: () -> U
         Text(
             text = stringResource(if (running) R.string.timer_stop else R.string.timer_start),
             color = fg,
-            style = TextStyle(fontFamily = Satoshi, fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
+            style = TextStyle(fontFamily = Inter, fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
         )
     }
 }
@@ -641,7 +641,7 @@ private fun TimerCell(
                     ),
                     singleLine = true,
                     textStyle = TextStyle(
-                        fontFamily = Satoshi,
+                        fontFamily = Inter,
                         fontSize = 32.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = tokens.textPrimary,
@@ -664,7 +664,7 @@ private fun TimerCell(
                     text = formatDecimal(liveValue),
                     color = tokens.textPrimary,
                     style = TextStyle(
-                        fontFamily = Satoshi,
+                        fontFamily = Inter,
                         fontSize = 28.sp,
                         fontWeight = FontWeight.SemiBold,
                     ),
@@ -675,7 +675,7 @@ private fun TimerCell(
         Text(
             text = label,
             color = tokens.textPrimary.copy(alpha = 0.7f),
-            style = TextStyle(fontFamily = Satoshi, fontSize = 14.sp),
+            style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
         )
     }
 }
@@ -693,7 +693,7 @@ private fun PresetChip(label: String, enabled: Boolean, onClick: () -> Unit) {
         Text(
             text = label,
             color = tokens.textPrimary,
-            style = TextStyle(fontFamily = Satoshi, fontSize = 14.sp),
+            style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
         )
     }
 }

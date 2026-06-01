@@ -72,8 +72,8 @@
     <!-- Licenses screen -->
     <string name="licenses_title">Open-source licenses</string>
     <string name="licenses_intro">Metiq is built on the work of others. Their licenses follow.</string>
-    <string name="licenses_satoshi_title" translatable="false">Satoshi</string>
-    <string name="licenses_satoshi_body" translatable="false">Variable font by Indian Type Foundry, used as the app\'s display + body typeface. Licensed under the Indian Type Foundry Free Font License — free to use in personal and commercial projects, no attribution required, redistribution of the source font file outside the app is not permitted.</string>
+    <string name="licenses_inter_title" translatable="false">Inter</string>
+    <string name="licenses_inter_body" translatable="false">Variable font by Rasmus Andersson, used as the app\'s display + body typeface. Licensed under the SIL Open Font License 1.1. Full license text: https://openfontlicense.org</string>
     <string name="licenses_apache2_title" translatable="false">Apache License 2.0</string>
     <string name="licenses_apache2_body" translatable="false">Used by Jetpack Compose, Material 3, AndroidX Lifecycle, AndroidX DataStore, AndroidX AppCompat and AndroidX Media3. Full license text: https://www.apache.org/licenses/LICENSE-2.0</string>
     <string name="licenses_kotlin_title" translatable="false">Kotlin standard library</string>
