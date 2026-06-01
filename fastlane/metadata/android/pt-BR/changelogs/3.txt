@@ -1,0 +1,1 @@
+Correção de build para o F-Droid: removido o plugin Gradle foojay-resolver para que a build funcione no sandbox do F-Droid.

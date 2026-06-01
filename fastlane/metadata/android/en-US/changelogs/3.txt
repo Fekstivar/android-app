@@ -1,0 +1,1 @@
+Build fix for F-Droid: drop the foojay-resolver Gradle plugin so the build runs in the F-Droid sandbox.
