@@ -1,0 +1,6 @@
+Primera versión pública.
+
+• Ruidos rosa, marrón, blanco y gris.
+• Temporizador de apagado con preajustes y duración personalizada.
+• Controles desde pantalla de bloqueo y notificación mediante MediaSession.
+• Completamente sin conexión. Sin anuncios, sin rastreo, sin analíticas.

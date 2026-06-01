@@ -1,0 +1,6 @@
+Première version publique.
+
+• Bruits rose, marron, blanc et gris.
+• Minuteur d'arrêt avec préréglages et durée personnalisée.
+• Contrôles depuis l'écran de verrouillage et la notification via MediaSession.
+• Entièrement hors-ligne. Sans publicité, sans pistage, sans analytique.

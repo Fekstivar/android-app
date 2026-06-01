@@ -1,0 +1,18 @@
+Metiq riproduce rumore colorato di alta qualità per aiutarti a concentrarti, addormentarti o isolarti dal mondo.
+
+Scegli un colore, tocca, ascolta. Tutta qui l'app.
+
+• Rumore rosa — più morbido del bianco, ideale per sonno e lettura.
+• Rumore marrone — profondo e caldo, utile per concentrazione e sollievo dall'acufene.
+• Rumore bianco — il classico, copre i suoni improvvisi.
+• Rumore grigio — percettivamente piatto, pensato per risultare uniforme su tutto lo spettro.
+
+Caratteristiche
+• Quattro rumori colorati, in loop senza interruzioni.
+• Timer di spegnimento con preset rapidi e ore/minuti/secondi personalizzabili.
+• Integrazione MediaSession: controlla la riproduzione da schermata di blocco, notifica o cuffie Bluetooth.
+• Funziona completamente offline. L'audio è incluso — niente streaming, niente account, niente permesso internet.
+• Niente pubblicità. Niente tracciamento. Niente analytics. Niente SDK di terze parti.
+• Footprint minimo, consumo batteria ridotto.
+
+Open source con licenza GPL v3. Codice sorgente su GitHub: https://github.com/metiq-xyz/android-app

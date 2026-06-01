@@ -1,0 +1,18 @@
+Metiq joue du bruit coloré de haute qualité pour vous aider à vous concentrer, à vous endormir ou à vous couper du monde.
+
+Choisissez une couleur, touchez, écoutez. C'est toute l'appli.
+
+• Bruit rose — plus doux que le blanc, idéal pour le sommeil et la lecture.
+• Bruit marron — profond et chaud, bon pour la concentration et le soulagement des acouphènes.
+• Bruit blanc — le classique, masque les sons soudains.
+• Bruit gris — perceptivement plat, conçu pour rester uniforme sur tout le spectre.
+
+Fonctionnalités
+• Quatre bruits colorés, en boucle sans coupure.
+• Minuteur d'arrêt avec préréglages rapides et heures/minutes/secondes personnalisables.
+• Intégration MediaSession : contrôlez la lecture depuis l'écran de verrouillage, la notification ou un casque Bluetooth.
+• Fonctionne entièrement hors-ligne. L'audio est embarqué — pas de streaming, pas de compte, pas d'autorisation internet.
+• Sans publicité. Sans pistage. Sans analytique. Sans SDK tiers.
+• Empreinte minimale, faible consommation de batterie.
+
+Open source sous licence GPL v3. Code source sur GitHub: https://github.com/metiq-xyz/android-app

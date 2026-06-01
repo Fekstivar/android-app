@@ -1,0 +1,6 @@
+Primeira versão pública.
+
+• Ruídos rosa, marrom, branco e cinza.
+• Temporizador de desligamento com presets e duração personalizada.
+• Controles pela tela de bloqueio e notificação via MediaSession.
+• Totalmente offline. Sem anúncios, sem rastreamento, sem analytics.

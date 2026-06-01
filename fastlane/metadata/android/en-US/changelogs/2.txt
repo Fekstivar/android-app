@@ -1,0 +1,6 @@
+First public release.
+
+• Pink, brown, white, and grey noise.
+• Sleep timer with presets and custom duration.
+• Lock-screen and notification controls via MediaSession.
+• Fully offline. No ads, no tracking, no analytics.

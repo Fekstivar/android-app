@@ -1,0 +1,6 @@
+Prima release pubblica.
+
+• Rumori rosa, marrone, bianco e grigio.
+• Timer di spegnimento con preset e durata personalizzata.
+• Controlli da schermata di blocco e notifica tramite MediaSession.
+• Completamente offline. Niente pubblicità, niente tracciamento, niente analytics.
