@@ -17,6 +17,15 @@
     <img src="https://github.com/metiq-xyz/android-app/actions/workflows/ci.yml/badge.svg" alt="CI">
 </p>
 
+<p align="center">
+    <a href="https://ko-fi.com/metiq">
+      <img src="https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-Fi">
+    </a>
+    <a href="https://github.com/sponsors/metiq-xyz">
+      <img src="https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA" alt="GH sponsor">
+    </a>
+</p>
+
 # Metiq
 
 A no-nonsense noise app for focus, sleep, study, and relaxation. Colored noise
