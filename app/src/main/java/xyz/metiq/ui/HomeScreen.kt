@@ -418,7 +418,7 @@ private fun HelperText() {
         text = stringResource(R.string.home_helper),
         color = LocalMetiqColors.current.textPrimary,
         textAlign = TextAlign.Center,
-        style = TextStyle(fontFamily = Inter, fontSize = 16.sp, lineHeight = 20.sp),
+        style = TextStyle(fontFamily = Inter, fontSize = 15.sp, lineHeight = 20.sp),
     )
 }
 

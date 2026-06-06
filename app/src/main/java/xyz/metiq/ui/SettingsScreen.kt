@@ -3,7 +3,6 @@ package xyz.metiq.ui
 import android.content.Intent
 import androidx.core.net.toUri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -24,7 +22,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
@@ -65,7 +62,6 @@ import xyz.metiq.MAX_TIMER_PRESETS
 import xyz.metiq.R
 import xyz.metiq.Settings
 import xyz.metiq.ui.theme.LocalMetiqColors
-import xyz.metiq.ui.theme.MetiqColors
 import xyz.metiq.ui.theme.MetiqTheme
 import xyz.metiq.ui.theme.Inter
 
@@ -175,13 +171,11 @@ fun SettingsScreen(
                         )
                     },
                 )
-                Spacer(Modifier.height(8.dp))
                 LinkRow(
                     label = stringResource(R.string.settings_donate_kofi_label),
                     description = stringResource(R.string.settings_donate_description),
                     onClick = { openUrl(context, KOFI_URL) },
                 )
-                Spacer(Modifier.height(8.dp))
                 LinkRow(
                     label = stringResource(R.string.settings_donate_github_label),
                     onClick = { openUrl(context, GH_SPONSORS_URL) },
@@ -189,12 +183,11 @@ fun SettingsScreen(
             }
             Section(stringResource(R.string.settings_section_about)) {
                 LabeledValue(stringResource(R.string.settings_about_version), version)
-                Spacer(Modifier.height(12.dp))
                 LinkRow(
                     label = stringResource(R.string.settings_about_open_licenses),
                     onClick = onOpenLicenses,
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(12.dp))
                 Text(
                     text = stringResource(
                         R.string.settings_about_made_with,
@@ -205,11 +198,7 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = Inter,
-                        fontWeight = FontWeight.SemiBold
-                    ),
+                    style = TextStyle(fontSize = 12.sp, fontFamily = Inter),
                 )
             }
         }
@@ -233,7 +222,7 @@ private fun Section(title: String, content: @Composable () -> Unit) {
             style = TextStyle(
                 fontFamily = Inter,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
             ),
         )
         content()
@@ -264,7 +253,7 @@ private fun <T> DropdownPickerRow(
             text = label,
             color = tokens.textPrimary,
             modifier = Modifier.weight(1f),
-            style = TextStyle(fontFamily = Inter, fontSize = 16.sp),
+            style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
         )
         Box {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -275,7 +264,7 @@ private fun <T> DropdownPickerRow(
                 Text(
                     text = labelFor(current),
                     color = tokens.textPrimary.copy(alpha = 0.7f),
-                    style = TextStyle(fontFamily = Inter, fontSize = 16.sp),
+                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
                 )
                 Spacer(Modifier.width(4.dp))
                 Icon(
@@ -330,13 +319,13 @@ private fun ToggleRow(
             Text(
                 text = label,
                 color = tokens.textPrimary,
-                style = TextStyle(fontFamily = Inter, fontSize = 16.sp),
+                style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
             )
             if (description != null) {
                 Text(
                     text = description,
                     color = tokens.textPrimary.copy(alpha = 0.6f),
-                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp, lineHeight = 16.sp),
+                    style = TextStyle(fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp),
                 )
             }
         }
@@ -386,7 +375,7 @@ private fun TimerPresetsEditor(
                 Text(
                     text = "#${idx + 1}",
                     color = tokens.textPrimary.copy(alpha = 0.5f),
-                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+                    style = TextStyle(fontFamily = Inter, fontSize = 13.sp),
                     modifier = Modifier.width(28.dp),
                 )
                 Box(
@@ -411,7 +400,7 @@ private fun TimerPresetsEditor(
                         singleLine = true,
                         textStyle = TextStyle(
                             fontFamily = Inter,
-                            fontSize = 16.sp,
+                            fontSize = 15.sp,
                             color = tokens.textPrimary,
                         ),
                         cursorBrush = SolidColor(tokens.textPrimary),
@@ -421,7 +410,7 @@ private fun TimerPresetsEditor(
                 Text(
                     text = stringResource(R.string.settings_timer_unit_min),
                     color = tokens.textPrimary.copy(alpha = 0.6f),
-                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+                    style = TextStyle(fontFamily = Inter, fontSize = 13.sp),
                 )
             }
         }
@@ -438,7 +427,7 @@ private fun TimerPresetsEditor(
                 color = tokens.textPrimary,
                 style = TextStyle(
                     fontFamily = Inter,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
                 ),
             )
@@ -462,11 +451,7 @@ private fun LinkRow(
         Text(
             text = label,
             color = tokens.textPrimary,
-            style = TextStyle(
-                fontFamily = Inter,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
-            ),
+            style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
         )
         if (description != null) {
             Text(
