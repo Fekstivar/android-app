@@ -85,7 +85,7 @@ fun LicensesScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.licenses_intro),
                 color = tokens.textPrimary.copy(alpha = 0.7f),
-                style = TextStyle(fontFamily = Inter, fontSize = 16.sp, lineHeight = 18.sp),
+                style = TextStyle(fontFamily = Inter, fontSize = 14.sp, lineHeight = 18.sp),
             )
             Spacer(Modifier.height(4.dp))
             LICENSES.forEach { entry ->
@@ -110,7 +110,7 @@ private fun LicenseCard(entry: LicenseEntry) {
             color = tokens.textPrimary,
             style = TextStyle(
                 fontFamily = Inter,
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
             ),
         )
@@ -118,7 +118,7 @@ private fun LicenseCard(entry: LicenseEntry) {
         Text(
             text = stringResource(entry.bodyRes),
             color = tokens.textPrimary.copy(alpha = 0.75f),
-            style = TextStyle(fontFamily = Inter, fontSize = 14.sp, lineHeight = 18.sp),
+            style = TextStyle(fontFamily = Inter, fontSize = 15.sp, lineHeight = 18.sp),
         )
     }
 }

@@ -4,6 +4,19 @@
     <string name="home_playing_on">Reproduciendo en: %1$s</string>
     <string name="home_settings_cd">Ajustes</string>
 
+    <string name="tab_noise">Ruido</string>
+    <string name="tab_ambient">Ambiente</string>
+    <string name="tab_settings">Ajustes</string>
+
+    <string name="ambient_helper">Elige un preajuste o crea tu propio sonido.\nToca un orbe para empezar y arrastra su control para ajustar el nivel.</string>
+    <string name="ambient_off">Apagado</string>
+    <string name="ambient_now_playing">Mezcla ambiental</string>
+    <string name="ambient_seawaves">Olas del mar</string>
+    <string name="ambient_thunderstorm">Tormenta</string>
+    <string name="ambient_fire">Crepitar del fuego</string>
+    <string name="ambient_birds">Canto de pájaros</string>
+    <string name="ambient_cafe">Ambiente de café</string>
+
     <string name="color_pink">Rosa</string>
     <string name="color_brown">Marrón</string>
     <string name="color_white">Blanco</string>
@@ -44,8 +57,11 @@
 
     <string name="settings_section_about">Acerca de</string>
     <string name="settings_about_version">Versión</string>
-    <string name="settings_about_made_with">Hecho con ❤️ por %1$s</string>
     <string name="settings_about_open_licenses">Licencias de código abierto</string>
     <string name="licenses_title">Licencias de código abierto</string>
     <string name="licenses_intro">Metiq se basa en el trabajo de otros. Sus licencias siguen.</string>
+
+    <string name="mix_cabin">Cabaña acogedora</string>
+    <string name="mix_beach">Playa tropical</string>
+    <string name="mix_bar">Bar concurrido</string>
 </resources>

@@ -90,9 +90,11 @@ fun ParticleField(
     color: Color,
     modifier: Modifier = Modifier,
     count: Int = 90,
+    seed: Long = 0xC0FFEE,
+    intensity: Float = 1f,
 ) {
-    val rng = remember { Random(0xC0FFEE) }
-    val particles = remember(count) { List(count) { newParticle(rng) } }
+    val rng = remember(seed) { Random(seed) }
+    val particles = remember(count, seed) { List(count) { newParticle(rng) } }
     var frameTime by remember { mutableLongStateOf(0L) }
     LaunchedEffect(Unit) {
         var last = 0L
@@ -111,7 +113,7 @@ fun ParticleField(
         @Suppress("UNUSED_EXPRESSION") frameTime
         particles.forEach { p ->
             drawCircle(
-                color = color.copy(alpha = p.alpha),
+                color = color.copy(alpha = p.alpha * intensity),
                 radius = p.radiusDp.dp.toPx(),
                 center = Offset(p.x * size.width, p.y * size.height),
             )

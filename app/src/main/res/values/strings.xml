@@ -7,6 +7,26 @@
     <string name="home_playing_on">Playing on: %1$s</string>
     <string name="home_settings_cd">Settings</string>
 
+    <!-- Bottom navigation tabs -->
+    <string name="tab_noise">Noise</string>
+    <string name="tab_ambient">Ambient</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Ambient mixer -->
+    <string name="ambient_helper">Select a preset or create your own sound.\nTap an orb to start, then drag its slider to set the level.</string>
+    <string name="ambient_off">Off</string>
+    <string name="ambient_now_playing">Ambient mix</string>
+    <string name="ambient_seawaves">Sea waves</string>
+    <string name="ambient_thunderstorm">Thunderstorm</string>
+    <string name="ambient_fire">Fire crackling</string>
+    <string name="ambient_birds">Birds chirping</string>
+    <string name="ambient_cafe">Café ambience</string>
+
+    <!-- Mix presets -->
+    <string name="mix_cabin">Cozy cabin</string>
+    <string name="mix_beach">Tropical beach</string>
+    <string name="mix_bar">Crowded bar</string>
+
     <!-- Noise colors (used in UI labels and default-color picker) -->
     <string name="color_pink">Pink</string>
     <string name="color_brown">Brown</string>
@@ -65,8 +85,6 @@
     <!-- Settings: about section -->
     <string name="settings_section_about">About</string>
     <string name="settings_about_version">Version</string>
-    <string name="settings_about_made_with">Made with ❤️ by %1$s</string>
-    <string name="settings_about_authors_value" translatable="false">Federico Luzzi and Cristina Gatti</string>
     <string name="settings_about_open_licenses">Open-source licenses</string>
 
     <!-- Licenses screen -->

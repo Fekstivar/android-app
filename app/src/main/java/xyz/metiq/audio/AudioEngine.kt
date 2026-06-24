@@ -36,7 +36,11 @@ class AudioEngine(private val context: Context) {
 
     suspend fun preload(id: String, assetPath: String) {
         if (pcmCache.containsKey(id)) return
-        val pcm = withContext(Dispatchers.IO) { decodeAssetToPcm(assetPath) }
+        // Tolerate missing/undecodable assets so a not-yet-shipped ambient sound
+        // can't crash preloading; the layer simply stays unavailable until added.
+        val pcm = withContext(Dispatchers.IO) {
+            runCatching { decodeAssetToPcm(assetPath) }.getOrNull()
+        } ?: return
         pcmCache.putIfAbsent(id, pcm)
     }
 
@@ -102,6 +106,8 @@ class AudioEngine(private val context: Context) {
     }
 
     fun activeLayerIds(): Set<String> = layers.keys.toSet()
+
+    fun layerVolume(id: String): Float? = layers[id]?.volume
 
     suspend fun switchTo(newId: String, newAssetPath: String) {
         layers.keys.filter { it != newId }.forEach { stopLayer(it) }

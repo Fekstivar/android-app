@@ -129,78 +129,90 @@ fun SettingsScreen(
             )
         },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-            Section(stringResource(R.string.settings_section_appearance)) {
-                ToggleRow(
-                    label = stringResource(R.string.settings_particles_label),
-                    description = stringResource(R.string.settings_particles_description),
-                    checked = settings.particlesEnabled,
-                    onToggle = onParticlesEnabled,
-                )
-            }
-            Section(stringResource(R.string.settings_section_language)) {
-                DropdownPickerRow(
-                    label = stringResource(R.string.settings_language_label),
-                    options = LANGUAGE_OPTIONS,
-                    current = LANGUAGE_OPTIONS.first { it.tag == settings.languageTag },
-                    labelFor = { stringResource(it.labelRes) },
-                    onPick = { onLanguageTag(it.tag) },
-                )
-            }
-            Section(stringResource(R.string.settings_section_timer_presets)) {
-                TimerPresetsEditor(
-                    presetsSeconds = settings.timerPresetsSeconds,
-                    onChange = onTimerPresets,
-                )
-            }
-            Section(stringResource(R.string.settings_section_support)) {
-                LinkRow(
-                    label = stringResource(R.string.settings_rate_label, BuildConfig.STORE_NAME),
-                    onClick = {
-                        openUrlWithFallback(
-                            context,
-                            BuildConfig.STORE_RATE_URL,
-                            BuildConfig.STORE_RATE_FALLBACK_URL,
-                        )
-                    },
-                )
-                LinkRow(
-                    label = stringResource(R.string.settings_donate_kofi_label),
-                    description = stringResource(R.string.settings_donate_description),
-                    onClick = { openUrl(context, KOFI_URL) },
-                )
-                LinkRow(
-                    label = stringResource(R.string.settings_donate_github_label),
-                    onClick = { openUrl(context, GH_SPONSORS_URL) },
-                )
-            }
-            Section(stringResource(R.string.settings_section_about)) {
-                LabeledValue(stringResource(R.string.settings_about_version), version)
-                LinkRow(
-                    label = stringResource(R.string.settings_about_open_licenses),
-                    onClick = onOpenLicenses,
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = stringResource(
-                        R.string.settings_about_made_with,
-                        stringResource(R.string.settings_about_authors_value),
-                    ),
-                    color = tokens.textPrimary.copy(alpha = 0.6f),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    style = TextStyle(fontSize = 12.sp, fontFamily = Inter),
-                )
-            }
+        SettingsContent(
+            settings = settings,
+            onParticlesEnabled = onParticlesEnabled,
+            onTimerPresets = onTimerPresets,
+            onLanguageTag = onLanguageTag,
+            onOpenLicenses = onOpenLicenses,
+            modifier = Modifier.padding(padding),
+        )
+    }
+}
+
+@Composable
+fun SettingsContent(
+    settings: Settings,
+    onParticlesEnabled: (Boolean) -> Unit,
+    onTimerPresets: (List<Long>) -> Unit,
+    onLanguageTag: (String?) -> Unit,
+    onOpenLicenses: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val tokens = LocalMetiqColors.current
+    val context = LocalContext.current
+    val version = remember {
+        runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        }.getOrNull() ?: "—"
+    }
+    Column(
+        modifier = modifier
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        Section(stringResource(R.string.settings_section_appearance)) {
+            ToggleRow(
+                label = stringResource(R.string.settings_particles_label),
+                description = stringResource(R.string.settings_particles_description),
+                checked = settings.particlesEnabled,
+                onToggle = onParticlesEnabled,
+            )
+        }
+        Section(stringResource(R.string.settings_section_language)) {
+            DropdownPickerRow(
+                label = stringResource(R.string.settings_language_label),
+                options = LANGUAGE_OPTIONS,
+                current = LANGUAGE_OPTIONS.first { it.tag == settings.languageTag },
+                labelFor = { stringResource(it.labelRes) },
+                onPick = { onLanguageTag(it.tag) },
+            )
+        }
+        Section(stringResource(R.string.settings_section_timer_presets)) {
+            TimerPresetsEditor(
+                presetsSeconds = settings.timerPresetsSeconds,
+                onChange = onTimerPresets,
+            )
+        }
+        Section(stringResource(R.string.settings_section_support)) {
+            LinkRow(
+                label = stringResource(R.string.settings_rate_label, BuildConfig.STORE_NAME),
+                onClick = {
+                    openUrlWithFallback(
+                        context,
+                        BuildConfig.STORE_RATE_URL,
+                        BuildConfig.STORE_RATE_FALLBACK_URL,
+                    )
+                },
+            )
+            LinkRow(
+                label = stringResource(R.string.settings_donate_kofi_label),
+                description = stringResource(R.string.settings_donate_description),
+                onClick = { openUrl(context, KOFI_URL) },
+            )
+            LinkRow(
+                label = stringResource(R.string.settings_donate_github_label),
+                onClick = { openUrl(context, GH_SPONSORS_URL) },
+            )
+        }
+        Section(stringResource(R.string.settings_section_about)) {
+            LabeledValue(stringResource(R.string.settings_about_version), version)
+            LinkRow(
+                label = stringResource(R.string.settings_about_open_licenses),
+                onClick = onOpenLicenses,
+            )
         }
     }
 }

@@ -137,10 +137,15 @@ class PlaybackService : MediaSessionService() {
         const val ENGINE_BIND_ACTION = "xyz.metiq.audio.ENGINE"
 
         private val PRELOAD_ASSETS = mapOf(
-            "pink" to "audio/pink.ogg",
-            "brown" to "audio/brown.ogg",
-            "white" to "audio/white.ogg",
-            "grey" to "audio/grey.ogg",
+            "pink" to "audio/noise/pink.ogg",
+            "brown" to "audio/noise/brown.ogg",
+            "white" to "audio/noise/white.ogg",
+            "grey" to "audio/noise/grey.ogg",
+            "seawaves" to "audio/ambient/seawaves.ogg",
+            "thunderstorm" to "audio/ambient/thunderstorm.ogg",
+            "fire" to "audio/ambient/fire.ogg",
+            "birds" to "audio/ambient/birds.ogg",
+            "cafe" to "audio/ambient/cafe.ogg",
         )
     }
 }
