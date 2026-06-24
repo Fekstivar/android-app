@@ -1,0 +1,1 @@
+Remove unused wake-lock and network-state permissions — Metiq now requests only what playback needs.

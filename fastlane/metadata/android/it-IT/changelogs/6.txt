@@ -1,0 +1,1 @@
+Rimosse autorizzazioni inutilizzate (wake lock e stato della rete): Metiq ora richiede solo ciò che serve alla riproduzione.

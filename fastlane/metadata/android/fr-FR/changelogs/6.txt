@@ -1,0 +1,1 @@
+Suppression des autorisations inutilisées (wake lock et état du réseau) : Metiq ne demande plus que le nécessaire à la lecture.

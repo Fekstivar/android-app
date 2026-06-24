@@ -1,0 +1,1 @@
+Eliminados permisos no utilizados (wake lock y estado de la red): Metiq solo solicita lo necesario para la reproducción.
