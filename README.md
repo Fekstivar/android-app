@@ -60,15 +60,6 @@ non-negotiables: simplicity and battery efficiency.
 Metiq targets Android 10 (API 29) and newer, which covers the vast majority of
 devices in active use today.
 
-## A few things that aren't in v1
-
-We kept the first release deliberately small. The following are on the roadmap
-for future versions:
-
-- Ambient sounds (rain, thunder, sea waves, wind, café, fan, fireplace)
-- Sound mixing with user presets
-- iOS and web/browser extension clients
-
 ## Contributing
 
 If you'd like to file a bug, suggest a feature, or contribute code or
