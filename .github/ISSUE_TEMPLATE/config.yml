@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: ☕ Support Metiq
+    url: https://ko-fi.com/metiq
+    about: Metiq is free forever. If it helps you in any way, a small tip keeps it going.
+  - name: 📖 Source & contributing
+    url: https://github.com/metiq-xyz/android-app/blob/main/CONTRIBUTING.md
+    about: Filing a detailed bug, or want to contribute code or translations? Start here.

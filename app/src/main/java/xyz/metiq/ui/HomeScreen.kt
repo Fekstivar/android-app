@@ -1,6 +1,11 @@
 package xyz.metiq.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -93,11 +98,13 @@ import androidx.media3.session.SessionToken
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import xyz.metiq.BuildConfig
 import xyz.metiq.DEFAULT_SETTINGS
 import xyz.metiq.R
 import xyz.metiq.Settings
 import xyz.metiq.audio.PlaybackService
 import xyz.metiq.ui.components.ParticleField
+import xyz.metiq.ui.components.RatePromptBanner
 import xyz.metiq.ui.components.WaveRings
 import xyz.metiq.ui.theme.LocalMetiqColors
 import xyz.metiq.ui.theme.MetiqColors
@@ -222,6 +229,9 @@ fun HomeScreen(
     onParticlesEnabled: (Boolean) -> Unit,
     onTimerPresets: (List<Long>) -> Unit,
     onLanguageTag: (String?) -> Unit,
+    ratePromptVisible: Boolean = false,
+    onRatePromptRate: () -> Unit = {},
+    onRatePromptDismiss: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -488,10 +498,41 @@ fun HomeScreen(
                 )
             }
         } else {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+        ) {
+            // Sticky note rides above the logo + app box, pushing them down rather
+            // than overlaying the timer. Swiping it away gives the space back.
+            AnimatedVisibility(
+                visible = ratePromptVisible && !showLicenses,
+                enter = slideInVertically { -it } + fadeIn(),
+                exit = slideOutVertically { -it } + fadeOut(),
+            ) {
+                RatePromptBanner(
+                    showRate = BuildConfig.STORE_SUPPORTS_RATING,
+                    storeName = BuildConfig.STORE_NAME,
+                    onRate = {
+                        openStoreRating(context)
+                        onRatePromptRate()
+                    },
+                    onFeedback = {
+                        openUrl(context, FEEDBACK_URL)
+                        onRatePromptRate()
+                    },
+                    onDonate = {
+                        openUrl(context, KOFI_URL)
+                        onRatePromptRate()
+                    },
+                    onDismiss = onRatePromptDismiss,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+                )
+            }
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 8.dp)
                 .clip(RoundedCornerShape(32.dp))
                 .background(tokens.foreground),
@@ -624,6 +665,7 @@ fun HomeScreen(
                     },
                 )
             }
+        }
         }
         }
         if (showLicenses) {

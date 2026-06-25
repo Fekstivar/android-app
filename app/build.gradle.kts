@@ -67,12 +67,15 @@ android {
         create("fdroid") {
             dimension = "store"
             isDefault = true
+            // F-Droid has no rating/review system, so the rate cue is hidden here.
+            buildConfigField("boolean", "STORE_SUPPORTS_RATING", "false")
             buildConfigField("String", "STORE_RATE_URL", "\"fdroid.app:xyz.metiq\"")
             buildConfigField("String", "STORE_RATE_FALLBACK_URL", "\"https://f-droid.org/packages/xyz.metiq\"")
             buildConfigField("String", "STORE_NAME", "\"F-Droid\"")
         }
         create("play") {
             dimension = "store"
+            buildConfigField("boolean", "STORE_SUPPORTS_RATING", "true")
             buildConfigField("String", "STORE_RATE_URL", "\"market://details?id=xyz.metiq\"")
             buildConfigField("String", "STORE_RATE_FALLBACK_URL", "\"https://play.google.com/store/apps/details?id=xyz.metiq\"")
             buildConfigField("String", "STORE_NAME", "\"Play Store\"")

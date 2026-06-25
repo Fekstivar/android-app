@@ -19,6 +19,7 @@ class MetiqApp : Application() {
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate).launch {
             val snapshot = settings.flow.first()
             applyLanguageTag(snapshot.languageTag)
+            settings.registerLaunch()
         }
     }
 }

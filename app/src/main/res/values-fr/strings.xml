@@ -55,6 +55,14 @@
     <string name="settings_donate_kofi_label">Offrez-nous un café sur Ko-fi</string>
     <string name="settings_donate_github_label">Sponsorisez-nous sur GitHub</string>
 
+    <string name="rate_prompt_title">Vous aimez Metiq ?</string>
+    <string name="rate_prompt_message">Notez sur %1$s, dites ce qui manque ou faites un don.</string>
+    <string name="rate_prompt_message_no_rating">Dites ce qui manque ou faites un don pour le garder gratuit.</string>
+    <string name="rate_prompt_cta">Évaluer</string>
+    <string name="rate_prompt_feedback_cta">Avis</string>
+    <string name="rate_prompt_donate_cta">Faire un don</string>
+    <string name="rate_prompt_dismiss_cd">Fermer</string>
+
     <string name="settings_section_about">À propos</string>
     <string name="settings_about_version">Version</string>
     <string name="settings_about_open_licenses">Licences open-source</string>

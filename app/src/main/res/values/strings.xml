@@ -82,6 +82,15 @@
     <string name="settings_donate_kofi_label">Buy us a coffee on Ko-fi</string>
     <string name="settings_donate_github_label">Sponsor us on GitHub</string>
 
+    <!-- Rate prompt (swipeable note) -->
+    <string name="rate_prompt_title">Enjoying Metiq?</string>
+    <string name="rate_prompt_message">Rate on %1$s, tell us what you miss, or donate.</string>
+    <string name="rate_prompt_message_no_rating">Tell us what you miss, or donate to keep it free.</string>
+    <string name="rate_prompt_cta">Rate</string>
+    <string name="rate_prompt_feedback_cta">Feedback</string>
+    <string name="rate_prompt_donate_cta">Donate</string>
+    <string name="rate_prompt_dismiss_cd">Dismiss</string>
+
     <!-- Settings: about section -->
     <string name="settings_section_about">About</string>
     <string name="settings_about_version">Version</string>

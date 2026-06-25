@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity() {
         val app = application as MetiqApp
         setContent {
             val settings by app.settings.flow.collectAsState(initial = DEFAULT_SETTINGS)
+            val ratePromptVisible by app.settings.ratePromptVisible.collectAsState(initial = false)
             val scope = rememberCoroutineScope()
             val repo = app.settings
             MetiqTheme {
@@ -26,6 +27,9 @@ class MainActivity : AppCompatActivity() {
                     onParticlesEnabled = { scope.launch { repo.setParticlesEnabled(it) } },
                     onTimerPresets = { scope.launch { repo.setTimerPresetsSeconds(it) } },
                     onLanguageTag = { scope.launch { repo.setLanguageTag(it) } },
+                    ratePromptVisible = ratePromptVisible,
+                    onRatePromptRate = { scope.launch { repo.optOutRatePrompt() } },
+                    onRatePromptDismiss = { scope.launch { repo.snoozeRatePrompt() } },
                 )
             }
         }

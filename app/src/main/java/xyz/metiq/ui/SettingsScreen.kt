@@ -1,7 +1,5 @@
 package xyz.metiq.ui
 
-import android.content.Intent
-import androidx.core.net.toUri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -79,7 +77,6 @@ private val LANGUAGE_OPTIONS = listOf(
     LanguageOption("pt", R.string.settings_language_portuguese),
 )
 
-private const val KOFI_URL = "https://ko-fi.com/metiq"
 private const val GH_SPONSORS_URL = "https://github.com/sponsors/metiq-xyz"
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -187,16 +184,12 @@ fun SettingsContent(
             )
         }
         Section(stringResource(R.string.settings_section_support)) {
-            LinkRow(
-                label = stringResource(R.string.settings_rate_label, BuildConfig.STORE_NAME),
-                onClick = {
-                    openUrlWithFallback(
-                        context,
-                        BuildConfig.STORE_RATE_URL,
-                        BuildConfig.STORE_RATE_FALLBACK_URL,
-                    )
-                },
-            )
+            if (BuildConfig.STORE_SUPPORTS_RATING) {
+                LinkRow(
+                    label = stringResource(R.string.settings_rate_label, BuildConfig.STORE_NAME),
+                    onClick = { openStoreRating(context) },
+                )
+            }
             LinkRow(
                 label = stringResource(R.string.settings_donate_kofi_label),
                 description = stringResource(R.string.settings_donate_description),
@@ -496,22 +489,6 @@ private fun LabeledValue(label: String, value: String) {
             style = TextStyle(fontFamily = Inter, fontSize = 16.sp, textAlign = TextAlign.End),
         )
     }
-}
-
-private fun openUrl(context: android.content.Context, url: String) {
-    runCatching {
-        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-    }
-}
-
-private fun openUrlWithFallback(
-    context: android.content.Context,
-    primary: String,
-    fallback: String
-) {
-    val intent = Intent(Intent.ACTION_VIEW, primary.toUri())
-    val ok = runCatching { context.startActivity(intent) }.isSuccess
-    if (!ok) runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, fallback.toUri())) }
 }
 
 @Preview(name = "Settings", showBackground = true, backgroundColor = 0xFF111010)

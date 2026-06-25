@@ -1,0 +1,51 @@
+name: 💬 Feedback or idea
+description: Tell us what you think, or what you'd love Metiq to do next.
+title: "[Feedback]: "
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking a moment to share — Metiq is small and shaped by what
+        people actually want.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of feedback is this?
+      options:
+        - I'd like a new feature or sound
+        - Something doesn't work the way I expected
+        - General thoughts on the app
+        - Something else
+    validations:
+      required: false
+  - type: textarea
+    id: feedback
+    attributes:
+      label: What's on your mind?
+      description: What you'd like, what's missing, or what you enjoy — whatever feels useful.
+      placeholder: "I'd love it if Metiq could…"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything that helps us picture it?
+      description: When it happens, what you were doing, a screenshot — only if it's relevant.
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Settings → About → Version. Useful if you're reporting something off.
+      placeholder: "0.3.1"
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: One quick check
+      options:
+        - label: I had a quick look to see if someone already suggested this.
+          required: false

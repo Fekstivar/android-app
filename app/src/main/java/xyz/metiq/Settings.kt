@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -32,12 +34,22 @@ const val MAX_TIMER_PRESETS = 4
 
 val SUPPORTED_LANGUAGE_TAGS: List<String> = listOf("en", "it", "es", "fr", "pt")
 
+// Rate-prompt policy: only nudge once the user has clearly stuck around, and
+// re-nudge sparingly after a swipe-away so it never feels nagging.
+private const val RATE_MIN_LAUNCHES = 4
+private const val RATE_MIN_AGE_MILLIS = 3L * 24 * 60 * 60 * 1000 // 3 days since first launch
+private const val RATE_REPROMPT_MILLIS = 21L * 24 * 60 * 60 * 1000 // 3 weeks after a dismissal
+
 private val Context.dataStore by preferencesDataStore(name = "metiq_settings")
 
 private object Keys {
     val PARTICLES_ENABLED = booleanPreferencesKey("particles_enabled")
     val TIMER_PRESETS = stringPreferencesKey("timer_presets")
     val LANGUAGE_TAG = stringPreferencesKey("language_tag")
+    val RATE_FIRST_LAUNCH = longPreferencesKey("rate_first_launch_millis")
+    val RATE_LAUNCH_COUNT = intPreferencesKey("rate_launch_count")
+    val RATE_LAST_PROMPT = longPreferencesKey("rate_last_prompt_millis")
+    val RATE_OPTED_OUT = booleanPreferencesKey("rate_opted_out")
 }
 
 class SettingsRepository(context: Context) {
@@ -62,6 +74,43 @@ class SettingsRepository(context: Context) {
             else it[Keys.LANGUAGE_TAG] = tag
         }
         applyLanguageTag(tag)
+    }
+
+    // Whether the "rate us" note should currently be shown. Recomputed on every
+    // emission (i.e. each launch increment), against the current wall clock.
+    val ratePromptVisible: Flow<Boolean> = store.data.catch { e ->
+        if (e is IOException) emit(emptyPreferences()) else throw e
+    }.map { prefs ->
+        val now = System.currentTimeMillis()
+        val optedOut = prefs[Keys.RATE_OPTED_OUT] ?: false
+        val firstLaunch = prefs[Keys.RATE_FIRST_LAUNCH] ?: now
+        val launchCount = prefs[Keys.RATE_LAUNCH_COUNT] ?: 0
+        val lastPrompt = prefs[Keys.RATE_LAST_PROMPT] ?: 0L
+        val minLaunches = if (BuildConfig.DEBUG) 0 else RATE_MIN_LAUNCHES
+        val minAgeMillis = if (BuildConfig.DEBUG) 0L else RATE_MIN_AGE_MILLIS
+        !optedOut &&
+            launchCount >= minLaunches &&
+            now - firstLaunch >= minAgeMillis &&
+            (lastPrompt == 0L || now - lastPrompt >= RATE_REPROMPT_MILLIS)
+    }
+
+    // Call once per cold start: stamps the first launch and bumps the counter.
+    suspend fun registerLaunch() {
+        val now = System.currentTimeMillis()
+        store.edit { prefs ->
+            if (prefs[Keys.RATE_FIRST_LAUNCH] == null) prefs[Keys.RATE_FIRST_LAUNCH] = now
+            prefs[Keys.RATE_LAUNCH_COUNT] = (prefs[Keys.RATE_LAUNCH_COUNT] ?: 0) + 1
+        }
+    }
+
+    // User swiped the note away: hide it and snooze until the reprompt interval.
+    suspend fun snoozeRatePrompt() {
+        store.edit { it[Keys.RATE_LAST_PROMPT] = System.currentTimeMillis() }
+    }
+
+    // User tapped through to rate: never show the note again.
+    suspend fun optOutRatePrompt() {
+        store.edit { it[Keys.RATE_OPTED_OUT] = true }
     }
 
     private fun Preferences.toSettings(): Settings {
