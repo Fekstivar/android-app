@@ -1,0 +1,1 @@
+Ajout d'une invite facultative pour noter Metiq, envoyer un retour ou soutenir le développement.

@@ -1,0 +1,1 @@
+Added an optional prompt to rate Metiq, send feedback, or support development.
