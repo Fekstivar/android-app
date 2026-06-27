@@ -1,14 +1,20 @@
-Metiq joue du bruit coloré de haute qualité pour vous aider à vous concentrer, à vous endormir ou à vous couper du monde.
+Metiq joue du bruit coloré de haute qualité et des sons d'ambiance naturels pour vous aider à vous concentrer, à vous endormir ou à vous couper du monde.
 
-Choisissez une couleur, touchez, écoutez. C'est toute l'appli.
+Ouvrez, touchez, écoutez. C'est toute l'appli.
 
-• Bruit rose — plus doux que le blanc, idéal pour le sommeil et la lecture.
-• Bruit marron — profond et chaud, bon pour la concentration et le soulagement des acouphènes.
-• Bruit blanc — le classique, masque les sons soudains.
-• Bruit gris — perceptivement plat, conçu pour rester uniforme sur tout le spectre.
+Bruit coloré
+• Rose — plus doux que le blanc, idéal pour le sommeil et la lecture.
+• Marron — profond et chaud, bon pour la concentration et le soulagement des acouphènes.
+• Blanc — le classique, masque les sons soudains.
+• Gris — perceptivement plat, conçu pour rester uniforme sur tout le spectre.
+
+Sons d'ambiance
+• Vagues de la mer, orage, crépitement du feu, chant des oiseaux et ambiance de café.
+• Partez d'un préréglage, ou mélangez les sons dans votre propre mix et réglez chaque niveau.
 
 Fonctionnalités
-• Quatre bruits colorés, en boucle sans coupure.
+• Quatre bruits colorés et cinq sons d'ambiance, en boucle sans coupure.
+• Superposez et mélangez les sons d'ambiance, avec des préréglages rapides.
 • Minuteur d'arrêt avec préréglages rapides et heures/minutes/secondes personnalisables.
 • Intégration MediaSession : contrôlez la lecture depuis l'écran de verrouillage, la notification ou un casque Bluetooth.
 • Fonctionne entièrement hors-ligne. L'audio est embarqué — pas de streaming, pas de compte, pas d'autorisation internet.

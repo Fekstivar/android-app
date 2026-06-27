@@ -1,14 +1,20 @@
-Metiq reproduce ruido de colores de alta calidad para ayudarte a concentrarte, conciliar el sueño o aislarte del mundo.
+Metiq reproduce ruido de colores de alta calidad y sonidos ambientales naturales para ayudarte a concentrarte, conciliar el sueño o aislarte del mundo.
 
-Elige un color, toca, escucha. Eso es toda la app.
+Abre, toca, escucha. Eso es toda la app.
 
-• Ruido rosa — más suave que el blanco, ideal para dormir y leer.
-• Ruido marrón — profundo y cálido, bueno para concentración y alivio del tinnitus.
-• Ruido blanco — el clásico, enmascara sonidos repentinos.
-• Ruido gris — perceptivamente plano, diseñado para sonar uniforme en todo el espectro.
+Ruido de colores
+• Rosa — más suave que el blanco, ideal para dormir y leer.
+• Marrón — profundo y cálido, bueno para concentración y alivio del tinnitus.
+• Blanco — el clásico, enmascara sonidos repentinos.
+• Gris — perceptivamente plano, diseñado para sonar uniforme en todo el espectro.
+
+Sonidos ambientales
+• Olas del mar, tormenta, crepitar del fuego, canto de pájaros y ambiente de café.
+• Empieza con un preajuste, o mezcla los sonidos en tu propio mix y ajusta cada nivel.
 
 Características
-• Cuatro ruidos de colores, en bucle sin cortes.
+• Cuatro ruidos de colores y cinco sonidos ambientales, en bucle sin cortes.
+• Superpón y mezcla los sonidos ambientales, con preajustes rápidos.
 • Temporizador de apagado con preajustes rápidos y horas/minutos/segundos personalizables.
 • Integración con MediaSession: controla la reproducción desde la pantalla de bloqueo, notificación o auriculares Bluetooth.
 • Funciona completamente sin conexión. El audio está incluido — sin streaming, sin cuenta, sin permiso de internet.
