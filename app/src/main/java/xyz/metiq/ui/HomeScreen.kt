@@ -27,7 +27,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -84,6 +87,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -787,6 +791,7 @@ private fun TimerBlock(
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TimerCell(
+                modifier = Modifier.weight(1f),
                 label = stringResource(R.string.timer_hours),
                 field = TimerField.HOURS,
                 liveValue = hoursFor(remainingSeconds),
@@ -798,6 +803,7 @@ private fun TimerBlock(
                 enabled = enabled && !running,
             )
             TimerCell(
+                modifier = Modifier.weight(1f),
                 label = stringResource(R.string.timer_minutes),
                 field = TimerField.MINUTES,
                 liveValue = minutesFor(remainingSeconds),
@@ -809,6 +815,7 @@ private fun TimerBlock(
                 enabled = enabled && !running,
             )
             TimerCell(
+                modifier = Modifier.weight(1f),
                 label = stringResource(R.string.timer_seconds),
                 field = TimerField.SECONDS,
                 liveValue = secondsFor(remainingSeconds),
@@ -828,6 +835,7 @@ private fun TimerBlock(
         ) {
             presetsSeconds.forEach { seconds ->
                 PresetChip(
+                    modifier = Modifier.weight(1f),
                     label = presetLabel(seconds),
                     enabled = enabled && !running,
                     onClick = { onPresetSelect(seconds) },
@@ -865,6 +873,7 @@ private fun StartStopButton(running: Boolean, enabled: Boolean, onClick: () -> U
 
 @Composable
 private fun TimerCell(
+    modifier: Modifier = Modifier,
     label: String,
     @Suppress("UNUSED_PARAMETER") field: TimerField,
     liveValue: Int,
@@ -876,10 +885,12 @@ private fun TimerCell(
     enabled: Boolean,
 ) {
     val tokens = LocalMetiqColors.current
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
-                .size(width = 96.dp, height = 64.dp)
+                .fillMaxWidth()
+                .height(64.dp)
+                .sizeIn(maxWidth = 96.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(tokens.cellBackground)
                 .clickable(enabled = enabled && !isEditing) { onBeginEdit() },
@@ -944,19 +955,23 @@ private fun TimerCell(
 }
 
 @Composable
-private fun PresetChip(label: String, enabled: Boolean, onClick: () -> Unit) {
+private fun PresetChip(modifier: Modifier = Modifier, label: String, enabled: Boolean, onClick: () -> Unit) {
     val tokens = LocalMetiqColors.current
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(100.dp))
             .background(tokens.cellBackground)
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
             color = tokens.textPrimary,
             style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
         )
     }
 }
@@ -1082,27 +1097,33 @@ private fun AmbientGrid(
     onVolume: (String, Float) -> Unit,
     onVolumeSettled: (String) -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        AMBIENT_SOUNDS.chunked(3).forEach { row ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.Top,
-            ) {
-                row.forEach { sound ->
-                    val level = levels[sound.id]
-                    AmbientOrb(
-                        sound = sound,
-                        active = level != null,
-                        wavesOn = wavesOn,
-                        volume = level ?: AMBIENT_DEFAULT_VOLUME,
-                        onTap = { onTap(sound.id) },
-                        onVolume = { onVolume(sound.id, it) },
-                        onVolumeSettled = { onVolumeSettled(sound.id) },
-                    )
+    val columns = 3
+    val spacing = 8.dp
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val cellWidth = ((maxWidth - spacing * (columns - 1)) / columns).coerceAtMost(AMBIENT_CELL_WIDTH)
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            AMBIENT_SOUNDS.chunked(columns).forEach { row ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(spacing),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    row.forEach { sound ->
+                        val level = levels[sound.id]
+                        AmbientOrb(
+                            modifier = Modifier.width(cellWidth),
+                            sound = sound,
+                            active = level != null,
+                            wavesOn = wavesOn,
+                            volume = level ?: AMBIENT_DEFAULT_VOLUME,
+                            onTap = { onTap(sound.id) },
+                            onVolume = { onVolume(sound.id, it) },
+                            onVolumeSettled = { onVolumeSettled(sound.id) },
+                        )
+                    }
                 }
             }
         }
@@ -1111,6 +1132,7 @@ private fun AmbientGrid(
 
 @Composable
 private fun AmbientOrb(
+    modifier: Modifier = Modifier,
     sound: AmbientSound,
     active: Boolean,
     wavesOn: Boolean,
@@ -1123,11 +1145,14 @@ private fun AmbientOrb(
     val orbFill = lerp(sound.accent, Color.White, 0.40f)
     val iconTint = lerp(sound.accent, Color.Black, 0.55f)
     Column(
-        modifier = Modifier.width(AMBIENT_CELL_WIDTH),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            modifier = Modifier.size(BUTTON_HEIGHT),
+            modifier = Modifier
+                .sizeIn(maxWidth = BUTTON_HEIGHT, maxHeight = BUTTON_HEIGHT)
+                .fillMaxWidth()
+                .aspectRatio(1f),
             contentAlignment = Alignment.Center,
         ) {
             if (active && wavesOn) {
@@ -1141,7 +1166,7 @@ private fun AmbientOrb(
             }
             Box(
                 modifier = Modifier
-                    .size(BUTTON_HEIGHT)
+                    .fillMaxSize()
                     .clip(CircleShape)
                     .background(orbFill)
                     .clickable(onClick = onTap)
