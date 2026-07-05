@@ -8,15 +8,25 @@ import android.media.AudioTrack
 import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.ConcurrentHashMap
 
+private const val PAUSE_FADE_MS = 400L
+private const val FADE_STEP_MS = 20L
+
+@OptIn(ExperimentalCoroutinesApi::class)
 class AudioEngine(private val context: Context) {
     private data class Layer(
         val track: AudioTrack,
@@ -33,6 +43,13 @@ class AudioEngine(private val context: Context) {
     private val layers = ConcurrentHashMap<String, Layer>()
     private val pcmCache = ConcurrentHashMap<String, Pcm>()
     private var masterVolume: Float = 1f
+
+    // Single-threaded so a pause fade and a subsequent resume can never
+    // write track volumes concurrently.
+    private val fadeScope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
+    private var fadeJob: Job? = null
+
+    private fun effectiveVolume(l: Layer): Float = (l.volume * masterVolume).coerceIn(0f, 1f)
 
     suspend fun preload(id: String, assetPath: String) {
         if (pcmCache.containsKey(id)) return
@@ -88,15 +105,45 @@ class AudioEngine(private val context: Context) {
         }
     }
 
-    fun pauseAll() {
-        for ((_, l) in layers) l.track.pause()
+    fun pauseAll(fade: Boolean = true) {
+        fadeJob?.cancel()
+        if (!fade) {
+            for ((_, l) in layers) runCatching { l.track.pause() }
+            return
+        }
+        fadeJob = fadeScope.launch {
+            val steps = (PAUSE_FADE_MS / FADE_STEP_MS).toInt()
+            for (i in 1..steps) {
+                val factor = 1f - i.toFloat() / steps
+                for ((_, l) in layers) {
+                    runCatching { l.track.setVolume(effectiveVolume(l) * factor) }
+                }
+                delay(FADE_STEP_MS)
+            }
+            for ((_, l) in layers) {
+                runCatching { l.track.pause() }
+                // Restore so a later resume plays at the configured level.
+                runCatching { l.track.setVolume(effectiveVolume(l)) }
+            }
+        }
     }
 
     fun resumeAll() {
-        for ((_, l) in layers) l.track.play()
+        fadeJob?.cancel()
+        fadeScope.launch {
+            for ((_, l) in layers) {
+                runCatching {
+                    l.track.setVolume(effectiveVolume(l))
+                    l.track.play()
+                }
+            }
+        }
     }
 
+    // Also reached via hardStop() while the engine object stays in use, so only
+    // cancel the in-flight jobs — never the scopes.
     fun release() {
+        fadeJob?.cancel()
         for ((_, l) in layers) {
             runCatching { l.track.stop() }
             runCatching { l.track.release() }

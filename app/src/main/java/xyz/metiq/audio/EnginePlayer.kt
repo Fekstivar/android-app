@@ -37,7 +37,9 @@ class EnginePlayer(
     fun notifyPausedExternally() {
         if (!playing) return
         playing = false
-        engine.pauseAll()
+        // Instant pause: this fires on audio route loss (e.g. headphones
+        // unplugged), where a fade would leak sound out of the speaker.
+        engine.pauseAll(fade = false)
         invalidateState()
     }
 
