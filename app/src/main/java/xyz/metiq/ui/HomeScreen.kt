@@ -13,8 +13,12 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -34,6 +38,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -515,7 +520,24 @@ fun HomeScreen(
     Scaffold(
         containerColor = tokens.background,
         bottomBar = {
-            if (!showLicenses) MetiqBottomBar(selected = tab, onSelect = { tab = it })
+            // Playback is exclusive (noise xor ambient), so at most one tab carries the dot.
+            val playingTab = when {
+                !playing -> null
+                activeId != null -> HomeTab.NOISE
+                ambientLevels.isNotEmpty() -> HomeTab.AMBIENT
+                else -> null
+            }
+            val playingAccent = when (playingTab) {
+                HomeTab.NOISE -> activeId?.let { noiseArgbById[it] }?.let { Color(it) }
+                HomeTab.AMBIENT -> Color(AMBIENT_TILE_ARGB)
+                else -> null
+            }
+            if (!showLicenses) MetiqBottomBar(
+                selected = tab,
+                onSelect = { tab = it },
+                playingTab = playingTab,
+                playingAccent = playingAccent ?: tokens.textPrimary,
+            )
         },
     ) { padding ->
       Box(modifier = Modifier.fillMaxSize()) {
@@ -1157,7 +1179,12 @@ private suspend fun selectColor(
 }
 
 @Composable
-private fun MetiqBottomBar(selected: HomeTab, onSelect: (HomeTab) -> Unit) {
+private fun MetiqBottomBar(
+    selected: HomeTab,
+    onSelect: (HomeTab) -> Unit,
+    playingTab: HomeTab?,
+    playingAccent: Color,
+) {
     val tokens = LocalMetiqColors.current
     val itemColors = NavigationBarItemDefaults.colors(
         selectedIconColor = tokens.background,
@@ -1170,14 +1197,18 @@ private fun MetiqBottomBar(selected: HomeTab, onSelect: (HomeTab) -> Unit) {
         NavigationBarItem(
             selected = selected == HomeTab.NOISE,
             onClick = { onSelect(HomeTab.NOISE) },
-            icon = { Icon(Icons.Outlined.GraphicEq, contentDescription = null) },
+            icon = {
+                TabIcon(Icons.Outlined.GraphicEq, playingTab == HomeTab.NOISE, playingAccent)
+            },
             label = { Text(stringResource(R.string.tab_noise), fontFamily = Inter) },
             colors = itemColors,
         )
         NavigationBarItem(
             selected = selected == HomeTab.AMBIENT,
             onClick = { onSelect(HomeTab.AMBIENT) },
-            icon = { Icon(Icons.Outlined.Waves, contentDescription = null) },
+            icon = {
+                TabIcon(Icons.Outlined.Waves, playingTab == HomeTab.AMBIENT, playingAccent)
+            },
             label = { Text(stringResource(R.string.tab_ambient), fontFamily = Inter) },
             colors = itemColors,
         )
@@ -1188,6 +1219,31 @@ private fun MetiqBottomBar(selected: HomeTab, onSelect: (HomeTab) -> Unit) {
             label = { Text(stringResource(R.string.tab_settings), fontFamily = Inter) },
             colors = itemColors,
         )
+    }
+}
+
+// Tab icon with a pulsing dot in the mode's accent while that mode is playing.
+@Composable
+private fun TabIcon(vector: ImageVector, playing: Boolean, accent: Color) {
+    Box {
+        Icon(vector, contentDescription = null)
+        if (playing) {
+            val pulse by rememberInfiniteTransition(label = "playingDot")
+                .animateFloat(
+                    initialValue = 0.4f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
+                    label = "playingDotAlpha",
+                )
+            Box(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 4.dp, y = (-2).dp)
+                    .size(6.dp)
+                    .graphicsLayer { alpha = pulse }
+                    .background(accent, CircleShape)
+            )
+        }
     }
 }
 
