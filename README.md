@@ -26,23 +26,33 @@
     </a>
 </p>
 
+<p align="center">
+    <a href="https://f-droid.org/packages/xyz.metiq">
+      <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">
+    </a>
+</p>
+
 # Metiq
 
 A no-nonsense noise app for focus, sleep, study, and relaxation. Colored noise
-(white, pink, brown, grey) with a sleep timer. Designed around two
-non-negotiables: simplicity and battery efficiency.
+(white, pink, brown, grey) and natural ambient sounds you can layer into your
+own mixes, with a sleep timer. Designed around two non-negotiables: simplicity
+and battery efficiency.
 
 ## What it does
 
 - **Colored noise playback** — pre-rendered, seamless loops at -22 LUFS so every
   color sounds equally loud.
+- **Ambient sounds and mixes** — sea waves, thunderstorm, fire, birds, café, and
+  wind. Layer them at independent levels, start from a preset, or save your own
+  mixes.
 - **Sleep timer** — set hours, minutes, and seconds, or pick from your saved
   presets. Audio fades out gracefully when the timer expires.
 - **Stays out of your way** — no accounts, no cloud, no tracking, no ads. The
   app runs without an internet connection.
 - **Light on your battery** — audio is handled by the hardware mixer via
   Android's `AudioTrack` in static mode, so the app process stays idle while you
-  sleep. Background animations pause automatically when battery saver kicks in.
+  sleep.
 - **Familiar media controls** — lock screen, notification, and Bluetooth headset
   transport buttons all work the way you'd expect.
 - **Five languages out of the box** — English, Italian, Spanish, French,
@@ -53,7 +63,7 @@ non-negotiables: simplicity and battery efficiency.
 
 ## Where to get it
 
-- **F-Droid**: coming soon
+- [**F-Droid**](https://f-droid.org/packages/xyz.metiq)
 - **Google Play**: coming soon
 - **Direct APK**: built and attached to every tagged release on this repository
 
