@@ -108,6 +108,7 @@ import androidx.lifecycle.compose.currentStateAsState
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -331,6 +332,41 @@ fun HomeScreen(
     }
 
     DisposableEffect(Unit) {
+        var controllerFuture: ListenableFuture<MediaController>? = null
+        var connectedController: MediaController? = null
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                playing = isPlaying
+            }
+        }
+
+        fun releaseController() {
+            controllerFuture?.let { f ->
+                // Not yet connected: releaseFuture is the sanctioned way to abort.
+                if (connectedController == null) MediaController.releaseFuture(f)
+            }
+            controllerFuture = null
+            connectedController?.removeListener(listener)
+            connectedController?.release()
+            connectedController = null
+            controller = null
+        }
+
+        fun connectController() {
+            releaseController()
+            val token = SessionToken(context, ComponentName(context, PlaybackService::class.java))
+            val future = MediaController.Builder(context, token).buildAsync()
+            controllerFuture = future
+            future.addListener({
+                if (controllerFuture !== future) return@addListener // superseded by a reconnect
+                val c = future.get()
+                connectedController = c
+                controller = c
+                playing = c.isPlaying
+                c.addListener(listener)
+            }, ContextCompat.getMainExecutor(context))
+        }
+
         val conn = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, b: IBinder?) {
                 val bound = b as PlaybackService.EngineBinder
@@ -346,6 +382,10 @@ fun HomeScreen(
                     }
                 }
                 if (ambientLevels.isNotEmpty() && activeId == null) tab = HomeTab.AMBIENT
+                // This fires again when the system restarts a killed service. A controller
+                // built for the previous session would silently drop every command (play/
+                // pause state then never reaches the UI), so rebuild it on each (re)connect.
+                connectController()
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
@@ -357,26 +397,8 @@ fun HomeScreen(
         ).setAction(PlaybackService.ENGINE_BIND_ACTION)
         context.bindService(bindIntent, conn, Context.BIND_AUTO_CREATE)
 
-        val token = SessionToken(context, ComponentName(context, PlaybackService::class.java))
-        val future = MediaController.Builder(context, token).buildAsync()
-        val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                playing = isPlaying
-            }
-        }
-        future.addListener({
-            val c = future.get()
-            controller = c
-            playing = c.isPlaying
-            c.addListener(listener)
-        }, ContextCompat.getMainExecutor(context))
-
         onDispose {
-            controller?.run {
-                removeListener(listener)
-                release()
-            }
-            controller = null
+            releaseController()
             context.unbindService(conn)
         }
     }
