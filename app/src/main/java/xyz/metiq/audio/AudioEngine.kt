@@ -8,7 +8,9 @@ import android.media.AudioTrack
 import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -41,7 +43,11 @@ class AudioEngine(private val context: Context) {
     )
 
     private val layers = ConcurrentHashMap<String, Layer>()
-    private val pcmCache = ConcurrentHashMap<String, Pcm>()
+
+    // Caches the decode itself, not just its result, so a startLayer racing an
+    // in-flight preload awaits that decode instead of running a duplicate one.
+    private val pcmCache = ConcurrentHashMap<String, Deferred<Pcm>>()
+    private val decodeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var masterVolume: Float = 1f
 
     // Single-threaded so a pause fade and a subsequent resume can never
@@ -51,14 +57,33 @@ class AudioEngine(private val context: Context) {
 
     private fun effectiveVolume(l: Layer): Float = (l.volume * masterVolume).coerceIn(0f, 1f)
 
+    private fun pcmAsync(id: String, assetPath: String): Deferred<Pcm> =
+        pcmCache.computeIfAbsent(id) {
+            decodeScope.async { decodeAssetToPcm(assetPath) }
+        }
+
+    // Awaits the (possibly shared) decode; drops the cache entry when the decode
+    // itself failed so a later attempt can retry, but keeps it when only the
+    // awaiting caller was cancelled.
+    private suspend fun awaitPcm(id: String, assetPath: String): Pcm {
+        val deferred = pcmAsync(id, assetPath)
+        return try {
+            deferred.await()
+        } catch (e: Throwable) {
+            if (deferred.isCompleted) pcmCache.remove(id, deferred)
+            throw e
+        }
+    }
+
     suspend fun preload(id: String, assetPath: String) {
-        if (pcmCache.containsKey(id)) return
         // Tolerate missing/undecodable assets so a not-yet-shipped ambient sound
         // can't crash preloading; the layer simply stays unavailable until added.
-        val pcm = withContext(Dispatchers.IO) {
-            runCatching { decodeAssetToPcm(assetPath) }.getOrNull()
-        } ?: return
-        pcmCache.putIfAbsent(id, pcm)
+        try {
+            awaitPcm(id, assetPath)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Throwable) {
+        }
     }
 
     suspend fun preloadAll(assets: Map<String, String>) = coroutineScope {
@@ -68,9 +93,7 @@ class AudioEngine(private val context: Context) {
 
     suspend fun startLayer(id: String, assetPath: String, volume: Float = 1f) {
         if (layers.containsKey(id)) return
-        val pcm = pcmCache[id] ?: withContext(Dispatchers.IO) {
-            decodeAssetToPcm(assetPath).also { pcmCache.putIfAbsent(id, it) }
-        }
+        val pcm = awaitPcm(id, assetPath)
         val effective = (volume * masterVolume).coerceIn(0f, 1f)
         val track = withContext(Dispatchers.IO) {
             val bufferBytes = pcm.data.size * 2
