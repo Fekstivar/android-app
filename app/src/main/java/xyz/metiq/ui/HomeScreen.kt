@@ -6,14 +6,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.os.IBinder
-import android.os.PowerManager
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateDpAsState
@@ -291,21 +288,6 @@ fun HomeScreen(
         )
     }
 
-    val powerManager = remember(context) { context.getSystemService(PowerManager::class.java) }
-    var powerSave by remember { mutableStateOf(powerManager?.isPowerSaveMode == true) }
-    DisposableEffect(context) {
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(c: Context?, i: Intent?) {
-                powerSave = powerManager?.isPowerSaveMode == true
-            }
-        }
-        context.registerReceiver(
-            receiver,
-            IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED),
-        )
-        onDispose { context.unregisterReceiver(receiver) }
-    }
-
     val resetTimer: () -> Unit = {
         timerRemaining = 0L
         timerRunning = false
@@ -425,17 +407,17 @@ fun HomeScreen(
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val onNoiseTab = tab == HomeTab.NOISE
     val particlesOn =
-        onNoiseTab && activeColor != null && playing && settings.particlesEnabled && !powerSave &&
+        onNoiseTab && activeColor != null && playing && settings.particlesEnabled &&
                 lifecycleState.isAtLeast(Lifecycle.State.STARTED)
     val ambientWavesOn =
-        !onNoiseTab && playing && !powerSave &&
+        !onNoiseTab && playing &&
                 lifecycleState.isAtLeast(Lifecycle.State.STARTED)
     val ambientParticlesOn =
-        !onNoiseTab && playing && settings.particlesEnabled && !powerSave &&
+        !onNoiseTab && playing && settings.particlesEnabled &&
                 ambientLevels.isNotEmpty() &&
                 lifecycleState.isAtLeast(Lifecycle.State.STARTED)
     val wavesOn =
-        onNoiseTab && activeColor != null && playing && !powerSave &&
+        onNoiseTab && activeColor != null && playing &&
                 lifecycleState.isAtLeast(Lifecycle.State.STARTED)
     val timerEnabled = (activeId != null || ambientLevels.isNotEmpty()) && playing
     val tokens = LocalMetiqColors.current
