@@ -1,2 +1,3 @@
 • Novo som ambiente de vento
 • Download mais leve: loops de ruído mais curtos e ainda contínuos
+• Indicador de reprodução na barra inferior: mostra se um ruído ou mix ambiente está tocando

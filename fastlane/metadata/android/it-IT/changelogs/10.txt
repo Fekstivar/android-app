@@ -1,2 +1,3 @@
 • Nuovo suono ambientale del vento
 • Download più leggero: loop di rumore più corti e sempre senza interruzioni
+• Indicatore di riproduzione nella barra inferiore: mostra se suona un rumore o un mix ambientale

@@ -1,2 +1,3 @@
 • Nuevo sonido ambiental de viento
 • Descarga más ligera: bucles de ruido más cortos e igual de fluidos
+• Indicador de reproducción en la barra inferior: muestra si suena ruido o una mezcla ambiental

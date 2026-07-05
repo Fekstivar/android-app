@@ -1,2 +1,3 @@
 • New wind ambient sound
 • Smaller app download: shorter, still-seamless noise loops
+• Playing indicator on the bottom bar shows whether noise or an ambient mix is on

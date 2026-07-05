@@ -1,2 +1,3 @@
 • Nouveau son d'ambiance de vent
 • Téléchargement plus léger : boucles de bruit plus courtes, toujours sans coupure
+• Indicateur de lecture dans la barre du bas : montre si un bruit ou un mix d'ambiance joue
