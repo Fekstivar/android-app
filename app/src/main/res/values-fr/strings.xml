@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_helper">Touchez une couleur de bruit pour le lire ou l\'arrêter.\nDéfinissez une minuterie si vous voulez qu\'il s\'arrête automatiquement.</string>
-    <string name="home_playing_on">Lecture sur : %1$s</string>
-    <string name="home_settings_cd">Paramètres</string>
 
     <string name="tab_noise">Bruit</string>
     <string name="tab_ambient">Ambiance</string>
     <string name="tab_settings">Paramètres</string>
 
-    <string name="ambient_helper">Choisissez un préréglage ou créez votre propre son.\nTouchez un orbe pour démarrer, puis glissez son curseur pour régler le niveau.</string>
     <string name="ambient_off">Inactif</string>
     <string name="ambient_now_playing">Mix d\'ambiance</string>
     <string name="ambient_seawaves">Vagues de la mer</string>
@@ -72,4 +68,14 @@
     <string name="mix_cabin">Chalet douillet</string>
     <string name="mix_beach">Plage tropicale</string>
     <string name="mix_bar">Bar bondé</string>
+
+    <!-- Custom mixes -->
+    <string name="mix_save_chip">Enregistrer le mix</string>
+    <string name="mix_save_title">Enregistrer le mix actuel</string>
+    <string name="mix_save_name_hint">Nom</string>
+    <string name="mix_save_confirm">Enregistrer</string>
+    <string name="mix_delete_title">Supprimer le mix ?</string>
+    <string name="mix_delete_message">« %1$s » sera supprimé.</string>
+    <string name="mix_delete_confirm">Supprimer</string>
+    <string name="dialog_cancel">Annuler</string>
 </resources>

@@ -2,18 +2,12 @@
 <resources>
     <string name="app_name" translatable="false">Metiq</string>
 
-    <!-- Home screen -->
-    <string name="home_helper">Tap a noise color to play or stop it.\nSet a timer if you want it to turn off automatically.</string>
-    <string name="home_playing_on">Playing on: %1$s</string>
-    <string name="home_settings_cd">Settings</string>
-
     <!-- Bottom navigation tabs -->
     <string name="tab_noise">Noise</string>
     <string name="tab_ambient">Ambient</string>
     <string name="tab_settings">Settings</string>
 
     <!-- Ambient mixer -->
-    <string name="ambient_helper">Select a preset or create your own sound.\nTap an orb to start, then drag its slider to set the level.</string>
     <string name="ambient_off">Off</string>
     <string name="ambient_now_playing">Ambient mix</string>
     <string name="ambient_seawaves">Sea waves</string>
@@ -26,6 +20,16 @@
     <string name="mix_cabin">Cozy cabin</string>
     <string name="mix_beach">Tropical beach</string>
     <string name="mix_bar">Crowded bar</string>
+
+    <!-- Custom mixes -->
+    <string name="mix_save_chip">Save mix</string>
+    <string name="mix_save_title">Save current mix</string>
+    <string name="mix_save_name_hint">Name</string>
+    <string name="mix_save_confirm">Save</string>
+    <string name="mix_delete_title">Delete mix?</string>
+    <string name="mix_delete_message">“%1$s” will be removed.</string>
+    <string name="mix_delete_confirm">Delete</string>
+    <string name="dialog_cancel">Cancel</string>
 
     <!-- Noise colors (used in UI labels and default-color picker) -->
     <string name="color_pink">Pink</string>

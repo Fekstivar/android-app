@@ -16,10 +16,16 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
+data class CustomMix(
+    val name: String,
+    val layers: Map<String, Float>,
+)
+
 data class Settings(
     val particlesEnabled: Boolean,
     val timerPresetsSeconds: List<Long>,
     val languageTag: String?,
+    val customMixes: List<CustomMix>,
 )
 
 val DEFAULT_SETTINGS = Settings(
@@ -28,9 +34,37 @@ val DEFAULT_SETTINGS = Settings(
         15L * 60, 30L * 60, 45L * 60, 60L * 60
     ),
     languageTag = null,
+    customMixes = emptyList(),
 )
 
 const val MAX_TIMER_PRESETS = 4
+const val MAX_CUSTOM_MIXES = 6
+const val MAX_CUSTOM_MIX_NAME_LENGTH = 24
+
+// One mix per line as "name|id:volume,id:volume". The name is sanitized of the
+// separator characters on save, so a plain split round-trips safely.
+private fun encodeCustomMixes(mixes: List<CustomMix>): String =
+    mixes.take(MAX_CUSTOM_MIXES).joinToString("\n") { mix ->
+        val name = mix.name.replace('\n', ' ').replace('|', ' ')
+            .trim().take(MAX_CUSTOM_MIX_NAME_LENGTH)
+        val layers = mix.layers.entries.joinToString(",") { (id, vol) ->
+            "$id:${vol.coerceIn(0f, 1f)}"
+        }
+        "$name|$layers"
+    }
+
+private fun decodeCustomMixes(encoded: String): List<CustomMix> =
+    encoded.lineSequence().mapNotNull { line ->
+        val sep = line.indexOf('|')
+        if (sep <= 0) return@mapNotNull null
+        val name = line.substring(0, sep).trim()
+        val layers = line.substring(sep + 1).split(',').mapNotNull { entry ->
+            val id = entry.substringBefore(':').takeIf { it.isNotBlank() }
+            val vol = entry.substringAfter(':', "").toFloatOrNull()
+            if (id != null && vol != null && vol > 0f) id to vol.coerceIn(0f, 1f) else null
+        }.toMap()
+        if (name.isNotEmpty() && layers.isNotEmpty()) CustomMix(name, layers) else null
+    }.take(MAX_CUSTOM_MIXES).toList()
 
 val SUPPORTED_LANGUAGE_TAGS: List<String> = listOf("en", "it", "es", "fr", "pt")
 
@@ -45,6 +79,7 @@ private val Context.dataStore by preferencesDataStore(name = "metiq_settings")
 private object Keys {
     val PARTICLES_ENABLED = booleanPreferencesKey("particles_enabled")
     val TIMER_PRESETS = stringPreferencesKey("timer_presets")
+    val CUSTOM_MIXES = stringPreferencesKey("custom_mixes")
     val LANGUAGE_TAG = stringPreferencesKey("language_tag")
     val RATE_FIRST_LAUNCH = longPreferencesKey("rate_first_launch_millis")
     val RATE_LAUNCH_COUNT = intPreferencesKey("rate_launch_count")
@@ -66,6 +101,10 @@ class SettingsRepository(context: Context) {
     suspend fun setTimerPresetsSeconds(presets: List<Long>) {
         val capped = presets.take(MAX_TIMER_PRESETS).filter { it > 0L }
         store.edit { it[Keys.TIMER_PRESETS] = capped.joinToString(",") }
+    }
+
+    suspend fun setCustomMixes(mixes: List<CustomMix>) {
+        store.edit { it[Keys.CUSTOM_MIXES] = encodeCustomMixes(mixes) }
     }
 
     suspend fun setLanguageTag(tag: String?) {
@@ -119,10 +158,12 @@ class SettingsRepository(context: Context) {
             ?.filter { it > 0L }?.take(MAX_TIMER_PRESETS)?.ifEmpty { null }
             ?: DEFAULT_SETTINGS.timerPresetsSeconds
         val languageTag = this[Keys.LANGUAGE_TAG]?.takeIf { it in SUPPORTED_LANGUAGE_TAGS }
+        val customMixes = this[Keys.CUSTOM_MIXES]?.let(::decodeCustomMixes).orEmpty()
         return Settings(
             particlesEnabled = particles,
             timerPresetsSeconds = presets,
             languageTag = languageTag,
+            customMixes = customMixes,
         )
     }
 }

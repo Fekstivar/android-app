@@ -29,8 +29,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -45,14 +44,20 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +68,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -70,6 +80,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.contentDescription
@@ -99,7 +110,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import xyz.metiq.BuildConfig
+import xyz.metiq.CustomMix
 import xyz.metiq.DEFAULT_SETTINGS
+import xyz.metiq.MAX_CUSTOM_MIXES
+import xyz.metiq.MAX_CUSTOM_MIX_NAME_LENGTH
 import xyz.metiq.R
 import xyz.metiq.Settings
 import xyz.metiq.audio.PlaybackService
@@ -126,6 +140,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.graphics.Color
+import kotlin.math.abs
 
 private enum class HomeTab { NOISE, AMBIENT, SETTINGS }
 
@@ -175,6 +190,13 @@ private val NOISE_COLORS = listOf(
 
 private val NOISE_IDS = NOISE_COLORS.map { it.id }.toSet()
 private val AMBIENT_IDS = AMBIENT_SOUNDS.map { it.id }.toSet()
+
+// A preset counts as "playing" only when the active mix matches it exactly:
+// same sounds, same volumes (small epsilon for float round-trips).
+private fun mixMatches(active: Map<String, Float>, layers: Map<String, Float>): Boolean {
+    if (active.keys != layers.keys) return false
+    return active.all { (id, v) -> abs(v - (layers[id] ?: return false)) < 0.01f }
+}
 
 @Composable
 private fun paletteFor(id: String): NoisePalette {
@@ -228,6 +250,7 @@ fun HomeScreen(
     settings: Settings,
     onParticlesEnabled: (Boolean) -> Unit,
     onTimerPresets: (List<Long>) -> Unit,
+    onCustomMixes: (List<CustomMix>) -> Unit,
     onLanguageTag: (String?) -> Unit,
     ratePromptVisible: Boolean = false,
     onRatePromptRate: () -> Unit = {},
@@ -243,6 +266,9 @@ fun HomeScreen(
     var startJob by remember { mutableStateOf<Job?>(null) }
     var tab by remember { mutableStateOf(HomeTab.NOISE) }
     val ambientLevels = remember { mutableStateMapOf<String, Float>() }
+
+    var showSaveMixDialog by remember { mutableStateOf(false) }
+    var pendingMixDelete by remember { mutableStateOf<CustomMix?>(null) }
 
     var timerRemaining by remember { mutableLongStateOf(0L) }
     var timerRunning by remember { mutableStateOf(false) }
@@ -449,6 +475,18 @@ fun HomeScreen(
         }
     }
 
+    // Retapping the active preset: stop every sound in the mix at once.
+    val stopAmbient: () -> Unit = {
+        val b = binder
+        if (b != null) {
+            ambientLevels.keys.toList().forEach { b.engine.stopLayer(it) }
+            ambientLevels.clear()
+            b.setActiveColor(null, null)
+            controller?.stop()
+            resetTimer()
+        }
+    }
+
     // Tapping an orb starts it at the default volume, or turns it off if already active.
     // Fine level control lives in each active orb's slider (sliding to zero also turns it off).
     val tapAmbient: (String) -> Unit = { id ->
@@ -582,8 +620,6 @@ fun HomeScreen(
             ) {
                 when (tab) {
                     HomeTab.NOISE -> {
-                        HelperText()
-                        Spacer(Modifier.height(24.dp))
                         ColorGrid(
                             activeId = activeId,
                             wavesOn = wavesOn,
@@ -602,9 +638,16 @@ fun HomeScreen(
                     }
 
                     HomeTab.AMBIENT -> {
-                        AmbientHelperText()
-                        Spacer(Modifier.height(20.dp))
-                        MixPresets(onApply = applyMix)
+                        val activeMix = ambientLevels.filterValues { it > 0f }
+                        val mixIsSaved = PREMADE_MIXES.any { mixMatches(activeMix, it.layers) } ||
+                                settings.customMixes.any { mixMatches(activeMix, it.layers) }
+                        MixPresets(
+                            customMixes = settings.customMixes,
+                            activeMix = activeMix,
+                            onApply = applyMix,
+                            onStop = stopAmbient,
+                            onDelete = { pendingMixDelete = it },
+                        )
                         Spacer(Modifier.height(24.dp))
                         AmbientGrid(
                             levels = ambientLevels,
@@ -617,6 +660,12 @@ fun HomeScreen(
                             onVolumeSettled = { id ->
                                 if ((ambientLevels[id] ?: 0f) <= 0f) disableAmbient(id)
                             },
+                        )
+                        Spacer(Modifier.height(24.dp))
+                        SaveMixButton(
+                            enabled = activeMix.isNotEmpty() && !mixIsSaved &&
+                                    settings.customMixes.size < MAX_CUSTOM_MIXES,
+                            onClick = { showSaveMixDialog = true },
                         )
                     }
 
@@ -671,17 +720,75 @@ fun HomeScreen(
         if (showLicenses) {
             LicensesScreen(onBack = { showLicenses = false })
         }
+        pendingMixDelete?.let { mix ->
+            AlertDialog(
+                onDismissRequest = { pendingMixDelete = null },
+                title = { Text(stringResource(R.string.mix_delete_title), fontFamily = Inter) },
+                text = {
+                    Text(
+                        stringResource(R.string.mix_delete_message, mix.name),
+                        fontFamily = Inter,
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onCustomMixes(settings.customMixes - mix)
+                        pendingMixDelete = null
+                    }) { Text(stringResource(R.string.mix_delete_confirm), fontFamily = Inter) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingMixDelete = null }) {
+                        Text(stringResource(R.string.dialog_cancel), fontFamily = Inter)
+                    }
+                },
+            )
+        }
+        if (showSaveMixDialog) {
+            SaveMixDialog(
+                onDismiss = { showSaveMixDialog = false },
+                onSave = { name ->
+                    val snapshot = ambientLevels.filterValues { it > 0f }
+                    if (snapshot.isNotEmpty()) {
+                        val others = settings.customMixes
+                            .filterNot { it.name.equals(name, ignoreCase = true) }
+                        onCustomMixes((others + CustomMix(name, snapshot)).take(MAX_CUSTOM_MIXES))
+                    }
+                    showSaveMixDialog = false
+                },
+            )
+        }
       }
     }
 }
 
 @Composable
-private fun HelperText() {
-    Text(
-        text = stringResource(R.string.home_helper),
-        color = LocalMetiqColors.current.textPrimary,
-        textAlign = TextAlign.Center,
-        style = TextStyle(fontFamily = Inter, fontSize = 15.sp, lineHeight = 20.sp),
+private fun SaveMixDialog(
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.mix_save_title), fontFamily = Inter) },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it.take(MAX_CUSTOM_MIX_NAME_LENGTH) },
+                singleLine = true,
+                placeholder = { Text(stringResource(R.string.mix_save_name_hint), fontFamily = Inter) },
+            )
+        },
+        confirmButton = {
+            TextButton(
+                enabled = name.isNotBlank(),
+                onClick = { onSave(name.trim().replace('|', ' ')) },
+            ) { Text(stringResource(R.string.mix_save_confirm), fontFamily = Inter) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.dialog_cancel), fontFamily = Inter)
+            }
+        },
     )
 }
 
@@ -1024,30 +1131,90 @@ private fun MetiqBottomBar(selected: HomeTab, onSelect: (HomeTab) -> Unit) {
     }
 }
 
-@Composable
-private fun AmbientHelperText() {
-    Text(
-        text = stringResource(R.string.ambient_helper),
-        color = LocalMetiqColors.current.textPrimary,
-        textAlign = TextAlign.Center,
-        style = TextStyle(fontFamily = Inter, fontSize = 15.sp, lineHeight = 20.sp),
-    )
-}
+// Horizontal padding the parent scroll column applies to its children; the preset
+// row escapes it so its scroll viewport reaches the foreground card edges.
+private val CONTENT_HORIZONTAL_PADDING = 20.dp
+private val MIX_EDGE_FADE_WIDTH = 24.dp
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MixPresets(
+    customMixes: List<CustomMix>,
+    activeMix: Map<String, Float>,
     onApply: (Map<String, Float>) -> Unit,
+    onStop: () -> Unit,
+    onDelete: (CustomMix) -> Unit,
 ) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    val tokens = LocalMetiqColors.current
+    val scroll = rememberScrollState()
+    Row(
+        modifier = Modifier
+            .layout { measurable, constraints ->
+                val expanded =
+                    constraints.maxWidth + (CONTENT_HORIZONTAL_PADDING * 2).roundToPx()
+                val placeable = measurable.measure(
+                    constraints.copy(minWidth = expanded, maxWidth = expanded)
+                )
+                layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+            }
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+            .drawWithContent {
+                drawContent()
+                // Fade chips out at the strip edges, only on the side(s) with
+                // more content to scroll to.
+                val fade = MIX_EDGE_FADE_WIDTH.toPx()
+                if (scroll.value > 0) {
+                    drawRect(
+                        brush = Brush.horizontalGradient(
+                            0f to Color.Transparent, 1f to Color.Black,
+                            startX = 0f, endX = fade,
+                        ),
+                        size = Size(fade, size.height),
+                        blendMode = BlendMode.DstIn,
+                    )
+                }
+                if (scroll.value < scroll.maxValue) {
+                    drawRect(
+                        brush = Brush.horizontalGradient(
+                            0f to Color.Black, 1f to Color.Transparent,
+                            startX = size.width - fade, endX = size.width,
+                        ),
+                        topLeft = Offset(size.width - fade, 0f),
+                        size = Size(fade, size.height),
+                        blendMode = BlendMode.DstIn,
+                    )
+                }
+            }
+            .horizontalScroll(scroll)
+            .padding(horizontal = CONTENT_HORIZONTAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        customMixes.forEach { mix ->
+            key(mix.name) {
+                val active = mixMatches(activeMix, mix.layers)
+                MixChip(
+                    label = mix.name,
+                    active = active,
+                    onClick = { if (active) onStop() else onApply(mix.layers) },
+                    trailingIcon = Icons.Outlined.Delete,
+                    onTrailingClick = { onDelete(mix) },
+                )
+            }
+        }
+        if (customMixes.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(20.dp)
+                    .background(tokens.divider),
+            )
+        }
         PREMADE_MIXES.forEach { preset ->
+            val active = mixMatches(activeMix, preset.layers)
             MixChip(
                 label = stringResource(preset.labelRes),
-                onClick = { onApply(preset.layers) },
+                active = active,
+                onClick = { if (active) onStop() else onApply(preset.layers) },
             )
         }
     }
@@ -1057,19 +1224,71 @@ private fun MixPresets(
 private fun MixChip(
     label: String,
     onClick: () -> Unit,
+    active: Boolean = false,
+    trailingIcon: ImageVector? = null,
+    onTrailingClick: (() -> Unit)? = null,
 ) {
     val tokens = LocalMetiqColors.current
-    Box(
+    val background = if (active) tokens.textPrimary else tokens.cellBackground
+    val content = if (active) tokens.background else tokens.textPrimary
+    Row(
         modifier = Modifier
             .clip(RoundedCornerShape(100.dp))
-            .background(tokens.cellBackground)
+            .background(background)
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
             text = label,
-            color = tokens.textPrimary,
+            color = content,
             style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+        )
+        if (trailingIcon != null && onTrailingClick != null) {
+            Icon(
+                imageVector = trailingIcon,
+                contentDescription = stringResource(R.string.mix_delete_confirm),
+                tint = content.copy(alpha = 0.7f),
+                modifier = Modifier
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .clickable(onClick = onTrailingClick),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SaveMixButton(
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val tokens = LocalMetiqColors.current
+    val contentAlpha = if (enabled) 1f else 0.4f
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(100.dp))
+            .background(tokens.textPrimary.copy(alpha = 0.12f))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Add,
+            contentDescription = null,
+            tint = tokens.textPrimary.copy(alpha = contentAlpha),
+            modifier = Modifier.size(16.dp),
+        )
+        Text(
+            text = stringResource(R.string.mix_save_chip),
+            color = tokens.textPrimary.copy(alpha = contentAlpha),
+            style = TextStyle(
+                fontFamily = Inter,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+            ),
         )
     }
 }
@@ -1274,6 +1493,7 @@ private fun HomeScreenPreview() {
             settings = DEFAULT_SETTINGS,
             onParticlesEnabled = {},
             onTimerPresets = {},
+            onCustomMixes = {},
             onLanguageTag = {},
         )
     }

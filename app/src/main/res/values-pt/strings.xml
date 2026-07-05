@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_helper">Toque numa cor de ruído para reproduzi-lo ou pará-lo.\nDefina um temporizador se quiser que se desligue automaticamente.</string>
-    <string name="home_playing_on">Reproduzindo em: %1$s</string>
-    <string name="home_settings_cd">Configurações</string>
 
     <string name="tab_noise">Ruído</string>
     <string name="tab_ambient">Ambiente</string>
     <string name="tab_settings">Configurações</string>
 
-    <string name="ambient_helper">Escolha uma predefinição ou crie o seu próprio som.\nToque num orbe para começar e arraste o controlo para ajustar o nível.</string>
     <string name="ambient_off">Inativo</string>
     <string name="ambient_now_playing">Mix ambiente</string>
     <string name="ambient_seawaves">Ondas do mar</string>
@@ -72,4 +68,14 @@
     <string name="mix_cabin">Cabana aconchegante</string>
     <string name="mix_beach">Praia tropical</string>
     <string name="mix_bar">Bar lotado</string>
+
+    <!-- Custom mixes -->
+    <string name="mix_save_chip">Salvar mistura</string>
+    <string name="mix_save_title">Salvar a mistura atual</string>
+    <string name="mix_save_name_hint">Nome</string>
+    <string name="mix_save_confirm">Salvar</string>
+    <string name="mix_delete_title">Excluir a mistura?</string>
+    <string name="mix_delete_message">“%1$s” será removida.</string>
+    <string name="mix_delete_confirm">Excluir</string>
+    <string name="dialog_cancel">Cancelar</string>
 </resources>
