@@ -22,6 +22,7 @@
     <string name="ambient_fire">Fire crackling</string>
     <string name="ambient_birds">Birds chirping</string>
     <string name="ambient_cafe">Café ambience</string>
+    <string name="ambient_wind">Wind</string>
 
     <!-- Mix presets -->
     <string name="mix_cabin">Cozy cabin</string>

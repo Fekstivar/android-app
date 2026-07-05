@@ -146,6 +146,7 @@ class PlaybackService : MediaSessionService() {
             "fire" to "audio/ambient/fire.ogg",
             "birds" to "audio/ambient/birds.ogg",
             "cafe" to "audio/ambient/cafe.ogg",
+            "wind" to "audio/ambient/wind.ogg",
         )
     }
 }

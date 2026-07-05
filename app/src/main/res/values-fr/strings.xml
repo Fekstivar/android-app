@@ -18,6 +18,7 @@ Enregistrez votre propre mix avec « Enregistrer le mix », puis utilisez l\'ic�
     <string name="ambient_fire">Crépitement du feu</string>
     <string name="ambient_birds">Chant des oiseaux</string>
     <string name="ambient_cafe">Ambiance de café</string>
+    <string name="ambient_wind">Vent</string>
 
     <string name="color_pink">Rose</string>
     <string name="color_brown">Marron</string>

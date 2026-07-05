@@ -45,6 +45,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Air
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
@@ -161,6 +162,7 @@ private val AMBIENT_SOUNDS = listOf(
     AmbientSound("fire", R.string.ambient_fire, Color(0xFFE8662B), iconVector = Icons.Outlined.LocalFireDepartment),
     AmbientSound("birds", R.string.ambient_birds, Color(0xFF4CAF7D), iconResId = R.drawable.ic_ambient_birds),
     AmbientSound("cafe", R.string.ambient_cafe, Color(0xFFB8862B), iconVector = Icons.Outlined.Storefront),
+    AmbientSound("wind", R.string.ambient_wind, Color(0xFF3AA6B9), iconVector = Icons.Outlined.Air),
 )
 
 private const val AMBIENT_DEFAULT_VOLUME = 0.7f

@@ -18,6 +18,7 @@ Salva il tuo mix con “Salva mix” e usa l\'icona del cestino per eliminarlo.<
     <string name="ambient_fire">Crepitio del fuoco</string>
     <string name="ambient_birds">Cinguettio di uccelli</string>
     <string name="ambient_cafe">Atmosfera da caffè</string>
+    <string name="ambient_wind">Vento</string>
 
     <string name="color_pink">Rosa</string>
     <string name="color_brown">Marrone</string>
