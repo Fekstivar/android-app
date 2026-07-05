@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="help_cd">Aiuto</string>
+    <string name="help_title">Come funziona</string>
+    <string name="home_helper">Tocca un colore di rumore per riprodurlo o fermarlo.\nImposta un timer se vuoi che si spenga automaticamente.</string>
+    <string name="ambient_helper">Tocca un preset per riprodurlo, toccalo di nuovo per fermarlo.
+Tocca un orbe per avviare un suono, poi trascina il cursore per regolare il livello.
+Salva il tuo mix con “Salva mix” e usa l\'icona del cestino per eliminarlo.</string>
 
     <string name="tab_noise">Rumore</string>
     <string name="tab_ambient">Ambiente</string>

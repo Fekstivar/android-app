@@ -2,6 +2,13 @@
 <resources>
     <string name="app_name" translatable="false">Metiq</string>
 
+    <!-- Help modal (opened from the circled question mark on the Noise/Ambient screens) -->
+    <string name="help_cd">Help</string>
+    <string name="help_title">How it works</string>
+    <string name="home_helper">Tap a noise color to play or stop it.\nSet a timer if you want it to turn off automatically.</string>
+    <string name="ambient_helper">Tap a preset to play it, tap it again to stop it.\nTap an orb to start a sound, then drag its slider to set the level.\nSave your own mix with “Save mix”, and use the trash icon to delete it.</string>
+    <string name="dialog_ok" translatable="false">OK</string>
+
     <!-- Bottom navigation tabs -->
     <string name="tab_noise">Noise</string>
     <string name="tab_ambient">Ambient</string>

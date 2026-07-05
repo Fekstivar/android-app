@@ -44,12 +44,14 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -269,6 +271,7 @@ fun HomeScreen(
 
     var showSaveMixDialog by remember { mutableStateOf(false) }
     var pendingMixDelete by remember { mutableStateOf<CustomMix?>(null) }
+    var showHelp by remember { mutableStateOf(false) }
 
     var timerRemaining by remember { mutableLongStateOf(0L) }
     var timerRunning by remember { mutableStateOf(false) }
@@ -595,19 +598,32 @@ fun HomeScreen(
                     )
                 }
             }
-            Row(
+            Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .fillMaxWidth()
                     .padding(start = 20.dp, end = 20.dp, top = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
             ) {
                 Image(
                     painter = painterResource(R.drawable.logo_metiq),
                     contentDescription = stringResource(R.string.app_name),
-                    modifier = Modifier.height(32.dp),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .height(32.dp),
                 )
+                IconButton(
+                    onClick = { showHelp = true },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .size(32.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.HelpOutline,
+                        contentDescription = stringResource(R.string.help_cd),
+                        tint = tokens.textPrimary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
             Column(
                 modifier = Modifier
@@ -754,6 +770,26 @@ fun HomeScreen(
                         onCustomMixes((others + CustomMix(name, snapshot)).take(MAX_CUSTOM_MIXES))
                     }
                     showSaveMixDialog = false
+                },
+            )
+        }
+        if (showHelp) {
+            AlertDialog(
+                onDismissRequest = { showHelp = false },
+                title = { Text(stringResource(R.string.help_title), fontFamily = Inter) },
+                text = {
+                    Text(
+                        stringResource(
+                            if (tab == HomeTab.AMBIENT) R.string.ambient_helper
+                            else R.string.home_helper
+                        ),
+                        fontFamily = Inter,
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showHelp = false }) {
+                        Text(stringResource(R.string.dialog_ok), fontFamily = Inter)
+                    }
                 },
             )
         }
