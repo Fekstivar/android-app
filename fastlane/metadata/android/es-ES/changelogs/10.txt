@@ -1,0 +1,2 @@
+• Nuevo sonido ambiental de viento
+• Descarga más ligera: bucles de ruido más cortos e igual de fluidos

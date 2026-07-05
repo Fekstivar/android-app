@@ -9,12 +9,12 @@ Colored noise
 • Grey — perceptually flat, designed to feel even across the spectrum.
 
 Ambient sounds
-• Sea waves, thunderstorm, fire crackling, birds chirping, and café ambience.
-• Start from a preset, or blend sounds into your own mix and set each level.
+• Sea waves, thunderstorm, fire crackling, birds chirping, café ambience, and wind.
+• Start from a preset, or blend sounds into your own mix, set each level, and save it as a preset.
 
 Features
-• Four colored noises and five ambient sounds, looped seamlessly.
-• Layer and mix ambient sounds, with quick presets.
+• Four colored noises and six ambient sounds, looped seamlessly.
+• Layer and mix ambient sounds, with quick presets and your own saved mixes.
 • Sleep timer with quick presets and custom hours/minutes/seconds.
 • Media-session integration: control playback from your lock screen, notification, or Bluetooth headset.
 • Works fully offline. Audio is bundled — no streaming, no account, no internet permission.

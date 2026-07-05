@@ -1,0 +1,2 @@
+• New wind ambient sound
+• Smaller app download: shorter, still-seamless noise loops

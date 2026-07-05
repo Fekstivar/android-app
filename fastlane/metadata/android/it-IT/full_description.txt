@@ -9,12 +9,12 @@ Rumore colorato
 • Grigio — percettivamente piatto, pensato per risultare uniforme su tutto lo spettro.
 
 Suoni ambientali
-• Onde del mare, temporale, crepitio del fuoco, cinguettio di uccelli e atmosfera da caffè.
-• Parti da un preset, o mescola i suoni nel tuo mix e regola ogni livello.
+• Onde del mare, temporale, crepitio del fuoco, cinguettio di uccelli, atmosfera da caffè e vento.
+• Parti da un preset, o mescola i suoni nel tuo mix, regola ogni livello e salvalo come preset.
 
 Caratteristiche
-• Quattro rumori colorati e cinque suoni ambientali, in loop senza interruzioni.
-• Sovrapponi e mescola i suoni ambientali, con preset rapidi.
+• Quattro rumori colorati e sei suoni ambientali, in loop senza interruzioni.
+• Sovrapponi e mescola i suoni ambientali, con preset rapidi e i tuoi mix salvati.
 • Timer di spegnimento con preset rapidi e ore/minuti/secondi personalizzabili.
 • Integrazione MediaSession: controlla la riproduzione da schermata di blocco, notifica o cuffie Bluetooth.
 • Funziona completamente offline. L'audio è incluso — niente streaming, niente account, niente permesso internet.

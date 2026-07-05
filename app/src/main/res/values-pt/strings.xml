@@ -18,6 +18,7 @@ Salve a sua própria mistura com “Salvar mistura” e use o ícone da lixeira 
     <string name="ambient_fire">Crepitar do fogo</string>
     <string name="ambient_birds">Canto dos pássaros</string>
     <string name="ambient_cafe">Ambiente de café</string>
+    <string name="ambient_wind">Vento</string>
 
     <string name="color_pink">Rosa</string>
     <string name="color_brown">Marrom</string>

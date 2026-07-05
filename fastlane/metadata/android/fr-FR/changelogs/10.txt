@@ -1,0 +1,2 @@
+• Nouveau son d'ambiance de vent
+• Téléchargement plus léger : boucles de bruit plus courtes, toujours sans coupure

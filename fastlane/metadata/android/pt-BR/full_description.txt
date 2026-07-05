@@ -9,12 +9,12 @@ Ruído colorido
 • Cinza — perceptivamente plano, feito para soar uniforme em todo o espectro.
 
 Sons ambientes
-• Ondas do mar, tempestade, crepitar do fogo, canto dos pássaros e ambiente de café.
-• Comece por um preset, ou misture os sons no seu próprio mix e ajuste cada nível.
+• Ondas do mar, tempestade, crepitar do fogo, canto dos pássaros, ambiente de café e vento.
+• Comece por um preset, ou misture os sons no seu próprio mix, ajuste cada nível e salve como preset.
 
 Recursos
-• Quatro ruídos coloridos e cinco sons ambientes, em loop contínuo.
-• Sobreponha e misture os sons ambientes, com presets rápidos.
+• Quatro ruídos coloridos e seis sons ambientes, em loop contínuo.
+• Sobreponha e misture os sons ambientes, com presets rápidos e seus próprios mixes salvos.
 • Temporizador de desligamento com presets rápidos e horas/minutos/segundos personalizáveis.
 • Integração com MediaSession: controle a reprodução pela tela de bloqueio, notificação ou fones Bluetooth.
 • Funciona totalmente offline. O áudio vem embutido — sem streaming, sem conta, sem permissão de internet.

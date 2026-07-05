@@ -9,12 +9,12 @@ Ruido de colores
 • Gris — perceptivamente plano, diseñado para sonar uniforme en todo el espectro.
 
 Sonidos ambientales
-• Olas del mar, tormenta, crepitar del fuego, canto de pájaros y ambiente de café.
-• Empieza con un preajuste, o mezcla los sonidos en tu propio mix y ajusta cada nivel.
+• Olas del mar, tormenta, crepitar del fuego, canto de pájaros, ambiente de café y viento.
+• Empieza con un preajuste, o mezcla los sonidos en tu propio mix, ajusta cada nivel y guárdalo como preajuste.
 
 Características
-• Cuatro ruidos de colores y cinco sonidos ambientales, en bucle sin cortes.
-• Superpón y mezcla los sonidos ambientales, con preajustes rápidos.
+• Cuatro ruidos de colores y seis sonidos ambientales, en bucle sin cortes.
+• Superpón y mezcla los sonidos ambientales, con preajustes rápidos y tus propias mezclas guardadas.
 • Temporizador de apagado con preajustes rápidos y horas/minutos/segundos personalizables.
 • Integración con MediaSession: controla la reproducción desde la pantalla de bloqueo, notificación o auriculares Bluetooth.
 • Funciona completamente sin conexión. El audio está incluido — sin streaming, sin cuenta, sin permiso de internet.
