@@ -1,0 +1,8 @@
+• Salve suas misturas como predefinições: toque para reproduzir ou parar, exclua com a lixeira
+• A faixa de predefinições agora rola na horizontal
+• Telas mais limpas: as dicas estão em uma janela de ajuda
+• Ícone temático no Android 13+
+• A reprodução diminui suavemente ao pausar
+• Início do som mais rápido após abrir o app
+• Corrigida a interface esmagada em telas pequenas
+• Corrigidas as animações paradas após reiniciar o app

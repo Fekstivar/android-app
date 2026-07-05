@@ -1,0 +1,8 @@
+• Salva i tuoi mix come preset: toccali per riprodurli o fermarli, eliminali con il cestino
+• La striscia dei preset ora scorre in orizzontale
+• Schermate più pulite: i suggerimenti sono in una finestra di aiuto
+• Icona a tema su Android 13+
+• La riproduzione sfuma quando messa in pausa
+• Avvio dei suoni più rapido dopo l'apertura
+• Risolta l'interfaccia schiacciata su schermi piccoli
+• Risolte le animazioni ferme dopo il riavvio dell'app

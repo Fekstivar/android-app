@@ -1,0 +1,8 @@
+• Enregistrez vos mix comme préréglages : touchez-les pour les lire ou les arrêter, supprimez-les via la corbeille
+• La bande des préréglages défile horizontalement
+• Écrans plus épurés : les astuces sont dans une fenêtre d'aide
+• Icône thématique sur Android 13+
+• La lecture s'estompe à la pause
+• Démarrage du son plus rapide
+• Correction de l'interface écrasée sur petits écrans
+• Correction des animations figées après un redémarrage

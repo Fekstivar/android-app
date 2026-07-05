@@ -1,0 +1,8 @@
+• Guarda tus mezclas como preajustes: tócalos para reproducirlos o detenerlos, elimínalos con la papelera
+• La franja de preajustes se desplaza en horizontal
+• Pantallas más limpias: los consejos están en un diálogo de ayuda
+• Icono temático en Android 13+
+• La reproducción se desvanece al pausar
+• Inicio del sonido más rápido tras abrir la app
+• Corregida la interfaz aplastada en pantallas pequeñas
+• Corregidas las animaciones detenidas tras reiniciar la app

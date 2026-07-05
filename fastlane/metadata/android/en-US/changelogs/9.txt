@@ -1,0 +1,8 @@
+• Save your own ambient mixes as presets: tap to play or stop them, delete with the trash icon
+• Preset strip is now horizontally scrollable
+• Cleaner screens: hints moved into a help dialog
+• Themed app icon on Android 13+
+• Playback fades out smoothly when paused
+• Faster sound start right after launch
+• Fixed layout squishing on small screens and large display sizes
+• Fixed animations staying still after the app restarted during playback
