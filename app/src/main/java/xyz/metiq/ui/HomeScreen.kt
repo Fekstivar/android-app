@@ -24,8 +24,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -982,7 +981,9 @@ private fun TimerBlock(
         ) {
             presetsSeconds.forEach { seconds ->
                 PresetChip(
-                    modifier = Modifier.weight(1f),
+                    // fill = false: cap width on narrow screens without stretching
+                    // content-sized chips (a lone preset must not become a full-width pill).
+                    modifier = Modifier.weight(1f, fill = false),
                     label = presetLabel(seconds),
                     enabled = enabled && !running,
                     onClick = { onPresetSelect(seconds) },
@@ -1035,9 +1036,11 @@ private fun TimerCell(
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
+                // Cap must precede fillMaxWidth: size modifiers respect incoming
+                // constraints, so the reverse order silently drops the cap.
+                .widthIn(max = 96.dp)
                 .fillMaxWidth()
                 .height(64.dp)
-                .sizeIn(maxWidth = 96.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(tokens.cellBackground)
                 .clickable(enabled = enabled && !isEditing) { onBeginEdit() },
@@ -1374,6 +1377,7 @@ private fun AmbientGrid(
                         val level = levels[sound.id]
                         AmbientOrb(
                             modifier = Modifier.width(cellWidth),
+                            orbSize = cellWidth.coerceAtMost(BUTTON_HEIGHT),
                             sound = sound,
                             active = level != null,
                             wavesOn = wavesOn,
@@ -1392,6 +1396,7 @@ private fun AmbientGrid(
 @Composable
 private fun AmbientOrb(
     modifier: Modifier = Modifier,
+    orbSize: Dp = BUTTON_HEIGHT,
     sound: AmbientSound,
     active: Boolean,
     wavesOn: Boolean,
@@ -1408,19 +1413,18 @@ private fun AmbientOrb(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            modifier = Modifier
-                .sizeIn(maxWidth = BUTTON_HEIGHT, maxHeight = BUTTON_HEIGHT)
-                .fillMaxWidth()
-                .aspectRatio(1f),
+            modifier = Modifier.size(orbSize),
             contentAlignment = Alignment.Center,
         ) {
             if (active && wavesOn) {
+                // Rings must track the actual orb size, which shrinks below
+                // BUTTON_HEIGHT on narrow screens.
                 WaveRings(
                     color = orbFill,
-                    diameter = BUTTON_HEIGHT,
+                    diameter = orbSize,
                     modifier = Modifier
                         .wrapContentSize(align = Alignment.Center, unbounded = true)
-                        .size(BUTTON_HEIGHT * WAVE_OVERSHOOT),
+                        .size(orbSize * WAVE_OVERSHOOT),
                 )
             }
             Box(
