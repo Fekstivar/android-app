@@ -1,16 +1,16 @@
-Metiq joue du bruit coloré de haute qualité et des sons d'ambiance naturels pour vous aider à vous concentrer, à vous endormir ou à vous couper du monde.
+Metiq joue du bruit coloré de haute qualité — blanc, rose, brun et gris — et des sons d'ambiance relaxants pour vous aider à vous concentrer, étudier, méditer, vous endormir ou vous couper du monde avec un bruit de fond apaisant.
 
 Ouvrez, touchez, écoutez. C'est toute l'appli.
 
 Bruit coloré
-• Rose — plus doux que le blanc, idéal pour le sommeil et la lecture.
-• Marron — profond et chaud, bon pour la concentration et le soulagement des acouphènes.
-• Blanc — le classique, masque les sons soudains.
-• Gris — perceptivement plat, conçu pour rester uniforme sur tout le spectre.
+• Bruit blanc — le classique, masque les sons soudains.
+• Bruit rose — plus doux que le blanc, idéal pour le sommeil et la lecture.
+• Bruit brun — profond et chaud, bon pour la concentration et le soulagement des acouphènes.
+• Bruit gris — perceptivement plat, conçu pour rester uniforme sur tout le spectre.
 
 Sons d'ambiance
-• Vagues de la mer, orage, crépitement du feu, chant des oiseaux, ambiance de café et vent.
-• Partez d'un préréglage, ou mélangez les sons dans votre propre mix, réglez chaque niveau et enregistrez-le comme préréglage.
+• Vagues de la mer, orage avec pluie, crépitement du feu, chant des oiseaux, ambiance de café et vent.
+• Partez d'un préréglage, ou mélangez les sons de la nature dans votre propre mix relaxant, réglez chaque niveau et enregistrez-le comme préréglage.
 
 Fonctionnalités
 • Quatre bruits colorés et six sons d'ambiance, en boucle sans coupure.
@@ -21,4 +21,7 @@ Fonctionnalités
 • Sans publicité. Sans pistage. Sans analytique. Sans SDK tiers.
 • Empreinte minimale, faible consommation de batterie.
 
+Que vous cherchiez une machine à bruit pour endormir un bébé, un bruit de fond calme pour étudier ou vous concentrer, des sons d'orage et de pluie pour vous relaxer, ou des sons de sommeil réguliers toute la nuit — Metiq reste simple.
+
 Open source sous licence GPL v3. Code source sur GitHub: https://github.com/metiq-xyz/android-app
+ 

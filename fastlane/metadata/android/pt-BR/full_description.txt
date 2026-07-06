@@ -1,16 +1,16 @@
-O Metiq reproduz ruído colorido de alta qualidade e sons ambientes naturais para te ajudar a focar, dormir ou se isolar do mundo.
+O Metiq reproduz ruído colorido de alta qualidade — branco, rosa, marrom e cinza — e sons ambientes relaxantes para te ajudar a focar, estudar, meditar, dormir ou se isolar do mundo com um ruído de fundo relaxante.
 
 Abra, toque, ouça. É só isso o app.
 
 Ruído colorido
-• Rosa — mais suave que o branco, ótimo para sono e leitura.
-• Marrom — profundo e quente, bom para foco e alívio de zumbido no ouvido.
-• Branco — o clássico, mascara sons repentinos.
-• Cinza — perceptivamente plano, feito para soar uniforme em todo o espectro.
+• Ruído branco — o clássico, mascara sons repentinos.
+• Ruído rosa — mais suave que o branco, ótimo para sono e leitura.
+• Ruído marrom — profundo e quente, bom para foco e alívio de zumbido no ouvido.
+• Ruído cinza — perceptivamente plano, feito para soar uniforme em todo o espectro.
 
 Sons ambientes
-• Ondas do mar, tempestade, crepitar do fogo, canto dos pássaros, ambiente de café e vento.
-• Comece por um preset, ou misture os sons no seu próprio mix, ajuste cada nível e salve como preset.
+• Ondas do mar, tempestade com chuva, crepitar do fogo, canto dos pássaros, ambiente de café e vento.
+• Comece por um preset, ou misture os sons da natureza no seu próprio mix relaxante, ajuste cada nível e salve como preset.
 
 Recursos
 • Quatro ruídos coloridos e seis sons ambientes, em loop contínuo.
@@ -20,5 +20,7 @@ Recursos
 • Funciona totalmente offline. O áudio vem embutido — sem streaming, sem conta, sem permissão de internet.
 • Sem anúncios. Sem rastreamento. Sem analytics. Sem SDKs de terceiros.
 • Pegada mínima, baixo consumo de bateria.
+
+Seja uma máquina de ruído para o bebê dormir, ruído de fundo calmo para estudar ou se concentrar, sons de tempestade e chuva para relaxar, ou sons de sono a noite toda — o Metiq mantém tudo simples.
 
 Código aberto sob licença GPL v3. Código-fonte no GitHub: https://github.com/metiq-xyz/android-app

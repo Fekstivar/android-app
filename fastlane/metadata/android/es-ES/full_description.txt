@@ -1,16 +1,16 @@
-Metiq reproduce ruido de colores de alta calidad y sonidos ambientales naturales para ayudarte a concentrarte, conciliar el sueño o aislarte del mundo.
+Metiq reproduce ruido de colores de alta calidad — blanco, rosa, marrón y gris — y sonidos ambientales relajantes para ayudarte a concentrarte, estudiar, meditar, conciliar el sueño o aislarte del mundo con un ruido de fondo relajante.
 
 Abre, toca, escucha. Eso es toda la app.
 
 Ruido de colores
-• Rosa — más suave que el blanco, ideal para dormir y leer.
-• Marrón — profundo y cálido, bueno para concentración y alivio del tinnitus.
-• Blanco — el clásico, enmascara sonidos repentinos.
-• Gris — perceptivamente plano, diseñado para sonar uniforme en todo el espectro.
+• Ruido blanco — el clásico, enmascara sonidos repentinos.
+• Ruido rosa — más suave que el blanco, ideal para dormir y leer.
+• Ruido marrón — profundo y cálido, bueno para concentración y alivio del tinnitus.
+• Ruido gris — perceptivamente plano, diseñado para sonar uniforme en todo el espectro.
 
 Sonidos ambientales
-• Olas del mar, tormenta, crepitar del fuego, canto de pájaros, ambiente de café y viento.
-• Empieza con un preajuste, o mezcla los sonidos en tu propio mix, ajusta cada nivel y guárdalo como preajuste.
+• Olas del mar, tormenta con lluvia, crepitar del fuego, canto de pájaros, ambiente de café y viento.
+• Empieza con un preajuste, o mezcla los sonidos de la naturaleza en tu propio mix relajante, ajusta cada nivel y guárdalo como preajuste.
 
 Características
 • Cuatro ruidos de colores y seis sonidos ambientales, en bucle sin cortes.
@@ -20,5 +20,7 @@ Características
 • Funciona completamente sin conexión. El audio está incluido — sin streaming, sin cuenta, sin permiso de internet.
 • Sin anuncios. Sin rastreo. Sin analíticas. Sin SDKs de terceros.
 • Huella mínima, consumo de batería reducido.
+
+Tanto si buscas una máquina de ruido para dormir a un bebé, ruido de fondo tranquilo para estudiar o concentrarte, sonidos de tormenta y lluvia para relajarte, o sonidos para dormir toda la noche — Metiq lo mantiene simple.
 
 Código abierto bajo licencia GPL v3. Código fuente en GitHub: https://github.com/metiq-xyz/android-app
