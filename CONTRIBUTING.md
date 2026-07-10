@@ -51,24 +51,15 @@ of minutes.
 
 ### A note on audio assets
 
-The four colored-noise loops the app plays (pink, brown, white, grey) are
-**not** stored in this repository. They live as release attachments on a sibling
-project,
+The four colored-noise loops (pink, brown, white, grey) and the ambient sounds
+the app plays are committed directly to this repository under
+`app/src/main/assets/audio/`.
+
+The colored-noise OGGs are produced by a sibling project,
 [`metiq-xyz/colored-noise-generator`](https://github.com/metiq-xyz/colored-noise-generator),
-which holds the Node.js + ffmpeg pipeline that produces them.
-
-A Gradle task called `downloadAudioAssets` runs before every build and fetches
-the four OGGs from the release pinned in `gradle.properties`
-(`audioAssetsRelease=v…`). The downloaded files land in
-`app/src/main/assets/audio/` (a gitignored build artifact directory). If the
-files are already present locally, the task skips the network call — so
-day-to-day builds are offline-friendly.
-
-To pin a different release for a one-off build:
-
-```bash
-./gradlew assembleFdroidDebug -PaudioAssetsRelease=v0.2.0
-```
+which holds the Node.js + ffmpeg pipeline that synthesizes, loudness-normalizes
+and encodes them. That repo is only run when the noise needs to change; the
+encoded artifacts are then copied into this repo and committed.
 
 ### Building and running
 
