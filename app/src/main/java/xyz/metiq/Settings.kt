@@ -88,7 +88,6 @@ private object Keys {
     val RATE_FIRST_LAUNCH = longPreferencesKey("rate_first_launch_millis")
     val RATE_LAUNCH_COUNT = intPreferencesKey("rate_launch_count")
     val RATE_LAST_PROMPT = longPreferencesKey("rate_last_prompt_millis")
-    val RATE_OPTED_OUT = booleanPreferencesKey("rate_opted_out")
 }
 
 class SettingsRepository(context: Context) {
@@ -129,14 +128,12 @@ class SettingsRepository(context: Context) {
         if (e is IOException) emit(emptyPreferences()) else throw e
     }.map { prefs ->
         val now = System.currentTimeMillis()
-        val optedOut = prefs[Keys.RATE_OPTED_OUT] ?: false
         val firstLaunch = prefs[Keys.RATE_FIRST_LAUNCH] ?: now
         val launchCount = prefs[Keys.RATE_LAUNCH_COUNT] ?: 0
         val lastPrompt = prefs[Keys.RATE_LAST_PROMPT] ?: 0L
         val minLaunches = if (BuildConfig.DEBUG) 0 else RATE_MIN_LAUNCHES
         val minAgeMillis = if (BuildConfig.DEBUG) 0L else RATE_MIN_AGE_MILLIS
-        !optedOut &&
-            launchCount >= minLaunches &&
+        launchCount >= minLaunches &&
             now - firstLaunch >= minAgeMillis &&
             (lastPrompt == 0L || now - lastPrompt >= RATE_REPROMPT_MILLIS)
     }
@@ -150,14 +147,10 @@ class SettingsRepository(context: Context) {
         }
     }
 
-    // User swiped the note away: hide it and snooze until the reprompt interval.
+    // Dismissing or acting on the note snoozes it until the reprompt interval, so it
+    // always resurfaces later rather than being permanently opted out.
     suspend fun snoozeRatePrompt() {
         store.edit { it[Keys.RATE_LAST_PROMPT] = System.currentTimeMillis() }
-    }
-
-    // User tapped through to rate: never show the note again.
-    suspend fun optOutRatePrompt() {
-        store.edit { it[Keys.RATE_OPTED_OUT] = true }
     }
 
     private fun Preferences.toSettings(): Settings {

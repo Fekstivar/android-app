@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
                     onCustomMixes = { scope.launch { repo.setCustomMixes(it) } },
                     onLanguageTag = { scope.launch { repo.setLanguageTag(it) } },
                     ratePromptVisible = ratePromptVisible,
-                    onRatePromptRate = { scope.launch { repo.optOutRatePrompt() } },
+                    onRatePromptRate = { scope.launch { repo.snoozeRatePrompt() } },
                     onRatePromptDismiss = { scope.launch { repo.snoozeRatePrompt() } },
                 )
             }

@@ -28,7 +28,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -44,9 +43,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Add
@@ -66,43 +62,33 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -116,7 +102,6 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import xyz.metiq.BuildConfig
 import xyz.metiq.CustomMix
@@ -150,7 +135,6 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.graphics.Color
 import kotlin.math.abs
-import kotlin.time.Duration.Companion.seconds
 
 private enum class HomeTab { NOISE, AMBIENT, SETTINGS }
 
@@ -235,27 +219,6 @@ private const val MIXER_OFF_WIDTH_FRACTION = 0.42f
 // Total animated dots shared across all active ambient force fields (split evenly per sound).
 private const val AMBIENT_PARTICLE_TOTAL = 90
 
-private enum class TimerField {
-    HOURS, MINUTES, SECONDS
-}
-
-private fun formatDecimal(n: Int): String = n.toString().padStart(2, '0')
-private fun hoursFor(seconds: Long): Int = (seconds / 3600L).toInt()
-private fun minutesFor(seconds: Long): Int = ((seconds / 60L) % 60L).toInt()
-private fun secondsFor(seconds: Long): Int = (seconds % 60L).toInt()
-
-@Composable
-private fun presetLabel(seconds: Long): String {
-    val totalMinutes = (seconds / 60L).toInt()
-    val hours = totalMinutes / 60
-    val remainder = totalMinutes % 60
-    return when {
-        hours > 0 && remainder == 0 -> stringResource(R.string.timer_preset_hours, hours)
-        hours > 0 -> stringResource(R.string.timer_preset_hours_minutes, hours, remainder)
-        else -> stringResource(R.string.timer_preset_minutes, totalMinutes)
-    }
-}
-
 @Composable
 fun HomeScreen(
     settings: Settings,
@@ -283,12 +246,6 @@ fun HomeScreen(
     var pendingMixDelete by remember { mutableStateOf<CustomMix?>(null) }
     var showHelp by remember { mutableStateOf(false) }
 
-    var timerRemaining by remember { mutableLongStateOf(0L) }
-    var timerRunning by remember { mutableStateOf(false) }
-    var editField by remember { mutableStateOf<TimerField?>(null) }
-    var editBuffer by remember { mutableStateOf("") }
-    var editInitial by remember { mutableStateOf("") }
-
     val noiseTitleById = NOISE_COLORS.associate { it.id to stringResource(it.noiseTitleRes) }
     val resolvedTokens = LocalMetiqColors.current
     val noiseArgbById = remember(resolvedTokens) {
@@ -300,30 +257,21 @@ fun HomeScreen(
         )
     }
 
-    val resetTimer: () -> Unit = {
-        timerRemaining = 0L
-        timerRunning = false
-        editField = null
-        editBuffer = ""
-        editInitial = ""
-    }
-
-    val commitTimerEdit: (TimerField) -> Unit = { field ->
-        if (editField == field && editBuffer.isNotBlank()) {
-            val parsed = editBuffer.toIntOrNull() ?: 0
-            val maxVal = if (field == TimerField.HOURS) 99 else 59
-            val clamped = parsed.coerceIn(0, maxVal)
-            val h = if (field == TimerField.HOURS) clamped else hoursFor(timerRemaining)
-            val m = if (field == TimerField.MINUTES) clamped else minutesFor(timerRemaining)
-            val s = if (field == TimerField.SECONDS) clamped else secondsFor(timerRemaining)
-            timerRemaining = h * 3600L + m * 60L + s
-        }
-        if (editField == field) {
-            editField = null
-            editBuffer = ""
-            editInitial = ""
-        }
-    }
+    // Sleep timer owns its own state + countdown; onFinished stops playback when it
+    // reaches zero (the timer then resets itself).
+    val timer = rememberSleepTimerState(
+        onFinished = {
+            val c = controller
+            val b = binder
+            if (c != null && b != null) {
+                b.engine.stopAll()
+                b.setActiveColor(null, null)
+                c.stop()
+                activeId = null
+                ambientLevels.clear()
+            }
+        },
+    )
 
     DisposableEffect(Unit) {
         var controllerFuture: ListenableFuture<MediaController>? = null
@@ -403,24 +351,6 @@ fun HomeScreen(
         binder?.engine?.setWarmth(settings.warmth)
     }
 
-    LaunchedEffect(timerRunning) {
-        if (!timerRunning) return@LaunchedEffect
-        while (timerRunning && timerRemaining > 0L) {
-            delay(1.seconds)
-            if (timerRunning) timerRemaining -= 1L
-        }
-        if (timerRunning && timerRemaining == 0L) {
-            val c = controller ?: return@LaunchedEffect
-            val b = binder ?: return@LaunchedEffect
-            b.engine.stopAll()
-            b.setActiveColor(null, null)
-            c.stop()
-            activeId = null
-            ambientLevels.clear()
-            resetTimer()
-        }
-    }
-
     val activeColor = activeId?.let { id -> NOISE_COLORS.firstOrNull { it.id == id } }
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val onNoiseTab = tab == HomeTab.NOISE
@@ -450,7 +380,7 @@ fun HomeScreen(
             activeId = null
             ambientLevels.keys.toList().forEach { b.engine.stopLayer(it) }
             ambientLevels.clear()
-            resetTimer()
+            timer.reset()
             b.setActiveColor(ambientNowPlaying, AMBIENT_TILE_ARGB)
             b.requestAudioFocusNow()
             c.play()
@@ -474,7 +404,7 @@ fun HomeScreen(
                 activeId = null
             }
             if (ambientLevels.isEmpty()) {
-                resetTimer()
+                timer.reset()
                 b.setActiveColor(ambientNowPlaying, AMBIENT_TILE_ARGB)
                 b.requestAudioFocusNow()
                 c.play()
@@ -495,7 +425,7 @@ fun HomeScreen(
             if (ambientLevels.isEmpty()) {
                 b.setActiveColor(null, null)
                 controller?.stop()
-                resetTimer()
+                timer.reset()
             }
         }
     }
@@ -508,7 +438,7 @@ fun HomeScreen(
             ambientLevels.clear()
             b.setActiveColor(null, null)
             controller?.stop()
-            resetTimer()
+            timer.reset()
         }
     }
 
@@ -687,7 +617,7 @@ fun HomeScreen(
                                 startJob?.cancel()
                                 startJob = scope.launch {
                                     selectColor(
-                                        id, title, argb, activeId, binder, controller, resetTimer,
+                                        id, title, argb, activeId, binder, controller, timer::reset,
                                     ) { activeId = it }
                                 }
                             },
@@ -728,47 +658,11 @@ fun HomeScreen(
 
                     HomeTab.SETTINGS -> Unit
                 }
-                Spacer(Modifier.height(32.dp))
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = tokens.divider,
-                    thickness = 1.dp,
-                )
-                Spacer(Modifier.height(24.dp))
-                TimerBlock(
+                Spacer(Modifier.height(56.dp))
+                SleepTimer(
+                    state = timer,
                     enabled = timerEnabled,
-                    remainingSeconds = timerRemaining,
-                    running = timerRunning,
-                    editField = editField,
-                    editBuffer = editBuffer,
                     presetsSeconds = settings.timerPresetsSeconds,
-                    onBeginEdit = { field ->
-                        if (timerEnabled && !timerRunning) {
-                            editField?.let { commitTimerEdit(it) }
-                            editBuffer = ""
-                            editInitial = ""
-                            editField = field
-                        }
-                    },
-                    onBufferChange = { editBuffer = it },
-                    onCommitField = commitTimerEdit,
-                    onPresetSelect = { seconds ->
-                        if (timerEnabled && !timerRunning) {
-                            timerRemaining = seconds
-                            timerRunning = true
-                            editField = null
-                            editBuffer = ""
-                            editInitial = ""
-                        }
-                    },
-                    onToggleRunning = {
-                        if (timerRunning) {
-                            timerRunning = false
-                            timerRemaining = 0L
-                        } else if (timerRemaining > 0L) {
-                            timerRunning = true
-                        }
-                    },
                 )
             }
         }
@@ -947,216 +841,6 @@ private fun ColorCircle(
             .semantics { this.contentDescription = contentDescription }
             .clickable(onClick = onClick),
     )
-}
-
-@Composable
-private fun TimerBlock(
-    enabled: Boolean,
-    remainingSeconds: Long,
-    running: Boolean,
-    editField: TimerField?,
-    editBuffer: String,
-    presetsSeconds: List<Long>,
-    onBeginEdit: (TimerField) -> Unit,
-    onBufferChange: (String) -> Unit,
-    onCommitField: (TimerField) -> Unit,
-    onPresetSelect: (Long) -> Unit,
-    onToggleRunning: () -> Unit,
-) {
-    val blockAlpha = if (enabled) 1f else MetiqColors.DisabledAlpha
-    Column(
-        modifier = Modifier.alpha(blockAlpha).fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TimerCell(
-                modifier = Modifier.weight(1f),
-                label = stringResource(R.string.timer_hours),
-                field = TimerField.HOURS,
-                liveValue = hoursFor(remainingSeconds),
-                isEditing = editField == TimerField.HOURS,
-                editBuffer = editBuffer,
-                onBeginEdit = { onBeginEdit(TimerField.HOURS) },
-                onBufferChange = onBufferChange,
-                onCommit = { onCommitField(TimerField.HOURS) },
-                enabled = enabled && !running,
-            )
-            TimerCell(
-                modifier = Modifier.weight(1f),
-                label = stringResource(R.string.timer_minutes),
-                field = TimerField.MINUTES,
-                liveValue = minutesFor(remainingSeconds),
-                isEditing = editField == TimerField.MINUTES,
-                editBuffer = editBuffer,
-                onBeginEdit = { onBeginEdit(TimerField.MINUTES) },
-                onBufferChange = onBufferChange,
-                onCommit = { onCommitField(TimerField.MINUTES) },
-                enabled = enabled && !running,
-            )
-            TimerCell(
-                modifier = Modifier.weight(1f),
-                label = stringResource(R.string.timer_seconds),
-                field = TimerField.SECONDS,
-                liveValue = secondsFor(remainingSeconds),
-                isEditing = editField == TimerField.SECONDS,
-                editBuffer = editBuffer,
-                onBeginEdit = { onBeginEdit(TimerField.SECONDS) },
-                onBufferChange = onBufferChange,
-                onCommit = { onCommitField(TimerField.SECONDS) },
-                enabled = enabled && !running,
-            )
-        }
-        Spacer(Modifier.height(12.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            presetsSeconds.forEach { seconds ->
-                PresetChip(
-                    // fill = false: cap width on narrow screens without stretching
-                    // content-sized chips (a lone preset must not become a full-width pill).
-                    modifier = Modifier.weight(1f, fill = false),
-                    label = presetLabel(seconds),
-                    enabled = enabled && !running,
-                    onClick = { onPresetSelect(seconds) },
-                )
-            }
-        }
-        Spacer(Modifier.height(16.dp))
-        StartStopButton(
-            running = running,
-            enabled = enabled && (running || remainingSeconds > 0L),
-            onClick = onToggleRunning,
-        )
-    }
-}
-
-@Composable
-private fun StartStopButton(running: Boolean, enabled: Boolean, onClick: () -> Unit) {
-    val tokens = LocalMetiqColors.current
-    val bg = if (running) tokens.textPrimary else tokens.textPrimary.copy(alpha = 0.12f)
-    val fg = if (running) tokens.background else tokens.textPrimary
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(100.dp))
-            .background(bg)
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-    ) {
-        Text(
-            text = stringResource(if (running) R.string.timer_stop else R.string.timer_start),
-            color = fg,
-            style = TextStyle(fontFamily = Inter, fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
-        )
-    }
-}
-
-@Composable
-private fun TimerCell(
-    modifier: Modifier = Modifier,
-    label: String,
-    @Suppress("UNUSED_PARAMETER") field: TimerField,
-    liveValue: Int,
-    isEditing: Boolean,
-    editBuffer: String,
-    onBeginEdit: () -> Unit,
-    onBufferChange: (String) -> Unit,
-    onCommit: () -> Unit,
-    enabled: Boolean,
-) {
-    val tokens = LocalMetiqColors.current
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                // Cap must precede fillMaxWidth: size modifiers respect incoming
-                // constraints, so the reverse order silently drops the cap.
-                .widthIn(max = 96.dp)
-                .fillMaxWidth()
-                .height(64.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(tokens.cellBackground)
-                .clickable(enabled = enabled && !isEditing) { onBeginEdit() },
-            contentAlignment = Alignment.Center,
-        ) {
-            if (isEditing) {
-                val focusRequester = remember { FocusRequester() }
-                val focusManager = LocalFocusManager.current
-                val keyboard = LocalSoftwareKeyboardController.current
-                var hadFocus by remember { mutableStateOf(false) }
-                BasicTextField(
-                    value = editBuffer,
-                    onValueChange = { txt ->
-                        if (txt.length <= 2 && txt.all { it.isDigit() }) onBufferChange(txt)
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done,
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = { focusManager.clearFocus() },
-                    ),
-                    singleLine = true,
-                    textStyle = TextStyle(
-                        fontFamily = Inter,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = tokens.textPrimary,
-                        textAlign = TextAlign.Center,
-                    ),
-                    cursorBrush = SolidColor(tokens.textPrimary),
-                    modifier = Modifier
-                        .focusRequester(focusRequester)
-                        .onFocusChanged { state ->
-                            if (state.isFocused) hadFocus = true
-                            else if (hadFocus) onCommit()
-                        },
-                )
-                LaunchedEffect(Unit) {
-                    focusRequester.requestFocus()
-                    keyboard?.show()
-                }
-            } else {
-                Text(
-                    text = formatDecimal(liveValue),
-                    color = tokens.textPrimary,
-                    style = TextStyle(
-                        fontFamily = Inter,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                )
-            }
-        }
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = label,
-            color = tokens.textPrimary.copy(alpha = 0.7f),
-            style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
-        )
-    }
-}
-
-@Composable
-private fun PresetChip(modifier: Modifier = Modifier, label: String, enabled: Boolean, onClick: () -> Unit) {
-    val tokens = LocalMetiqColors.current
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(100.dp))
-            .background(tokens.cellBackground)
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            color = tokens.textPrimary,
-            style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            softWrap = false,
-        )
-    }
 }
 
 private suspend fun selectColor(
