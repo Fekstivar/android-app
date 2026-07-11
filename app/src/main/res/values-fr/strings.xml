@@ -2,7 +2,7 @@
 <resources>
     <string name="help_cd">Aide</string>
     <string name="help_title">Comment ça marche</string>
-    <string name="home_helper">Touchez une couleur de bruit pour le lire ou l\'arrêter.\nDéfinissez une minuterie si vous voulez qu\'il s\'arrête automatiquement.</string>
+    <string name="home_helper">Touchez une couleur de bruit pour le lire ou l\'arrêter.\n\nDéfinissez une minuterie si vous voulez qu\'il s\'arrête automatiquement.\n\nTrop clair ou dur ? Adoucissez-le avec chaleur dans les paramètres.</string>
     <string name="ambient_helper">Touchez un préréglage pour le lire, touchez-le à nouveau pour l\'arrêter.
 Touchez un orbe pour démarrer un son, puis glissez son curseur pour régler le niveau.
 Enregistrez votre propre mix avec « Enregistrer le mix », puis utilisez l\'icône corbeille pour le supprimer.</string>
@@ -39,6 +39,12 @@ Enregistrez votre propre mix avec « Enregistrer le mix », puis utilisez l\'ic�
 
     <string name="settings_title">Paramètres</string>
     <string name="settings_back_cd">Retour</string>
+
+    <string name="settings_section_sound">Son</string>
+    <string name="settings_warmth_label">Chaleur</string>
+    <string name="settings_warmth_description">Atténue les aigus pour adoucir les couleurs de bruit dures. N\'affecte pas les sons d\'ambiance.</string>
+    <string name="settings_warmth_bright">Clair</string>
+    <string name="settings_warmth_warm">Chaud</string>
 
     <string name="settings_section_appearance">Apparence</string>
     <string name="settings_particles_label">Particules d\'arrière-plan</string>

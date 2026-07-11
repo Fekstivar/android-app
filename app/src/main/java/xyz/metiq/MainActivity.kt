@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
                 HomeScreen(
                     settings = settings,
                     onParticlesEnabled = { scope.launch { repo.setParticlesEnabled(it) } },
+                    onWarmth = { scope.launch { repo.setWarmth(it) } },
                     onTimerPresets = { scope.launch { repo.setTimerPresetsSeconds(it) } },
                     onCustomMixes = { scope.launch { repo.setCustomMixes(it) } },
                     onLanguageTag = { scope.launch { repo.setLanguageTag(it) } },

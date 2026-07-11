@@ -1,7 +1,10 @@
 package xyz.metiq.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,15 +37,22 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
@@ -62,6 +72,8 @@ import xyz.metiq.Settings
 import xyz.metiq.ui.theme.LocalMetiqColors
 import xyz.metiq.ui.theme.MetiqTheme
 import xyz.metiq.ui.theme.Inter
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 private data class LanguageOption(
     val tag: String?,
@@ -84,18 +96,14 @@ private const val GH_SPONSORS_URL = "https://github.com/sponsors/metiq-xyz"
 fun SettingsScreen(
     settings: Settings,
     onParticlesEnabled: (Boolean) -> Unit,
+    onWarmth: (Float) -> Unit,
+    onWarmthPreview: (Float) -> Unit = {},
     onTimerPresets: (List<Long>) -> Unit,
     onLanguageTag: (String?) -> Unit,
     onBack: () -> Unit,
     onOpenLicenses: () -> Unit,
 ) {
     val tokens = LocalMetiqColors.current
-    val context = LocalContext.current
-    val version = remember {
-        runCatching {
-            context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        }.getOrNull() ?: "—"
-    }
     Scaffold(
         containerColor = tokens.background,
         topBar = {
@@ -129,6 +137,8 @@ fun SettingsScreen(
         SettingsContent(
             settings = settings,
             onParticlesEnabled = onParticlesEnabled,
+            onWarmth = onWarmth,
+            onWarmthPreview = onWarmthPreview,
             onTimerPresets = onTimerPresets,
             onLanguageTag = onLanguageTag,
             onOpenLicenses = onOpenLicenses,
@@ -141,12 +151,13 @@ fun SettingsScreen(
 fun SettingsContent(
     settings: Settings,
     onParticlesEnabled: (Boolean) -> Unit,
+    onWarmth: (Float) -> Unit,
     onTimerPresets: (List<Long>) -> Unit,
     onLanguageTag: (String?) -> Unit,
     onOpenLicenses: () -> Unit,
     modifier: Modifier = Modifier,
+    onWarmthPreview: (Float) -> Unit = {},
 ) {
-    val tokens = LocalMetiqColors.current
     val context = LocalContext.current
     val version = remember {
         runCatching {
@@ -160,6 +171,13 @@ fun SettingsContent(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
+        Section(stringResource(R.string.settings_section_sound)) {
+            WarmthRow(
+                warmth = settings.warmth,
+                onWarmth = onWarmth,
+                onWarmthPreview = onWarmthPreview,
+            )
+        }
         Section(stringResource(R.string.settings_section_appearance)) {
             ToggleRow(
                 label = stringResource(R.string.settings_particles_label),
@@ -348,6 +366,119 @@ private fun ToggleRow(
     }
 }
 
+private val WARMTH_TRACK_HEIGHT = 6.dp
+private val WARMTH_THUMB_SIZE = 16.dp
+private val WARMTH_PREVIEW_THROTTLE = 30.milliseconds
+
+@Composable
+private fun WarmthRow(
+    warmth: Float,
+    onWarmth: (Float) -> Unit,
+    onWarmthPreview: (Float) -> Unit,
+) {
+    val tokens = LocalMetiqColors.current
+    var local by remember { mutableFloatStateOf(warmth) }
+    var interacting by remember { mutableStateOf(false) }
+    LaunchedEffect(warmth) { local = warmth }
+    LaunchedEffect(Unit) {
+        snapshotFlow { local }.collect { v ->
+            if (interacting) onWarmthPreview(v)
+            delay(WARMTH_PREVIEW_THROTTLE)
+        }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = SECTION_HORIZONTAL_PADDING, vertical = 8.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.settings_warmth_label),
+            color = tokens.textPrimary,
+            style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+        )
+        Text(
+            text = stringResource(R.string.settings_warmth_description),
+            color = tokens.textPrimary.copy(alpha = 0.6f),
+            style = TextStyle(fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp),
+        )
+        Spacer(Modifier.height(12.dp))
+        ThinSlider(
+            value = local,
+            onValue = { interacting = true; local = it },
+            onValueSettled = { interacting = false; onWarmth(local) },
+        )
+        Spacer(Modifier.height(4.dp))
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = stringResource(R.string.settings_warmth_bright),
+                color = tokens.textPrimary.copy(alpha = 0.5f),
+                modifier = Modifier.weight(1f),
+                style = TextStyle(fontFamily = Inter, fontSize = 12.sp),
+            )
+            Text(
+                text = stringResource(R.string.settings_warmth_warm),
+                color = tokens.textPrimary.copy(alpha = 0.5f),
+                style = TextStyle(fontFamily = Inter, fontSize = 12.sp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThinSlider(
+    value: Float,
+    onValue: (Float) -> Unit,
+    onValueSettled: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val tokens = LocalMetiqColors.current
+    val inactive = tokens.textPrimary.copy(alpha = 0.15f)
+    val activeFill = tokens.textPrimary.copy(alpha = 0.55f)
+    val thumbColor = tokens.textPrimary
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(WARMTH_THUMB_SIZE)
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    onValue((offset.x / size.width).coerceIn(0f, 1f))
+                    onValueSettled()
+                }
+            }
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onDragEnd = { onValueSettled() },
+                ) { change, _ ->
+                    change.consume()
+                    onValue((change.position.x / size.width).coerceIn(0f, 1f))
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val w = size.width
+            val cy = size.height / 2f
+            val barH = WARMTH_TRACK_HEIGHT.toPx()
+            val corner = CornerRadius(barH / 2f, barH / 2f)
+            val thumbR = WARMTH_THUMB_SIZE.toPx() / 2f
+            val thumbX = (value * w).coerceIn(thumbR, w - thumbR)
+            drawRoundRect(
+                color = inactive,
+                topLeft = Offset(0f, cy - barH / 2f),
+                size = Size(w, barH),
+                cornerRadius = corner,
+            )
+            drawRoundRect(
+                color = activeFill,
+                topLeft = Offset(0f, cy - barH / 2f),
+                size = Size(thumbX, barH),
+                cornerRadius = corner,
+            )
+            drawCircle(color = thumbColor, radius = thumbR, center = Offset(thumbX, cy))
+        }
+    }
+}
+
 @Composable
 private fun TimerPresetsEditor(
     presetsSeconds: List<Long>,
@@ -498,6 +629,7 @@ private fun SettingsScreenPreview() {
         SettingsScreen(
             settings = DEFAULT_SETTINGS,
             onParticlesEnabled = {},
+            onWarmth = {},
             onTimerPresets = {},
             onLanguageTag = {},
             onBack = {},

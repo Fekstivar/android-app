@@ -150,6 +150,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.graphics.Color
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.seconds
 
 private enum class HomeTab { NOISE, AMBIENT, SETTINGS }
 
@@ -259,6 +260,7 @@ private fun presetLabel(seconds: Long): String {
 fun HomeScreen(
     settings: Settings,
     onParticlesEnabled: (Boolean) -> Unit,
+    onWarmth: (Float) -> Unit,
     onTimerPresets: (List<Long>) -> Unit,
     onCustomMixes: (List<CustomMix>) -> Unit,
     onLanguageTag: (String?) -> Unit,
@@ -395,10 +397,16 @@ fun HomeScreen(
         }
     }
 
+    // Keep the engine's noise tone in sync with the Warmth setting — on (re)connect
+    // and whenever the user moves the slider.
+    LaunchedEffect(binder, settings.warmth) {
+        binder?.engine?.setWarmth(settings.warmth)
+    }
+
     LaunchedEffect(timerRunning) {
         if (!timerRunning) return@LaunchedEffect
         while (timerRunning && timerRemaining > 0L) {
-            delay(1000L)
+            delay(1.seconds)
             if (timerRunning) timerRemaining -= 1L
         }
         if (timerRunning && timerRemaining == 0L) {
@@ -563,6 +571,8 @@ fun HomeScreen(
                 SettingsContent(
                     settings = settings,
                     onParticlesEnabled = onParticlesEnabled,
+                    onWarmth = onWarmth,
+                    onWarmthPreview = { w -> binder?.engine?.setWarmth(w) },
                     onTimerPresets = onTimerPresets,
                     onLanguageTag = onLanguageTag,
                     onOpenLicenses = { showLicenses = true },
@@ -954,12 +964,11 @@ private fun TimerBlock(
     onToggleRunning: () -> Unit,
 ) {
     val blockAlpha = if (enabled) 1f else MetiqColors.DisabledAlpha
-    val tokens = LocalMetiqColors.current
     Column(
         modifier = Modifier.alpha(blockAlpha).fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TimerCell(
                 modifier = Modifier.weight(1f),
                 label = stringResource(R.string.timer_hours),
@@ -1619,6 +1628,7 @@ private fun HomeScreenPreview() {
         HomeScreen(
             settings = DEFAULT_SETTINGS,
             onParticlesEnabled = {},
+            onWarmth = {},
             onTimerPresets = {},
             onCustomMixes = {},
             onLanguageTag = {},

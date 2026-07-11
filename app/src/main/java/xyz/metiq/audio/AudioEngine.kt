@@ -19,20 +19,36 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
 
 private const val PAUSE_FADE_MS = 400L
 private const val FADE_STEP_MS = 20L
+
+// Noise layers are streamed block-by-block through a live low-pass so Warmth can be
+// applied on top of continuous playback (no track rebuild / restart).
+private const val NOISE_BLOCK_FRAMES = 1024
+// Per-block glide of the filter cutoff toward the target warmth — smooths coefficient
+// steps so dragging the slider sweeps the tone instead of clicking between values.
+private const val WARMTH_GLIDE = 0.2f
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AudioEngine(private val context: Context) {
     private data class Layer(
         val track: AudioTrack,
         var volume: Float,
+        val warmthEligible: Boolean,
+        // Non-null for streamed noise layers: the coroutine feeding + filtering the
+        // track. It owns the track's teardown, so stopping just cancels this job.
+        val feeder: Job? = null,
     )
 
     private data class Pcm(
@@ -49,6 +65,11 @@ class AudioEngine(private val context: Context) {
     private val pcmCache = ConcurrentHashMap<String, Deferred<Pcm>>()
     private val decodeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var masterVolume: Float = 1f
+
+    // Warmth 0f = off (bright); 1f = warmest. Read live by each noise feeder every
+    // block, so a change takes effect on the next ~23 ms without touching the track.
+    @Volatile
+    private var warmth: Float = 0f
 
     // Single-threaded so a pause fade and a subsequent resume can never
     // write track volumes concurrently.
@@ -91,27 +112,143 @@ class AudioEngine(private val context: Context) {
         Unit
     }
 
-    suspend fun startLayer(id: String, assetPath: String, volume: Float = 1f) {
+    suspend fun startLayer(
+        id: String,
+        assetPath: String,
+        volume: Float = 1f,
+        warmthEligible: Boolean = false,
+    ) {
         if (layers.containsKey(id)) return
         val pcm = awaitPcm(id, assetPath)
         val effective = (volume * masterVolume).coerceIn(0f, 1f)
-        val track = withContext(Dispatchers.IO) {
-            val bufferBytes = pcm.data.size * 2
-            val t = buildTrack(pcm.sampleRate, pcm.channelMask, bufferBytes)
-            t.write(pcm.data, 0, pcm.data.size, AudioTrack.WRITE_BLOCKING)
-            val frameCount = pcm.data.size / pcm.channelCount
-            t.setLoopPoints(0, frameCount, -1)
-            t.setVolume(effective)
-            t.play()
-            t
+        if (warmthEligible) {
+            // Streamed: a feeder loops the raw PCM through a live low-pass driven by
+            // `warmth`, so the tone changes without ever restarting the sound.
+            val track = withContext(Dispatchers.IO) { buildStreamTrack(pcm, effective) }
+            val feeder = launchNoiseFeeder(track, pcm)
+            layers[id] = Layer(track, volume, warmthEligible = true, feeder = feeder)
+        } else {
+            // Ambient: hardware-looped static track, unaffected by Warmth.
+            val track = withContext(Dispatchers.IO) {
+                buildLoopingTrack(pcm, pcm.data, effective)
+            }
+            layers[id] = Layer(track, volume, warmthEligible = false)
         }
-        layers[id] = Layer(track, volume)
+    }
+
+    // Maps 0..1 warmth to the low-pass corner. w=0 sits well above the audible band
+    // (effectively bright/bypass); w=1 stops at ~2.2 kHz so the four colors stay
+    // distinguishable, never fully muffled.
+    private fun warmthCutoffHz(w: Float): Float {
+        val fMax = 18000.0
+        val fMin = 2200.0
+        return (fMax * (fMin / fMax).pow(w.coerceIn(0f, 1f).toDouble())).toFloat()
+    }
+
+    private fun buildLoopingTrack(pcm: Pcm, data: ShortArray, effective: Float): AudioTrack {
+        val bufferBytes = data.size * 2
+        val t = buildTrack(pcm.sampleRate, pcm.channelMask, bufferBytes)
+        t.write(data, 0, data.size, AudioTrack.WRITE_BLOCKING)
+        val frameCount = data.size / pcm.channelCount
+        t.setLoopPoints(0, frameCount, -1)
+        t.setVolume(effective)
+        t.play()
+        return t
+    }
+
+    private fun buildStreamTrack(pcm: Pcm, effective: Float): AudioTrack {
+        val minBuf = AudioTrack.getMinBufferSize(
+            pcm.sampleRate, pcm.channelMask, AudioFormat.ENCODING_PCM_16BIT,
+        )
+        // A few blocks of headroom so the feeder never starves during a filter pass.
+        val desired = NOISE_BLOCK_FRAMES * pcm.channelCount * 2 * 4
+        val t = buildTrack(pcm.sampleRate, pcm.channelMask, maxOf(minBuf, desired), stream = true)
+        t.setVolume(effective)
+        return t
+    }
+
+    // Streams the raw loop through a 2nd-order (Butterworth-Q) low-pass whose cutoff
+    // glides toward the live `warmth` each block. Continuous playback, filtered on top —
+    // changing warmth never restarts the sound. The feeder owns the track's teardown.
+    private fun launchNoiseFeeder(track: AudioTrack, pcm: Pcm): Job =
+        decodeScope.launch {
+            val src = pcm.data
+            val ch = pcm.channelCount
+            val frames = src.size / ch
+            if (frames == 0) {
+                runCatching { track.release() }
+                return@launch
+            }
+            val sr = pcm.sampleRate
+            val fcMax = (sr * 0.45f) // keep the cutoff safely below Nyquist
+            val block = NOISE_BLOCK_FRAMES
+            val total = block * ch
+            val buf = ShortArray(total)
+            // Per-channel biquad state (Direct Form I).
+            val x1 = DoubleArray(ch); val x2 = DoubleArray(ch)
+            val y1 = DoubleArray(ch); val y2 = DoubleArray(ch)
+            // Start already at the target so opening at warmth>0 doesn't sweep in.
+            var fc = warmthCutoffHz(warmth).coerceIn(2200f, fcMax)
+            var b0 = 0.0; var b1 = 0.0; var b2 = 0.0; var a1 = 0.0; var a2 = 0.0
+            fun recompute(f: Double) {
+                val w0 = 2.0 * PI * f / sr
+                val cw = cos(w0)
+                val alpha = sin(w0) / (2.0 * 0.70710678)
+                val a0 = 1.0 + alpha
+                b0 = ((1.0 - cw) / 2.0) / a0
+                b1 = (1.0 - cw) / a0
+                b2 = b0
+                a1 = (-2.0 * cw) / a0
+                a2 = (1.0 - alpha) / a0
+            }
+            var pos = 0
+            try {
+                track.play()
+                while (isActive) {
+                    val target = warmthCutoffHz(warmth).coerceIn(2200f, fcMax)
+                    fc += (target - fc) * WARMTH_GLIDE
+                    recompute(fc.toDouble())
+                    for (f in 0 until block) {
+                        val base = pos * ch
+                        for (c in 0 until ch) {
+                            val x0 = src[base + c].toDouble()
+                            val y0 = b0 * x0 + b1 * x1[c] + b2 * x2[c] - a1 * y1[c] - a2 * y2[c]
+                            x2[c] = x1[c]; x1[c] = x0; y2[c] = y1[c]; y1[c] = y0
+                            buf[f * ch + c] = y0.coerceIn(-32768.0, 32767.0).toInt().toShort()
+                        }
+                        pos++
+                        if (pos >= frames) pos = 0
+                    }
+                    var off = 0
+                    while (off < total && isActive) {
+                        val n = track.write(buf, off, total - off, AudioTrack.WRITE_NON_BLOCKING)
+                        if (n < 0) return@launch
+                        off += n
+                        // Buffer full (or track paused): yield instead of spinning. delay
+                        // is a cooperative cancellation point, so stop takes effect here.
+                        if (off < total) delay(5)
+                    }
+                }
+            } finally {
+                runCatching { track.stop() }
+                runCatching { track.release() }
+            }
+        }
+
+    // Warmth is read live by each noise feeder, so this just updates the value; no
+    // track is rebuilt and playback is never interrupted.
+    fun setWarmth(value: Float) {
+        warmth = value.coerceIn(0f, 1f)
     }
 
     fun stopLayer(id: String) {
-        layers.remove(id)?.track?.let { t ->
-            t.stop()
-            t.release()
+        val l = layers.remove(id) ?: return
+        if (l.feeder != null) {
+            // The feeder's finally block stops + releases the track once it unwinds.
+            l.feeder.cancel()
+        } else {
+            runCatching { l.track.stop() }
+            runCatching { l.track.release() }
         }
     }
 
@@ -168,8 +305,12 @@ class AudioEngine(private val context: Context) {
     fun release() {
         fadeJob?.cancel()
         for ((_, l) in layers) {
-            runCatching { l.track.stop() }
-            runCatching { l.track.release() }
+            if (l.feeder != null) {
+                l.feeder.cancel()
+            } else {
+                runCatching { l.track.stop() }
+                runCatching { l.track.release() }
+            }
         }
         layers.clear()
         pcmCache.clear()
@@ -181,21 +322,30 @@ class AudioEngine(private val context: Context) {
 
     suspend fun switchTo(newId: String, newAssetPath: String) {
         layers.keys.filter { it != newId }.forEach { stopLayer(it) }
-        if (!layers.containsKey(newId)) startLayer(newId, newAssetPath, volume = 1f)
-        else setLayerVolume(newId, 1f)
+        if (!layers.containsKey(newId)) {
+            startLayer(newId, newAssetPath, volume = 1f, warmthEligible = true)
+        } else {
+            setLayerVolume(newId, 1f)
+        }
     }
 
     fun stopAll() {
         layers.keys.toList().forEach { stopLayer(it) }
     }
 
-    private fun buildTrack(sampleRate: Int, channelMask: Int, bufferBytes: Int): AudioTrack {
+    private fun buildTrack(
+        sampleRate: Int,
+        channelMask: Int,
+        bufferBytes: Int,
+        stream: Boolean = false,
+    ): AudioTrack {
         val attrs = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
         val format = AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT)
             .setSampleRate(sampleRate).setChannelMask(channelMask).build()
+        val mode = if (stream) AudioTrack.MODE_STREAM else AudioTrack.MODE_STATIC
         return AudioTrack.Builder().setAudioAttributes(attrs).setAudioFormat(format)
-            .setBufferSizeInBytes(bufferBytes).setTransferMode(AudioTrack.MODE_STATIC).build()
+            .setBufferSizeInBytes(bufferBytes).setTransferMode(mode).build()
     }
 
     private fun decodeAssetToPcm(assetPath: String): Pcm {

@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -26,6 +27,7 @@ data class Settings(
     val timerPresetsSeconds: List<Long>,
     val languageTag: String?,
     val customMixes: List<CustomMix>,
+    val warmth: Float,
 )
 
 val DEFAULT_SETTINGS = Settings(
@@ -35,6 +37,7 @@ val DEFAULT_SETTINGS = Settings(
     ),
     languageTag = null,
     customMixes = emptyList(),
+    warmth = 0f,
 )
 
 const val MAX_TIMER_PRESETS = 4
@@ -78,6 +81,7 @@ private val Context.dataStore by preferencesDataStore(name = "metiq_settings")
 
 private object Keys {
     val PARTICLES_ENABLED = booleanPreferencesKey("particles_enabled")
+    val WARMTH = floatPreferencesKey("warmth")
     val TIMER_PRESETS = stringPreferencesKey("timer_presets")
     val CUSTOM_MIXES = stringPreferencesKey("custom_mixes")
     val LANGUAGE_TAG = stringPreferencesKey("language_tag")
@@ -96,6 +100,10 @@ class SettingsRepository(context: Context) {
 
     suspend fun setParticlesEnabled(enabled: Boolean) {
         store.edit { it[Keys.PARTICLES_ENABLED] = enabled }
+    }
+
+    suspend fun setWarmth(warmth: Float) {
+        store.edit { it[Keys.WARMTH] = warmth.coerceIn(0f, 1f) }
     }
 
     suspend fun setTimerPresetsSeconds(presets: List<Long>) {
@@ -154,6 +162,7 @@ class SettingsRepository(context: Context) {
 
     private fun Preferences.toSettings(): Settings {
         val particles = this[Keys.PARTICLES_ENABLED] ?: DEFAULT_SETTINGS.particlesEnabled
+        val warmth = (this[Keys.WARMTH] ?: DEFAULT_SETTINGS.warmth).coerceIn(0f, 1f)
         val presets = this[Keys.TIMER_PRESETS]?.split(',')?.mapNotNull { it.toLongOrNull() }
             ?.filter { it > 0L }?.take(MAX_TIMER_PRESETS)?.ifEmpty { null }
             ?: DEFAULT_SETTINGS.timerPresetsSeconds
@@ -164,6 +173,7 @@ class SettingsRepository(context: Context) {
             timerPresetsSeconds = presets,
             languageTag = languageTag,
             customMixes = customMixes,
+            warmth = warmth,
         )
     }
 }

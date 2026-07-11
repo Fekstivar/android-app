@@ -5,7 +5,7 @@
     <!-- Help modal (opened from the circled question mark on the Noise/Ambient screens) -->
     <string name="help_cd">Help</string>
     <string name="help_title">How it works</string>
-    <string name="home_helper">Tap a noise color to play or stop it.\nSet a timer if you want it to turn off automatically.</string>
+    <string name="home_helper">Tap a noise color to play or stop it.\n\nSet a timer if you want it to turn off automatically.\n\nToo bright or harsh? Soften it with warmth in settings.</string>
     <string name="ambient_helper">Tap a preset to play it, tap it again to stop it.\nTap an orb to start a sound, then drag its slider to set the level.\nSave your own mix with “Save mix”, and use the trash icon to delete it.</string>
     <string name="dialog_ok" translatable="false">OK</string>
 
@@ -66,6 +66,13 @@
     <!-- Settings: top bar -->
     <string name="settings_title">Settings</string>
     <string name="settings_back_cd">Back</string>
+
+    <!-- Settings: sound section -->
+    <string name="settings_section_sound">Sound</string>
+    <string name="settings_warmth_label">Warmth</string>
+    <string name="settings_warmth_description">Rolls off the highs to soften harsh noise colors. Ambient sounds are unaffected.</string>
+    <string name="settings_warmth_bright">Bright</string>
+    <string name="settings_warmth_warm">Warm</string>
 
     <!-- Settings: appearance section -->
     <string name="settings_section_appearance">Appearance</string>

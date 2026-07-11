@@ -2,7 +2,7 @@
 <resources>
     <string name="help_cd">Aiuto</string>
     <string name="help_title">Come funziona</string>
-    <string name="home_helper">Tocca un colore di rumore per riprodurlo o fermarlo.\nImposta un timer se vuoi che si spenga automaticamente.</string>
+    <string name="home_helper">Tocca un colore di rumore per riprodurlo o fermarlo.\n\nImposta un timer se vuoi che si spenga automaticamente.\n\nTroppo brillante o gracchiante? Ammorbidiscilo con calore nelle impostazioni.</string>
     <string name="ambient_helper">Tocca un preset per riprodurlo, toccalo di nuovo per fermarlo.
 Tocca un orbe per avviare un suono, poi trascina il cursore per regolare il livello.
 Salva il tuo mix con “Salva mix” e usa l\'icona del cestino per eliminarlo.</string>
@@ -39,6 +39,12 @@ Salva il tuo mix con “Salva mix” e usa l\'icona del cestino per eliminarlo.<
 
     <string name="settings_title">Impostazioni</string>
     <string name="settings_back_cd">Indietro</string>
+
+    <string name="settings_section_sound">Suono</string>
+    <string name="settings_warmth_label">Calore</string>
+    <string name="settings_warmth_description">Attenua gli acuti per ammorbidire i colori di rumore aspri. Non influisce sui suoni ambientali.</string>
+    <string name="settings_warmth_bright">Brillante</string>
+    <string name="settings_warmth_warm">Caldo</string>
 
     <string name="settings_section_appearance">Aspetto</string>
     <string name="settings_particles_label">Particelle di sfondo</string>
