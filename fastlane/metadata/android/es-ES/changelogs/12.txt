@@ -1,0 +1,2 @@
+• Nuevo control de calidez: suaviza los colores de ruido brillantes o ásperos desde ajustes
+• Sonidos de ruido renovados, más suaves y menos ásperos

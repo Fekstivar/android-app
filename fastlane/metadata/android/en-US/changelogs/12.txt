@@ -1,0 +1,2 @@
+• New warmth control: soften bright or harsh noise colors, right from settings
+• Refreshed colored noise for a gentler, less harsh sound
