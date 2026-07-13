@@ -1,0 +1,1 @@
+• Ambient sounds now loop seamlessly — no more audible pause or restart in fire, sea waves and the rest
