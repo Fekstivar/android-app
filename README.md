@@ -28,7 +28,10 @@
 
 <p align="center">
     <a href="https://f-droid.org/packages/xyz.metiq">
-      <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">
+      <img src=".github/static/badges/giofd.png" alt="Get it on F-Droid" height="60">
+    </a>
+    <a href="https://play.google.com/store/apps/details?id=xyz.metiq">
+      <img src=".github/static/badges/giogp.png" alt="Get it on Google Play" height="60">
     </a>
 </p>
 
@@ -64,8 +67,10 @@ and battery efficiency.
 ## Where to get it
 
 - [**F-Droid**](https://f-droid.org/packages/xyz.metiq)
-- **Google Play**: coming soon
-- **Direct APK**: built and attached to every tagged release on this repository
+- [**Google Play**](https://play.google.com/store/apps/details?id=xyz.metiq)
+- **Direct APK**: built and attached to all
+  [releases](https://github.com/metiq-xyz/android-app/releases) on this
+  repository
 
 Metiq targets Android 10 (API 29) and newer, which covers the vast majority of
 devices in active use today.
