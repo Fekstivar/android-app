@@ -14,7 +14,7 @@ Salve a sua própria mistura com “Salvar mistura” e use o ícone da lixeira 
     <string name="ambient_off">Inativo</string>
     <string name="ambient_now_playing">Mix ambiente</string>
     <string name="ambient_seawaves">Ondas do mar</string>
-    <string name="ambient_thunderstorm">Tempestade</string>
+    <string name="ambient_rain">Chuva</string>
     <string name="ambient_fire">Crepitar do fogo</string>
     <string name="ambient_birds">Canto dos pássaros</string>
     <string name="ambient_cafe">Ambiente de café</string>

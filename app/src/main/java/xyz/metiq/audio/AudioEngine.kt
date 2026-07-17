@@ -19,7 +19,10 @@ import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 
-private const val PAUSE_FADE_MS = 400L
+// Every volume ramp (start, stop, pause, resume) uses this duration, applied in
+// FADE_STEP_MS-sized setVolume steps. Stopping keeps the track alive until its
+// fade-out finishes, which makes color switches crossfade.
+private const val FADE_MS = 400L
 private const val FADE_STEP_MS = 20L
 
 // Noise layers are streamed block-by-block through a live low-pass so Warmth can be
@@ -38,7 +41,13 @@ class AudioEngine(private val context: Context) {
         // Non-null for streamed noise layers: the coroutine feeding + filtering the
         // track. It owns the track's teardown, so stopping just cancels this job.
         val feeder: Job? = null,
-    )
+    ) {
+        // 0..1 start/stop ramp multiplied on top of the configured volume, so a
+        // stop mid-fade-in ramps down from wherever the fade-in got to.
+        @Volatile
+        var fadeFactor: Float = 1f
+        var fadeJob: Job? = null
+    }
 
     private val layers = ConcurrentHashMap<String, Layer>()
 
@@ -55,7 +64,14 @@ class AudioEngine(private val context: Context) {
     private val fadeScope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
     private var fadeJob: Job? = null
 
-    private fun effectiveVolume(l: Layer): Float = (l.volume * masterVolume).coerceIn(0f, 1f)
+    // Human loudness perception is logarithmic: a linear amplitude ramp sounds
+    // unchanged for most of its run, then falls off a cliff at the end. Map linear
+    // fade progress to a dB-linear gain (60 dB range) so fades sound even.
+    private fun fadeGain(progress: Float): Float =
+        if (progress <= 0f) 0f else 10f.pow(-3f * (1f - progress.coerceAtMost(1f)))
+
+    private fun appliedVolume(l: Layer): Float =
+        (l.volume * masterVolume * fadeGain(l.fadeFactor)).coerceIn(0f, 1f)
 
     suspend fun startLayer(
         id: String,
@@ -65,20 +81,39 @@ class AudioEngine(private val context: Context) {
     ) {
         if (layers.containsKey(id)) return
         val pcm = PcmStore.awaitPcm(context, id, assetPath)
-        val effective = (volume * masterVolume).coerceIn(0f, 1f)
-        if (warmthEligible) {
+        val layer = if (warmthEligible) {
             // Streamed: a feeder loops the raw PCM through a live low-pass driven by
             // `warmth`, so the tone changes without ever restarting the sound.
-            val track = withContext(Dispatchers.IO) { buildStreamTrack(pcm, effective) }
+            val track = withContext(Dispatchers.IO) { buildStreamTrack(pcm, 0f) }
             val feeder = launchNoiseFeeder(track, pcm)
-            layers[id] = Layer(track, volume, warmthEligible = true, feeder = feeder)
+            Layer(track, volume, warmthEligible = true, feeder = feeder)
         } else {
             // Ambient: hardware-looped static track, unaffected by Warmth.
             val track = withContext(Dispatchers.IO) {
-                buildLoopingTrack(pcm, pcm.data, effective)
+                buildLoopingTrack(pcm, pcm.data, 0f)
             }
-            layers[id] = Layer(track, volume, warmthEligible = false)
+            Layer(track, volume, warmthEligible = false)
         }
+        layer.fadeFactor = 0f
+        layers[id] = layer
+        rampLayer(layer, target = 1f, durationMs = FADE_MS)
+    }
+
+    // Ramps the layer's fade factor from wherever it currently is to `target`,
+    // reapplying the track volume each step.
+    private fun rampLayer(l: Layer, target: Float, durationMs: Long): Job {
+        l.fadeJob?.cancel()
+        val job = fadeScope.launch {
+            val from = l.fadeFactor
+            val steps = (durationMs / FADE_STEP_MS).toInt().coerceAtLeast(1)
+            for (i in 1..steps) {
+                l.fadeFactor = from + (target - from) * i / steps
+                runCatching { l.track.setVolume(appliedVolume(l)) }
+                delay(FADE_STEP_MS)
+            }
+        }
+        l.fadeJob = job
+        return job
     }
 
     // Maps 0..1 warmth to the low-pass corner. w=0 sits well above the audible band
@@ -187,26 +222,38 @@ class AudioEngine(private val context: Context) {
     }
 
     fun stopLayer(id: String) {
+        // Removed from the map immediately so a quick re-tap starts a fresh layer;
+        // this one fades out detached and tears itself down at the end.
         val l = layers.remove(id) ?: return
-        if (l.feeder != null) {
-            // The feeder's finally block stops + releases the track once it unwinds.
-            l.feeder.cancel()
-        } else {
-            runCatching { l.track.stop() }
-            runCatching { l.track.release() }
+        l.fadeJob?.cancel()
+        fadeScope.launch {
+            val from = l.fadeFactor
+            val steps = (FADE_MS / FADE_STEP_MS).toInt()
+            for (i in 1..steps) {
+                l.fadeFactor = from * (1f - i.toFloat() / steps)
+                runCatching { l.track.setVolume(appliedVolume(l)) }
+                delay(FADE_STEP_MS)
+            }
+            if (l.feeder != null) {
+                // The feeder's finally block stops + releases the track once it unwinds.
+                l.feeder.cancel()
+            } else {
+                runCatching { l.track.stop() }
+                runCatching { l.track.release() }
+            }
         }
     }
 
     fun setLayerVolume(id: String, volume: Float) {
         val l = layers[id] ?: return
         l.volume = volume
-        l.track.setVolume((volume * masterVolume).coerceIn(0f, 1f))
+        l.track.setVolume(appliedVolume(l))
     }
 
     fun setMasterVolume(volume: Float) {
         masterVolume = volume.coerceIn(0f, 1f)
         for ((_, l) in layers) {
-            l.track.setVolume((l.volume * masterVolume).coerceIn(0f, 1f))
+            l.track.setVolume(appliedVolume(l))
         }
     }
 
@@ -217,30 +264,38 @@ class AudioEngine(private val context: Context) {
             return
         }
         fadeJob = fadeScope.launch {
-            val steps = (PAUSE_FADE_MS / FADE_STEP_MS).toInt()
+            val steps = (FADE_MS / FADE_STEP_MS).toInt()
             for (i in 1..steps) {
                 val factor = 1f - i.toFloat() / steps
                 for ((_, l) in layers) {
-                    runCatching { l.track.setVolume(effectiveVolume(l) * factor) }
+                    runCatching { l.track.setVolume(appliedVolume(l) * fadeGain(factor)) }
                 }
                 delay(FADE_STEP_MS)
             }
             for ((_, l) in layers) {
                 runCatching { l.track.pause() }
                 // Restore so a later resume plays at the configured level.
-                runCatching { l.track.setVolume(effectiveVolume(l)) }
+                runCatching { l.track.setVolume(appliedVolume(l)) }
             }
         }
     }
 
     fun resumeAll() {
         fadeJob?.cancel()
-        fadeScope.launch {
+        fadeJob = fadeScope.launch {
             for ((_, l) in layers) {
                 runCatching {
-                    l.track.setVolume(effectiveVolume(l))
+                    l.track.setVolume(0f)
                     l.track.play()
                 }
+            }
+            val steps = (FADE_MS / FADE_STEP_MS).toInt()
+            for (i in 1..steps) {
+                val factor = i.toFloat() / steps
+                for ((_, l) in layers) {
+                    runCatching { l.track.setVolume(appliedVolume(l) * fadeGain(factor)) }
+                }
+                delay(FADE_STEP_MS)
             }
         }
     }
@@ -250,6 +305,7 @@ class AudioEngine(private val context: Context) {
     fun release() {
         fadeJob?.cancel()
         for ((_, l) in layers) {
+            l.fadeJob?.cancel()
             if (l.feeder != null) {
                 l.feeder.cancel()
             } else {

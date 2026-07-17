@@ -56,6 +56,8 @@ private fun encodeCustomMixes(mixes: List<CustomMix>): String =
         "$name|$layers"
     }
 
+private val LEGACY_LAYER_IDS = mapOf("thunderstorm" to "rain")
+
 private fun decodeCustomMixes(encoded: String): List<CustomMix> =
     encoded.lineSequence().mapNotNull { line ->
         val sep = line.indexOf('|')
@@ -63,6 +65,7 @@ private fun decodeCustomMixes(encoded: String): List<CustomMix> =
         val name = line.substring(0, sep).trim()
         val layers = line.substring(sep + 1).split(',').mapNotNull { entry ->
             val id = entry.substringBefore(':').takeIf { it.isNotBlank() }
+                ?.let { LEGACY_LAYER_IDS[it] ?: it }
             val vol = entry.substringAfter(':', "").toFloatOrNull()
             if (id != null && vol != null && vol > 0f) id to vol.coerceIn(0f, 1f) else null
         }.toMap()

@@ -42,7 +42,7 @@ object PcmStore {
 
     val AMBIENT_ASSETS = mapOf(
         "seawaves" to "audio/ambient/seawaves.ogg",
-        "thunderstorm" to "audio/ambient/thunderstorm.ogg",
+        "rain" to "audio/ambient/rain.ogg",
         "fire" to "audio/ambient/fire.ogg",
         "birds" to "audio/ambient/birds.ogg",
         "cafe" to "audio/ambient/cafe.ogg",
@@ -146,6 +146,16 @@ object PcmStore {
             for ((id, path) in NOISE_ASSETS) preload(appContext, id, path)
             noiseReady = true
             for ((id, path) in AMBIENT_ASSETS) preload(appContext, id, path)
+            sweepStaleCacheFiles(appContext)
+        }
+    }
+
+    // Deletes cache files that no current sound owns — renamed/removed ids
+    // (e.g. thunderstorm -> rain) and half-written .tmp files from crashes.
+    private fun sweepStaleCacheFiles(context: Context) {
+        val valid = (NOISE_ASSETS.keys + AMBIENT_ASSETS.keys).map { "$it.pcm" }.toSet()
+        File(context.filesDir, "pcm").listFiles()?.forEach { f ->
+            if (f.name !in valid) runCatching { f.delete() }
         }
     }
 

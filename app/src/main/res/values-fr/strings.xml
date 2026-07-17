@@ -14,7 +14,7 @@ Enregistrez votre propre mix avec « Enregistrer le mix », puis utilisez l\'ic�
     <string name="ambient_off">Inactif</string>
     <string name="ambient_now_playing">Mix d\'ambiance</string>
     <string name="ambient_seawaves">Vagues de la mer</string>
-    <string name="ambient_thunderstorm">Orage</string>
+    <string name="ambient_rain">Pluie</string>
     <string name="ambient_fire">Crépitement du feu</string>
     <string name="ambient_birds">Chant des oiseaux</string>
     <string name="ambient_cafe">Ambiance de café</string>

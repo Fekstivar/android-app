@@ -125,7 +125,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Storefront
-import androidx.compose.material.icons.outlined.Thunderstorm
+import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material.icons.outlined.Waves
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -148,7 +148,7 @@ private data class AmbientSound(
 
 private val AMBIENT_SOUNDS = listOf(
     AmbientSound("seawaves", R.string.ambient_seawaves, Color(0xFF3A7BD5), iconVector = Icons.Outlined.Waves),
-    AmbientSound("thunderstorm", R.string.ambient_thunderstorm, Color(0xFF6C5CE7), iconVector = Icons.Outlined.Thunderstorm),
+    AmbientSound("rain", R.string.ambient_rain, Color(0xFF6C5CE7), iconVector = Icons.Outlined.WaterDrop),
     AmbientSound("fire", R.string.ambient_fire, Color(0xFFE8662B), iconVector = Icons.Outlined.LocalFireDepartment),
     AmbientSound("birds", R.string.ambient_birds, Color(0xFF4CAF7D), iconResId = R.drawable.ic_ambient_birds),
     AmbientSound("cafe", R.string.ambient_cafe, Color(0xFFB8862B), iconVector = Icons.Outlined.Storefront),
@@ -165,9 +165,9 @@ private data class MixPreset(
 )
 
 private val PREMADE_MIXES = listOf(
-    MixPreset("cabin", R.string.mix_cabin, mapOf("fire" to 0.8f, "thunderstorm" to 0.45f)),
+    MixPreset("cabin", R.string.mix_cabin, mapOf("fire" to 0.8f, "rain" to 0.45f)),
     MixPreset("beach", R.string.mix_beach, mapOf("seawaves" to 0.7f, "birds" to 0.5f)),
-    MixPreset("bar", R.string.mix_bar, mapOf("cafe" to 0.8f, "thunderstorm" to 0.35f)),
+    MixPreset("bar", R.string.mix_bar, mapOf("cafe" to 0.8f, "rain" to 0.35f)),
 )
 
 private data class NoiseColor(
