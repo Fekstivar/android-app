@@ -1,0 +1,4 @@
+• Sounds now start instantly — no more delay after tapping a color or ambient sound
+• Much higher quality ambient sounds, all tuned to the same volume level
+• Rain replaces thunderstorm (your saved mixes carry over automatically)
+• Gentle fade in and out when starting, stopping or switching sounds

@@ -1,0 +1,4 @@
+• Les sons démarrent désormais instantanément — plus d'attente après avoir touché une couleur ou un son d'ambiance
+• Sons d'ambiance de bien meilleure qualité, tous réglés au même niveau de volume
+• La pluie remplace l'orage (vos mix enregistrés sont conservés automatiquement)
+• Fondu doux au démarrage, à l'arrêt ou au changement de son

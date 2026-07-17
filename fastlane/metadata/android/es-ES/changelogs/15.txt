@@ -1,0 +1,4 @@
+• Los sonidos ahora empiezan al instante — sin retraso al tocar un color o un sonido ambiental
+• Sonidos ambientales de mucha mayor calidad, todos ajustados al mismo nivel de volumen
+• La lluvia sustituye a la tormenta (tus mezclas guardadas se conservan automáticamente)
+• Fundido suave al iniciar, detener o cambiar de sonido

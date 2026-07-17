@@ -1,0 +1,4 @@
+• Os sons agora começam na hora — sem atraso ao tocar em uma cor ou som ambiente
+• Sons ambientes com qualidade muito maior, todos ajustados ao mesmo nível de volume
+• A chuva substitui a tempestade (suas misturas salvas são mantidas automaticamente)
+• Transição suave ao iniciar, parar ou trocar de som
