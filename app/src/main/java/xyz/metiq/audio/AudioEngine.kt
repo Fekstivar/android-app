@@ -1,29 +1,18 @@
 package xyz.metiq.audio
 
 import android.content.Context
-import android.content.res.AssetFileDescriptor
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import android.media.MediaCodec
-import android.media.MediaExtractor
-import android.media.MediaFormat
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.PI
 import kotlin.math.cos
@@ -51,19 +40,9 @@ class AudioEngine(private val context: Context) {
         val feeder: Job? = null,
     )
 
-    private data class Pcm(
-        val data: ShortArray,
-        val sampleRate: Int,
-        val channelMask: Int,
-        val channelCount: Int,
-    )
-
     private val layers = ConcurrentHashMap<String, Layer>()
 
-    // Caches the decode itself, not just its result, so a startLayer racing an
-    // in-flight preload awaits that decode instead of running a duplicate one.
-    private val pcmCache = ConcurrentHashMap<String, Deferred<Pcm>>()
-    private val decodeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val feederScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var masterVolume: Float = 1f
 
     // Warmth 0f = off (bright); 1f = warmest. Read live by each noise feeder every
@@ -78,40 +57,6 @@ class AudioEngine(private val context: Context) {
 
     private fun effectiveVolume(l: Layer): Float = (l.volume * masterVolume).coerceIn(0f, 1f)
 
-    private fun pcmAsync(id: String, assetPath: String): Deferred<Pcm> =
-        pcmCache.computeIfAbsent(id) {
-            decodeScope.async { decodeAssetToPcm(assetPath) }
-        }
-
-    // Awaits the (possibly shared) decode; drops the cache entry when the decode
-    // itself failed so a later attempt can retry, but keeps it when only the
-    // awaiting caller was cancelled.
-    private suspend fun awaitPcm(id: String, assetPath: String): Pcm {
-        val deferred = pcmAsync(id, assetPath)
-        return try {
-            deferred.await()
-        } catch (e: Throwable) {
-            if (deferred.isCompleted) pcmCache.remove(id, deferred)
-            throw e
-        }
-    }
-
-    suspend fun preload(id: String, assetPath: String) {
-        // Tolerate missing/undecodable assets so a not-yet-shipped ambient sound
-        // can't crash preloading; the layer simply stays unavailable until added.
-        try {
-            awaitPcm(id, assetPath)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Throwable) {
-        }
-    }
-
-    suspend fun preloadAll(assets: Map<String, String>) = coroutineScope {
-        assets.map { (id, path) -> async { preload(id, path) } }.awaitAll()
-        Unit
-    }
-
     suspend fun startLayer(
         id: String,
         assetPath: String,
@@ -119,7 +64,7 @@ class AudioEngine(private val context: Context) {
         warmthEligible: Boolean = false,
     ) {
         if (layers.containsKey(id)) return
-        val pcm = awaitPcm(id, assetPath)
+        val pcm = PcmStore.awaitPcm(context, id, assetPath)
         val effective = (volume * masterVolume).coerceIn(0f, 1f)
         if (warmthEligible) {
             // Streamed: a feeder loops the raw PCM through a live low-pass driven by
@@ -171,7 +116,7 @@ class AudioEngine(private val context: Context) {
     // glides toward the live `warmth` each block. Continuous playback, filtered on top —
     // changing warmth never restarts the sound. The feeder owns the track's teardown.
     private fun launchNoiseFeeder(track: AudioTrack, pcm: Pcm): Job =
-        decodeScope.launch {
+        feederScope.launch {
             val src = pcm.data
             val ch = pcm.channelCount
             val frames = src.size / ch
@@ -313,7 +258,6 @@ class AudioEngine(private val context: Context) {
             }
         }
         layers.clear()
-        pcmCache.clear()
     }
 
     fun activeLayerIds(): Set<String> = layers.keys.toSet()
@@ -346,80 +290,6 @@ class AudioEngine(private val context: Context) {
         val mode = if (stream) AudioTrack.MODE_STREAM else AudioTrack.MODE_STATIC
         return AudioTrack.Builder().setAudioAttributes(attrs).setAudioFormat(format)
             .setBufferSizeInBytes(bufferBytes).setTransferMode(mode).build()
-    }
-
-    private fun decodeAssetToPcm(assetPath: String): Pcm {
-        val afd: AssetFileDescriptor = context.assets.openFd(assetPath)
-        val extractor = MediaExtractor()
-        extractor.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-        afd.close()
-
-        val trackIndex = (0 until extractor.trackCount).firstOrNull { i ->
-            extractor.getTrackFormat(i).getString(MediaFormat.KEY_MIME)
-                ?.startsWith("audio/") == true
-        } ?: error("No audio track in $assetPath")
-        extractor.selectTrack(trackIndex)
-        val inputFormat = extractor.getTrackFormat(trackIndex)
-        val mime = inputFormat.getString(MediaFormat.KEY_MIME)!!
-        val sampleRate = inputFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE)
-        val channelCount = inputFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
-
-        val codec = MediaCodec.createDecoderByType(mime)
-        codec.configure(inputFormat, null, null, 0)
-        codec.start()
-
-        val info = MediaCodec.BufferInfo()
-        var sawInputEos = false
-        var sawOutputEos = false
-        val pcmBytes = java.io.ByteArrayOutputStream()
-
-        while (!sawOutputEos) {
-            if (!sawInputEos) {
-                val inIx = codec.dequeueInputBuffer(10_000)
-                if (inIx >= 0) {
-                    val inBuf: ByteBuffer = codec.getInputBuffer(inIx)!!
-                    val read = extractor.readSampleData(inBuf, 0)
-                    if (read < 0) {
-                        codec.queueInputBuffer(inIx, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
-                        sawInputEos = true
-                    } else {
-                        codec.queueInputBuffer(inIx, 0, read, extractor.sampleTime, 0)
-                        extractor.advance()
-                    }
-                }
-            }
-            val outIx = codec.dequeueOutputBuffer(info, 10_000)
-            if (outIx >= 0) {
-                val outBuf: ByteBuffer = codec.getOutputBuffer(outIx)!!
-                outBuf.position(info.offset)
-                outBuf.limit(info.offset + info.size)
-                val chunk = ByteArray(info.size)
-                outBuf.get(chunk)
-                pcmBytes.write(chunk)
-                codec.releaseOutputBuffer(outIx, false)
-                if ((info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) sawOutputEos = true
-            }
-        }
-
-        codec.stop()
-        codec.release()
-        extractor.release()
-
-        val bytes = pcmBytes.toByteArray()
-        val shorts = ShortArray(bytes.size / 2)
-        ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts)
-
-        val channelMask = when (channelCount) {
-            1 -> AudioFormat.CHANNEL_OUT_MONO
-            2 -> AudioFormat.CHANNEL_OUT_STEREO
-            else -> error("Unsupported channel count: $channelCount")
-        }
-        return Pcm(
-            data = shorts,
-            sampleRate = sampleRate,
-            channelMask = channelMask,
-            channelCount = channelCount,
-        )
     }
 
 }

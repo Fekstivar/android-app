@@ -12,11 +12,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 
 @OptIn(markerClass = [UnstableApi::class])
 class PlaybackService : MediaSessionService() {
@@ -26,7 +21,6 @@ class PlaybackService : MediaSessionService() {
     private lateinit var audioManager: AudioManager
     private lateinit var focusRequest: AudioFocusRequest
     private var focusHeld = false
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     inner class EngineBinder : Binder() {
         val engine: AudioEngine get() = this@PlaybackService.engine
@@ -82,9 +76,7 @@ class PlaybackService : MediaSessionService() {
             .setOnAudioFocusChangeListener(focusChangeListener)
             .build()
 
-        scope.launch {
-            engine.preloadAll(PRELOAD_ASSETS)
-        }
+        PcmStore.preloadAll(this)
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = session
@@ -101,7 +93,6 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
-        scope.cancel()
         abandonAudioFocus()
         session?.run {
             player.removeListener(playerListener)
@@ -135,18 +126,5 @@ class PlaybackService : MediaSessionService() {
 
     companion object {
         const val ENGINE_BIND_ACTION = "xyz.metiq.audio.ENGINE"
-
-        private val PRELOAD_ASSETS = mapOf(
-            "pink" to "audio/noise/pink.ogg",
-            "brown" to "audio/noise/brown.ogg",
-            "white" to "audio/noise/white.ogg",
-            "grey" to "audio/noise/grey.ogg",
-            "seawaves" to "audio/ambient/seawaves.ogg",
-            "thunderstorm" to "audio/ambient/thunderstorm.ogg",
-            "fire" to "audio/ambient/fire.ogg",
-            "birds" to "audio/ambient/birds.ogg",
-            "cafe" to "audio/ambient/cafe.ogg",
-            "wind" to "audio/ambient/wind.ogg",
-        )
     }
 }

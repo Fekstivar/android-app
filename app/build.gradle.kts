@@ -122,6 +122,7 @@ dependencies {
     implementation(libs.androidx.media3.common)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.splashscreen)
 
     debugImplementation(libs.androidx.ui.tooling)
 }

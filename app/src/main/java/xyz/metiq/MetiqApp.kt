@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import xyz.metiq.audio.PcmStore
 
 class MetiqApp : Application() {
     lateinit var settings: SettingsRepository
@@ -16,6 +17,7 @@ class MetiqApp : Application() {
         super.onCreate()
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         settings = SettingsRepository(this)
+        PcmStore.preloadAll(this)
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate).launch {
             val snapshot = settings.flow.first()
             applyLanguageTag(snapshot.languageTag)
