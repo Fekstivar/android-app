@@ -25,7 +25,7 @@ import kotlin.math.sqrt
 // step — it just avoids the startle, never delays the start. Fade-out is longer
 // and dB-linear for a smooth tail; stopping keeps the track alive until the
 // fade-out finishes, which makes color switches crossfade.
-private const val FADE_IN_MS = 120L
+private const val FADE_IN_MS = 50L
 private const val FADE_OUT_MS = 250L
 private const val FADE_STEP_MS = 20L
 
@@ -88,19 +88,15 @@ class AudioEngine(private val context: Context) {
     ) {
         if (layers.containsKey(id)) return
         val pcm = PcmStore.awaitPcm(context, id, assetPath)
-        val layer = if (warmthEligible) {
-            // Streamed: a feeder loops the raw PCM through a live low-pass driven by
-            // `warmth`, so the tone changes without ever restarting the sound.
-            val track = withContext(Dispatchers.IO) { buildStreamTrack(pcm, 0f) }
-            val feeder = launchNoiseFeeder(track, pcm)
-            Layer(track, volume, warmthEligible = true, feeder = feeder)
-        } else {
-            // Ambient: hardware-looped static track, unaffected by Warmth.
-            val track = withContext(Dispatchers.IO) {
-                buildLoopingTrack(pcm, pcm.data, 0f)
-            }
-            Layer(track, volume, warmthEligible = false)
-        }
+        // Every layer streams through a small (~85 ms) buffer: playback begins
+        // after one block instead of waiting for a full static-track upload —
+        // a 45 s ambient loop as a MODE_STATIC track needs a multi-MB AudioFlinger
+        // allocation plus a blocking copy of the whole PCM, which added hundreds
+        // of milliseconds between tap and sound. Noise layers additionally run
+        // through the live warmth low-pass.
+        val track = withContext(Dispatchers.IO) { buildStreamTrack(pcm, 0f) }
+        val feeder = launchFeeder(track, pcm, filtered = warmthEligible)
+        val layer = Layer(track, volume, warmthEligible, feeder)
         layer.fadeFactor = 0f
         layers[id] = layer
         rampIn(layer)
@@ -132,17 +128,6 @@ class AudioEngine(private val context: Context) {
         return (fMax * (fMin / fMax).pow(w.coerceIn(0f, 1f).toDouble())).toFloat()
     }
 
-    private fun buildLoopingTrack(pcm: Pcm, data: ShortArray, effective: Float): AudioTrack {
-        val bufferBytes = data.size * 2
-        val t = buildTrack(pcm.sampleRate, pcm.channelMask, bufferBytes)
-        t.write(data, 0, data.size, AudioTrack.WRITE_BLOCKING)
-        val frameCount = data.size / pcm.channelCount
-        t.setLoopPoints(0, frameCount, -1)
-        t.setVolume(effective)
-        t.play()
-        return t
-    }
-
     private fun buildStreamTrack(pcm: Pcm, effective: Float): AudioTrack {
         val minBuf = AudioTrack.getMinBufferSize(
             pcm.sampleRate, pcm.channelMask, AudioFormat.ENCODING_PCM_16BIT,
@@ -154,10 +139,12 @@ class AudioEngine(private val context: Context) {
         return t
     }
 
-    // Streams the raw loop through a 2nd-order (Butterworth-Q) low-pass whose cutoff
-    // glides toward the live `warmth` each block. Continuous playback, filtered on top —
-    // changing warmth never restarts the sound. The feeder owns the track's teardown.
-    private fun launchNoiseFeeder(track: AudioTrack, pcm: Pcm): Job =
+    // Streams the PCM loop into the track block by block; the feeder owns the
+    // track's teardown. With `filtered`, blocks pass through a 2nd-order
+    // (Butterworth-Q) low-pass whose cutoff glides toward the live `warmth` —
+    // continuous playback, filtered on top, so changing warmth never restarts
+    // the sound. Unfiltered (ambient) blocks are plain wrap-around copies.
+    private fun launchFeeder(track: AudioTrack, pcm: Pcm, filtered: Boolean): Job =
         feederScope.launch {
             val src = pcm.data
             val ch = pcm.channelCount
@@ -189,28 +176,45 @@ class AudioEngine(private val context: Context) {
                 a2 = (1.0 - alpha) / a0
             }
             var pos = 0
+            // play() is deferred until the first block is in the buffer, so output
+            // starts the instant playback begins instead of waiting on an underrun.
+            var started = false
             try {
-                track.play()
                 while (isActive) {
-                    val target = warmthCutoffHz(warmth).coerceIn(2200f, fcMax)
-                    fc += (target - fc) * WARMTH_GLIDE
-                    recompute(fc.toDouble())
-                    for (f in 0 until block) {
-                        val base = pos * ch
-                        for (c in 0 until ch) {
-                            val x0 = src[base + c].toDouble()
-                            val y0 = b0 * x0 + b1 * x1[c] + b2 * x2[c] - a1 * y1[c] - a2 * y2[c]
-                            x2[c] = x1[c]; x1[c] = x0; y2[c] = y1[c]; y1[c] = y0
-                            buf[f * ch + c] = y0.coerceIn(-32768.0, 32767.0).toInt().toShort()
+                    if (filtered) {
+                        val target = warmthCutoffHz(warmth).coerceIn(2200f, fcMax)
+                        fc += (target - fc) * WARMTH_GLIDE
+                        recompute(fc.toDouble())
+                        for (f in 0 until block) {
+                            val base = pos * ch
+                            for (c in 0 until ch) {
+                                val x0 = src[base + c].toDouble()
+                                val y0 = b0 * x0 + b1 * x1[c] + b2 * x2[c] - a1 * y1[c] - a2 * y2[c]
+                                x2[c] = x1[c]; x1[c] = x0; y2[c] = y1[c]; y1[c] = y0
+                                buf[f * ch + c] = y0.coerceIn(-32768.0, 32767.0).toInt().toShort()
+                            }
+                            pos++
+                            if (pos >= frames) pos = 0
                         }
-                        pos++
-                        if (pos >= frames) pos = 0
+                    } else {
+                        var f = 0
+                        while (f < block) {
+                            val n = minOf(block - f, frames - pos)
+                            System.arraycopy(src, pos * ch, buf, f * ch, n * ch)
+                            pos += n
+                            f += n
+                            if (pos >= frames) pos = 0
+                        }
                     }
                     var off = 0
                     while (off < total && isActive) {
                         val n = track.write(buf, off, total - off, AudioTrack.WRITE_NON_BLOCKING)
                         if (n < 0) return@launch
                         off += n
+                        if (!started && off > 0) {
+                            track.play()
+                            started = true
+                        }
                         // Buffer full (or track paused): yield instead of spinning. delay
                         // is a cooperative cancellation point, so stop takes effect here.
                         if (off < total) delay(5)
@@ -351,8 +355,12 @@ class AudioEngine(private val context: Context) {
         val format = AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT)
             .setSampleRate(sampleRate).setChannelMask(channelMask).build()
         val mode = if (stream) AudioTrack.MODE_STREAM else AudioTrack.MODE_STATIC
+        // Ask for the fast (low-latency) mixer path: the default deep-buffer route
+        // adds 100-200 ms between write and speaker, which makes taps feel laggy
+        // against the instant UI animation. Falls back gracefully where denied.
         return AudioTrack.Builder().setAudioAttributes(attrs).setAudioFormat(format)
-            .setBufferSizeInBytes(bufferBytes).setTransferMode(mode).build()
+            .setBufferSizeInBytes(bufferBytes).setTransferMode(mode)
+            .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+            .build()
     }
-
 }
