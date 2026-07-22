@@ -1,0 +1,2 @@
+• Sounds now start the instant you tap — faster audio path and quicker fades
+• New support note: star us on GitHub (F-Droid) or leave a review (Play)
