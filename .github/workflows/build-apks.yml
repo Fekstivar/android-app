@@ -1,9 +1,11 @@
-name: Build APKs
+name: Release
 on:
   push:
     tags:
       - "v*"
   workflow_dispatch:
+env:
+  EXPECTED_CERT_SHA256: 66b3797da88c1e2676b6d34056f6cea82d7ea59c000743b0f203f7eff88c0581
 jobs:
   build:
     name: Build ${{ matrix.flavor }} APK
@@ -11,25 +13,37 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flavor: [fdroid, play]
+        include:
+          - flavor: fdroid
+            task: assembleFdroidRelease
+            apk: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+            asset: fdroid.apk
+          - flavor: play
+            task: assemblePlayRelease
+            apk: app/build/outputs/apk/play/release/app-play-release.apk
+            asset: gplay.apk
     steps:
-      - name: Checkout repository
+      - name: Checkout tagged commit
         uses: actions/checkout@v4
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
-      - name: Set up Gradle
+      - name: Set up Gradle (caches disabled)
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-disabled: true
       - name: Decode keystore and write keystore.properties
-        if: ${{ env.KEYSTORE_BASE64 != '' && env.KEYSTORE_PASSWORD != '' && env.KEY_ALIAS != '' && env.KEY_PASSWORD != '' }}
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "::error::Keystore secrets are not configured" ; exit 1
+          fi
           echo "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/release.jks"
           cat > "$GITHUB_WORKSPACE/keystore.properties" <<EOF
           storeFile=$GITHUB_WORKSPACE/release.jks
@@ -37,19 +51,30 @@ jobs:
           keyAlias=$KEY_ALIAS
           keyPassword=$KEY_PASSWORD
           EOF
-      - name: Capitalize flavor
-        id: flavor
+      - name: Build release APK (no build cache)
+        run: ./gradlew --no-build-cache ${{ matrix.task }}
+      - name: Verify signature and embedded git revision
         run: |
-          flavor='${{ matrix.flavor }}'
-          capitalized="$(echo "${flavor:0:1}" | tr '[:lower:]' '[:upper:]')${flavor:1}"
-          echo "capitalized=$capitalized" >> "$GITHUB_OUTPUT"
-      - name: Build release APK
-        run: ./gradlew assemble${{ steps.flavor.outputs.capitalized }}Release
+          apksigner=$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -name apksigner | sort -V | tail -1)
+          actual=$("$apksigner" verify --print-certs "${{ matrix.apk }}" \
+            | grep -oP 'SHA-256 digest: \K[0-9a-f]+' | head -1)
+          if [ "$actual" != "$EXPECTED_CERT_SHA256" ]; then
+            echo "::error::APK signed with wrong certificate: $actual"; exit 1
+          fi
+          expected_rev=$(git rev-parse HEAD)
+          embedded_rev=$(unzip -p "${{ matrix.apk }}" META-INF/version-control-info.textproto \
+            | grep -oP 'revision: "\K[0-9a-f]+' || true)
+          if [ "$embedded_rev" != "$expected_rev" ]; then
+            echo "::error::Embedded git revision mismatch (expected $expected_rev, got ${embedded_rev:-none}) — would fail F-Droid verification"
+            exit 1
+          fi
+      - name: Rename APK
+        run: mv "${{ matrix.apk }}" "${{ matrix.asset }}"
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: metiq-${{ matrix.flavor }}-${{ github.ref_name }}
-          path: app/build/outputs/apk/${{ matrix.flavor }}/release/*.apk
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.asset }}
           if-no-files-found: error
   release:
     name: Create GitHub Release
@@ -70,3 +95,57 @@ jobs:
           tag_name: ${{ github.ref_name }}
           draft: true
           files: artifacts/**/*.apk
+  gplay:
+    name: Publish to Google Play
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tagged commit
+        uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Set up Gradle (caches disabled)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-disabled: true
+      - name: Decode keystore and write keystore.properties
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "::error::Keystore secrets are not configured" ; exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/release.jks"
+          cat > "$GITHUB_WORKSPACE/keystore.properties" <<EOF
+          storeFile=$GITHUB_WORKSPACE/release.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+      - name: Build Play release bundle (no build cache)
+        run: ./gradlew --no-build-cache bundlePlayRelease
+      - name: Collect release notes from fastlane changelogs
+        run: |
+          version_code=$(grep -oP 'versionCode = \K\d+' app/build.gradle.kts)
+          mkdir -p whatsnew
+          for dir in fastlane/metadata/android/*/; do
+            locale=$(basename "$dir")
+            src="$dir/changelogs/$version_code.txt"
+            [ -f "$src" ] && cp "$src" "whatsnew/whatsnew-$locale"
+          done
+          ls whatsnew
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: xyz.metiq
+          releaseFiles: app/build/outputs/bundle/playRelease/app-play-release.aab
+          track: production
+          whatsNewDirectory: whatsnew
