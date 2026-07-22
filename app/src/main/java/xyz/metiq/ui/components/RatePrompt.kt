@@ -43,15 +43,18 @@ import xyz.metiq.ui.theme.LocalMetiqColors
 import xyz.metiq.ui.theme.MetiqTheme
 
 // Non-blocking "support us" note. Sits above the app content, doesn't steal focus,
-// and can be flicked away in either direction to dismiss. [showRate] gates the
-// rating cue — false on stores without reviews (e.g. F-Droid), where only Feedback
-// and Donate are offered. [storeName] is the flavor's store, used only in the
-// rating copy; [onDismiss] fires when the note is swiped away.
+// and can be flicked away in either direction to dismiss (the only ways to close
+// it — action taps keep it open so the user can e.g. star AND donate).
+// [message] and [rateLabel] are resolved by the caller so the flavor decides the
+// wording (Play: rate a review; F-Droid: star the GitHub repo); [showFeedback]
+// gates the written-feedback cue — false on Play, where the review itself is the
+// feedback channel.
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RatePromptBanner(
-    showRate: Boolean,
-    storeName: String,
+    showFeedback: Boolean,
+    message: String,
+    rateLabel: String,
     onRate: () -> Unit,
     onFeedback: () -> Unit,
     onDonate: () -> Unit,
@@ -96,12 +99,9 @@ fun RatePromptBanner(
                             fontWeight = FontWeight.SemiBold,
                         ),
                     )
+                    Spacer(Modifier.height(6.dp))
                     Text(
-                        text = if (showRate) {
-                            stringResource(R.string.rate_prompt_message, storeName)
-                        } else {
-                            stringResource(R.string.rate_prompt_message_no_rating)
-                        },
+                        text = message,
                         color = tokens.textPrimary.copy(alpha = 0.6f),
                         style = TextStyle(fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp),
                     )
@@ -127,24 +127,20 @@ fun RatePromptBanner(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                if (showRate) {
+                ActionPill(
+                    label = rateLabel,
+                    background = tokens.textPrimary,
+                    foreground = tokens.background,
+                    onClick = onRate,
+                )
+                if (showFeedback) {
                     ActionPill(
-                        label = stringResource(R.string.rate_prompt_cta),
-                        background = tokens.textPrimary,
-                        foreground = tokens.background,
-                        onClick = onRate,
+                        label = stringResource(R.string.rate_prompt_feedback_cta),
+                        background = tokens.textPrimary.copy(alpha = 0.12f),
+                        foreground = tokens.textPrimary,
+                        onClick = onFeedback,
                     )
                 }
-                ActionPill(
-                    label = stringResource(R.string.rate_prompt_feedback_cta),
-                    background = if (showRate) {
-                        tokens.textPrimary.copy(alpha = 0.12f)
-                    } else {
-                        tokens.textPrimary
-                    },
-                    foreground = if (showRate) tokens.textPrimary else tokens.background,
-                    onClick = onFeedback,
-                )
                 ActionPill(
                     label = stringResource(R.string.rate_prompt_donate_cta),
                     background = tokens.textPrimary.copy(alpha = 0.12f),
@@ -161,8 +157,9 @@ fun RatePromptBanner(
 private fun RatePromptBannerPlayPreview() {
     MetiqTheme {
         RatePromptBanner(
-            showRate = true,
-            storeName = "Play Store",
+            showFeedback = false,
+            message = "Rate on Play Store or donate to keep it free.",
+            rateLabel = "Rate",
             onRate = {},
             onFeedback = {},
             onDonate = {},
@@ -177,8 +174,9 @@ private fun RatePromptBannerPlayPreview() {
 private fun RatePromptBannerFdroidPreview() {
     MetiqTheme {
         RatePromptBanner(
-            showRate = false,
-            storeName = "F-Droid",
+            showFeedback = true,
+            message = "Star us on GitHub, tell us what you miss, or donate.",
+            rateLabel = "Star",
             onRate = {},
             onFeedback = {},
             onDonate = {},

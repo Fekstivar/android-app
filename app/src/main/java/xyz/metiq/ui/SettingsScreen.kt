@@ -202,12 +202,10 @@ fun SettingsContent(
             )
         }
         Section(stringResource(R.string.settings_section_support)) {
-            if (BuildConfig.STORE_SUPPORTS_RATING) {
-                LinkRow(
-                    label = stringResource(R.string.settings_rate_label, BuildConfig.STORE_NAME),
-                    onClick = { openStoreRating(context) },
-                )
-            }
+            LinkRow(
+                label = stringResource(R.string.settings_rate_label, BuildConfig.STORE_NAME),
+                onClick = { openStoreRating(context) },
+            )
             LinkRow(
                 label = stringResource(R.string.settings_donate_kofi_label),
                 description = stringResource(R.string.settings_donate_description),

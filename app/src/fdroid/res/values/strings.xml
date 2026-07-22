@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F-Droid flavor: "rating" is starring the GitHub repo. -->
+<resources>
+    <string name="rate_prompt_message">Star us on GitHub, tell us what you miss, or donate.</string>
+    <string name="rate_prompt_cta">Star</string>
+    <string name="settings_rate_label">Star Metiq on GitHub</string>
+</resources>

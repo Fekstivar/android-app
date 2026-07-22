@@ -228,7 +228,6 @@ fun HomeScreen(
     onCustomMixes: (List<CustomMix>) -> Unit,
     onLanguageTag: (String?) -> Unit,
     ratePromptVisible: Boolean = false,
-    onRatePromptRate: () -> Unit = {},
     onRatePromptDismiss: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -523,20 +522,14 @@ fun HomeScreen(
                 exit = slideOutVertically { -it } + fadeOut(),
             ) {
                 RatePromptBanner(
-                    showRate = BuildConfig.STORE_SUPPORTS_RATING,
-                    storeName = BuildConfig.STORE_NAME,
-                    onRate = {
-                        openStoreRating(context)
-                        onRatePromptRate()
-                    },
-                    onFeedback = {
-                        openUrl(context, FEEDBACK_URL)
-                        onRatePromptRate()
-                    },
-                    onDonate = {
-                        openUrl(context, KOFI_URL)
-                        onRatePromptRate()
-                    },
+                    showFeedback = BuildConfig.SHOW_FEEDBACK_CTA,
+                    message = stringResource(R.string.rate_prompt_message, BuildConfig.STORE_NAME),
+                    rateLabel = stringResource(R.string.rate_prompt_cta),
+                    // Actions deliberately keep the note open (star AND donate is a
+                    // thing); only the explicit dismiss/swipe snoozes it.
+                    onRate = { openStoreRating(context) },
+                    onFeedback = { openUrl(context, FEEDBACK_URL) },
+                    onDonate = { openUrl(context, KOFI_URL) },
                     onDismiss = onRatePromptDismiss,
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
                 )

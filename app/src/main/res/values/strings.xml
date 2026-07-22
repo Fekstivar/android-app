@@ -103,8 +103,7 @@
 
     <!-- Rate prompt (swipeable note) -->
     <string name="rate_prompt_title">Enjoying Metiq?</string>
-    <string name="rate_prompt_message">Rate on %1$s, tell us what you miss, or donate.</string>
-    <string name="rate_prompt_message_no_rating">Tell us what you miss, or donate to keep it free.</string>
+    <string name="rate_prompt_message">Rate on %1$s or donate to keep it free.</string>
     <string name="rate_prompt_cta">Rate</string>
     <string name="rate_prompt_feedback_cta">Feedback</string>
     <string name="rate_prompt_donate_cta">Donate</string>

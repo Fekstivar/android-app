@@ -65,8 +65,7 @@ Guarda tu propia mezcla con “Guardar mezcla” y usa el icono de la papelera p
     <string name="settings_donate_github_label">Patrocínanos en GitHub</string>
 
     <string name="rate_prompt_title">¿Te gusta Metiq?</string>
-    <string name="rate_prompt_message">Valora en %1$s, dinos qué falta o dona.</string>
-    <string name="rate_prompt_message_no_rating">Dinos qué falta o dona para mantenerlo gratis.</string>
+    <string name="rate_prompt_message">Valora en %1$s o dona para mantenerlo gratis.</string>
     <string name="rate_prompt_cta">Valorar</string>
     <string name="rate_prompt_feedback_cta">Opinión</string>
     <string name="rate_prompt_donate_cta">Donar</string>

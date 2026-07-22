@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rate_prompt_message">Mettez une étoile sur GitHub, dites ce qui manque ou faites un don.</string>
+    <string name="rate_prompt_cta">Étoiler</string>
+    <string name="settings_rate_label">Mettez une étoile à Metiq sur GitHub</string>
+</resources>

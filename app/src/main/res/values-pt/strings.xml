@@ -65,8 +65,7 @@ Salve a sua própria mistura com “Salvar mistura” e use o ícone da lixeira 
     <string name="settings_donate_github_label">Patrocine-nos no GitHub</string>
 
     <string name="rate_prompt_title">Curtindo o Metiq?</string>
-    <string name="rate_prompt_message">Avalie em %1$s, diga o que falta ou doe.</string>
-    <string name="rate_prompt_message_no_rating">Diga o que falta ou doe para manter o app grátis.</string>
+    <string name="rate_prompt_message">Avalie em %1$s ou doe para manter o app grátis.</string>
     <string name="rate_prompt_cta">Avaliar</string>
     <string name="rate_prompt_feedback_cta">Opinião</string>
     <string name="rate_prompt_donate_cta">Doar</string>

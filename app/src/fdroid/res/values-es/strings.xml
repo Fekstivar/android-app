@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rate_prompt_message">Danos una estrella en GitHub, dinos qué falta o dona.</string>
+    <string name="rate_prompt_cta">Dar estrella</string>
+    <string name="settings_rate_label">Danos una estrella en GitHub</string>
+</resources>

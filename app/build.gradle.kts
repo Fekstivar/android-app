@@ -67,15 +67,18 @@ android {
         create("fdroid") {
             dimension = "store"
             isDefault = true
-            // F-Droid has no rating/review system, so the rate cue is hidden here.
-            buildConfigField("boolean", "STORE_SUPPORTS_RATING", "false")
-            buildConfigField("String", "STORE_RATE_URL", "\"fdroid.app:xyz.metiq\"")
-            buildConfigField("String", "STORE_RATE_FALLBACK_URL", "\"https://f-droid.org/packages/xyz.metiq\"")
-            buildConfigField("String", "STORE_NAME", "\"F-Droid\"")
+            // F-Droid has no ratings: the "rate" action is starring the GitHub repo
+            // (no direct star-action URL exists — starring is authenticated — so it
+            // lands on the repo page), and written feedback goes to GitHub issues.
+            buildConfigField("boolean", "SHOW_FEEDBACK_CTA", "true")
+            buildConfigField("String", "STORE_RATE_URL", "\"https://github.com/metiq-xyz/android-app\"")
+            buildConfigField("String", "STORE_RATE_FALLBACK_URL", "\"https://github.com/metiq-xyz/android-app\"")
+            buildConfigField("String", "STORE_NAME", "\"GitHub\"")
         }
         create("play") {
             dimension = "store"
-            buildConfigField("boolean", "STORE_SUPPORTS_RATING", "true")
+            // Play reviews are the feedback channel, so no separate feedback CTA.
+            buildConfigField("boolean", "SHOW_FEEDBACK_CTA", "false")
             buildConfigField("String", "STORE_RATE_URL", "\"market://details?id=xyz.metiq\"")
             buildConfigField("String", "STORE_RATE_FALLBACK_URL", "\"https://play.google.com/store/apps/details?id=xyz.metiq\"")
             buildConfigField("String", "STORE_NAME", "\"Play Store\"")
