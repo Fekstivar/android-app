@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Metiq" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.Metiq.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
-        <item name="android:forceDarkAllowed">false</item>
     </style>
+
+    <style name="Theme.Metiq" parent="Theme.Metiq.Base" />
 
     <style name="Theme.Metiq.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">#111010</item>
