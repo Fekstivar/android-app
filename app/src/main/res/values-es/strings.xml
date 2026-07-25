@@ -2,10 +2,8 @@
 <resources>
     <string name="help_cd">Ayuda</string>
     <string name="help_title">Cómo funciona</string>
-    <string name="home_helper">Toca un color de ruido para reproducirlo o detenerlo.\n\nConfigura un temporizador si quieres que se apague automáticamente.\n\n¿Demasiado brillante o áspero? Suavízalo con calidez en ajustes.</string>
-    <string name="ambient_helper">Toca un preajuste para reproducirlo y tócalo de nuevo para detenerlo.
-Toca un orbe para iniciar un sonido y arrastra su control para ajustar el nivel.
-Guarda tu propia mezcla con “Guardar mezcla” y usa el icono de la papelera para eliminarla.</string>
+    <string name="home_helper">Toca un color de ruido para reproducirlo o detenerlo.\nConfigura un temporizador si quieres que se apague automáticamente.\n¿Demasiado brillante o áspero? Suavízalo con calidez en ajustes.\n¿Prefieres inicios y finales más suaves? Ajusta la duración del fundido en ajustes.</string>
+    <string name="ambient_helper">Toca un preajuste para reproducirlo y tócalo de nuevo para detenerlo.\nToca un orbe para iniciar un sonido y arrastra su control para ajustar el nivel.\nGuarda tu propia mezcla con “Guardar mezcla” y usa el icono de la papelera para eliminarla.\n¿Prefieres inicios y finales más suaves? Ajusta la duración del fundido en ajustes.</string>
 
     <string name="tab_noise">Ruido</string>
     <string name="tab_ambient">Ambiente</string>

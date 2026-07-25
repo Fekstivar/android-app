@@ -2,10 +2,8 @@
 <resources>
     <string name="help_cd">Aide</string>
     <string name="help_title">Comment ça marche</string>
-    <string name="home_helper">Touchez une couleur de bruit pour le lire ou l\'arrêter.\n\nDéfinissez une minuterie si vous voulez qu\'il s\'arrête automatiquement.\n\nTrop clair ou dur ? Adoucissez-le avec chaleur dans les paramètres.</string>
-    <string name="ambient_helper">Touchez un préréglage pour le lire, touchez-le à nouveau pour l\'arrêter.
-Touchez un orbe pour démarrer un son, puis glissez son curseur pour régler le niveau.
-Enregistrez votre propre mix avec « Enregistrer le mix », puis utilisez l\'icône corbeille pour le supprimer.</string>
+    <string name="home_helper">Touchez une couleur de bruit pour le lire ou l\'arrêter.\nDéfinissez une minuterie si vous voulez qu\'il s\'arrête automatiquement.\nTrop clair ou dur ? Adoucissez-le avec chaleur dans les paramètres.\nVous préférez des débuts et fins plus doux ? Réglez la durée du fondu dans les paramètres.</string>
+    <string name="ambient_helper">Touchez un préréglage pour le lire, touchez-le à nouveau pour l\'arrêter.\nTouchez un orbe pour démarrer un son, puis glissez son curseur pour régler le niveau.\nEnregistrez votre propre mix avec « Enregistrer le mix », puis utilisez l\'icône corbeille pour le supprimer.\nVous préférez des débuts et fins plus doux ? Réglez la durée du fondu dans les paramètres.</string>
 
     <string name="tab_noise">Bruit</string>
     <string name="tab_ambient">Ambiance</string>

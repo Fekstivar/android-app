@@ -5,8 +5,8 @@
     <!-- Help modal (opened from the circled question mark on the Noise/Ambient screens) -->
     <string name="help_cd">Help</string>
     <string name="help_title">How it works</string>
-    <string name="home_helper">Tap a noise color to play or stop it.\n\nSet a timer if you want it to turn off automatically.\n\nToo bright or harsh? Soften it with warmth in settings.</string>
-    <string name="ambient_helper">Tap a preset to play it, tap it again to stop it.\nTap an orb to start a sound, then drag its slider to set the level.\nSave your own mix with “Save mix”, and use the trash icon to delete it.</string>
+    <string name="home_helper">Tap a noise color to play or stop it.\nSet a timer if you want it to turn off automatically.\nToo bright or harsh? Soften it with warmth in settings.\nPrefer softer starts and stops? Set the fade length in settings.</string>
+    <string name="ambient_helper">Tap a preset to play it, tap it again to stop it.\nTap an orb to start a sound, then drag its slider to set the level.\nSave your own mix with “Save mix”, and use the trash icon to delete it.\nPrefer softer starts and stops? Set the fade length in settings.</string>
     <string name="dialog_ok" translatable="false">OK</string>
 
     <!-- Bottom navigation tabs -->

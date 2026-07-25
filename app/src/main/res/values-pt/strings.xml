@@ -2,10 +2,8 @@
 <resources>
     <string name="help_cd">Ajuda</string>
     <string name="help_title">Como funciona</string>
-    <string name="home_helper">Toque numa cor de ruído para reproduzi-lo ou pará-lo.\n\nDefina um temporizador se quiser que se desligue automaticamente.\n\nMuito brilhante ou áspero? Suavize-o com calor nas configurações.</string>
-    <string name="ambient_helper">Toque numa predefinição para reproduzi-la e toque novamente para pará-la.
-Toque num orbe para iniciar um som e arraste o controlo para ajustar o nível.
-Salve a sua própria mistura com “Salvar mistura” e use o ícone da lixeira para excluí-la.</string>
+    <string name="home_helper">Toque numa cor de ruído para reproduzi-lo ou pará-lo.\nDefina um temporizador se quiser que se desligue automaticamente.\nMuito brilhante ou áspero? Suavize-o com calor nas configurações.\nPrefere inícios e fins mais suaves? Ajuste a duração da transição nas configurações.</string>
+    <string name="ambient_helper">Toque numa predefinição para reproduzi-la e toque novamente para pará-la.\nToque num orbe para iniciar um som e arraste o controlo para ajustar o nível.\nSalve a sua própria mistura com “Salvar mistura” e use o ícone da lixeira para excluí-la.\nPrefere inícios e fins mais suaves? Ajuste a duração da transição nas configurações.</string>
 
     <string name="tab_noise">Ruído</string>
     <string name="tab_ambient">Ambiente</string>
