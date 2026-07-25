@@ -36,6 +36,8 @@ class MainActivity : AppCompatActivity() {
                     settings = settings,
                     onParticlesEnabled = { scope.launch { repo.setParticlesEnabled(it) } },
                     onWarmth = { scope.launch { repo.setWarmth(it) } },
+                    onFadeSeconds = { scope.launch { repo.setFadeSeconds(it) } },
+                    onTimerFadeSeconds = { scope.launch { repo.setTimerFadeSeconds(it) } },
                     onTimerPresets = { scope.launch { repo.setTimerPresetsSeconds(it) } },
                     onCustomMixes = { scope.launch { repo.setCustomMixes(it) } },
                     onLanguageTag = { scope.launch { repo.setLanguageTag(it) } },

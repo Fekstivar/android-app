@@ -45,6 +45,11 @@ Enregistrez votre propre mix avec « Enregistrer le mix », puis utilisez l\'ic�
     <string name="settings_warmth_description">Atténue les aigus pour adoucir les couleurs de bruit dures. N\'affecte pas les sons d\'ambiance.</string>
     <string name="settings_warmth_bright">Clair</string>
     <string name="settings_warmth_warm">Chaud</string>
+    <string name="settings_fade_label">Fondu</string>
+    <string name="settings_fade_description">Durée d\'apparition et de disparition des sons au démarrage, à l\'arrêt ou au changement.</string>
+    <string name="settings_fade_unit" translatable="false">s</string>
+    <string name="settings_timer_fade_label">Fondu du minuteur</string>
+    <string name="settings_timer_fade_description">Durée de fondu spécifique au minuteur, utilisée lorsque le minuteur arrête la lecture.</string>
 
     <string name="settings_section_appearance">Apparence</string>
     <string name="settings_particles_label">Particules d\'arrière-plan</string>

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.verticalScroll
@@ -47,6 +48,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -57,6 +59,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,6 +72,7 @@ import xyz.metiq.DEFAULT_SETTINGS
 import xyz.metiq.MAX_TIMER_PRESETS
 import xyz.metiq.R
 import xyz.metiq.Settings
+import xyz.metiq.clampFadeSeconds
 import xyz.metiq.ui.theme.LocalMetiqColors
 import xyz.metiq.ui.theme.MetiqTheme
 import xyz.metiq.ui.theme.Inter
@@ -98,6 +102,8 @@ fun SettingsScreen(
     onParticlesEnabled: (Boolean) -> Unit,
     onWarmth: (Float) -> Unit,
     onWarmthPreview: (Float) -> Unit = {},
+    onFadeSeconds: (Float) -> Unit = {},
+    onTimerFadeSeconds: (Float) -> Unit = {},
     onTimerPresets: (List<Long>) -> Unit,
     onLanguageTag: (String?) -> Unit,
     onBack: () -> Unit,
@@ -139,6 +145,8 @@ fun SettingsScreen(
             onParticlesEnabled = onParticlesEnabled,
             onWarmth = onWarmth,
             onWarmthPreview = onWarmthPreview,
+            onFadeSeconds = onFadeSeconds,
+            onTimerFadeSeconds = onTimerFadeSeconds,
             onTimerPresets = onTimerPresets,
             onLanguageTag = onLanguageTag,
             onOpenLicenses = onOpenLicenses,
@@ -157,6 +165,8 @@ fun SettingsContent(
     onOpenLicenses: () -> Unit,
     modifier: Modifier = Modifier,
     onWarmthPreview: (Float) -> Unit = {},
+    onFadeSeconds: (Float) -> Unit = {},
+    onTimerFadeSeconds: (Float) -> Unit = {},
 ) {
     val context = LocalContext.current
     val version = remember {
@@ -176,6 +186,18 @@ fun SettingsContent(
                 warmth = settings.warmth,
                 onWarmth = onWarmth,
                 onWarmthPreview = onWarmthPreview,
+            )
+            FadeNumberRow(
+                label = stringResource(R.string.settings_fade_label),
+                description = stringResource(R.string.settings_fade_description),
+                seconds = settings.fadeSeconds,
+                onCommit = onFadeSeconds,
+            )
+            FadeNumberRow(
+                label = stringResource(R.string.settings_timer_fade_label),
+                description = stringResource(R.string.settings_timer_fade_description),
+                seconds = settings.timerFadeSeconds,
+                onCommit = onTimerFadeSeconds,
             )
         }
         Section(stringResource(R.string.settings_section_appearance)) {
@@ -251,6 +273,7 @@ private fun Section(title: String, content: @Composable () -> Unit) {
 }
 
 private val SECTION_HORIZONTAL_PADDING = 16.dp
+private val SETTING_TITLE_GAP = 2.dp
 
 @Composable
 private fun <T> DropdownPickerRow(
@@ -343,6 +366,7 @@ private fun ToggleRow(
                 style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
             )
             if (description != null) {
+                Spacer(Modifier.height(SETTING_TITLE_GAP))
                 Text(
                     text = description,
                     color = tokens.textPrimary.copy(alpha = 0.6f),
@@ -394,6 +418,7 @@ private fun WarmthRow(
             color = tokens.textPrimary,
             style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
         )
+        Spacer(Modifier.height(SETTING_TITLE_GAP))
         Text(
             text = stringResource(R.string.settings_warmth_description),
             color = tokens.textPrimary.copy(alpha = 0.6f),
@@ -417,6 +442,93 @@ private fun WarmthRow(
                 text = stringResource(R.string.settings_warmth_warm),
                 color = tokens.textPrimary.copy(alpha = 0.5f),
                 style = TextStyle(fontFamily = Inter, fontSize = 12.sp),
+            )
+        }
+    }
+}
+
+// Formats a fade value without a trailing ".0" (e.g. "5" not "5.0", but "0.3").
+private fun formatFadeSeconds(seconds: Float): String {
+    val s = clampFadeSeconds(seconds)
+    return if (s == s.toLong().toFloat()) s.toLong().toString() else s.toString()
+}
+
+@Composable
+private fun FadeNumberRow(
+    label: String,
+    description: String,
+    seconds: Float,
+    onCommit: (Float) -> Unit,
+) {
+    val tokens = LocalMetiqColors.current
+    val focusManager = LocalFocusManager.current
+    // Buffer resets whenever the committed value changes (incl. clamping on commit).
+    var text by remember(seconds) { mutableStateOf(formatFadeSeconds(seconds)) }
+    val commit: () -> Unit = {
+        focusManager.clearFocus()
+        val parsed = clampFadeSeconds(text.toFloatOrNull() ?: seconds)
+        text = formatFadeSeconds(parsed)
+        if (parsed != seconds) onCommit(parsed)
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = SECTION_HORIZONTAL_PADDING, vertical = 8.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = label,
+                    color = tokens.textPrimary,
+                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+                )
+                Spacer(Modifier.height(SETTING_TITLE_GAP))
+                Text(
+                    text = description,
+                    color = tokens.textPrimary.copy(alpha = 0.6f),
+                    style = TextStyle(fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp),
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Box(
+                modifier = Modifier
+                    .width(64.dp)
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(tokens.background)
+                    .padding(horizontal = 12.dp),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                BasicTextField(
+                    value = text,
+                    onValueChange = { txt ->
+                        // Digits and a single decimal separator, max 4 chars ("30" or "0.3").
+                        if (txt.length <= 4 && txt.all { it.isDigit() || it == '.' } &&
+                            txt.count { it == '.' } <= 1
+                        ) {
+                            text = txt
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Done,
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { commit() }),
+                    singleLine = true,
+                    textStyle = TextStyle(
+                        fontFamily = Inter,
+                        fontSize = 15.sp,
+                        color = tokens.textPrimary,
+                    ),
+                    cursorBrush = SolidColor(tokens.textPrimary),
+                    modifier = Modifier.onFocusChanged { if (!it.isFocused) commit() },
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = stringResource(R.string.settings_fade_unit),
+                color = tokens.textPrimary.copy(alpha = 0.6f),
+                style = TextStyle(fontFamily = Inter, fontSize = 13.sp),
             )
         }
     }
@@ -588,6 +700,7 @@ private fun LinkRow(
             style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
         )
         if (description != null) {
+            Spacer(Modifier.height(SETTING_TITLE_GAP))
             Text(
                 text = description,
                 color = tokens.textPrimary.copy(alpha = 0.6f),

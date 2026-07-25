@@ -73,6 +73,11 @@
     <string name="settings_warmth_description">Rolls off the highs to soften harsh noise colors. Ambient sounds are unaffected.</string>
     <string name="settings_warmth_bright">Bright</string>
     <string name="settings_warmth_warm">Warm</string>
+    <string name="settings_fade_label">Fade</string>
+    <string name="settings_fade_description">How long sounds ease in and out when you start, stop or switch them.</string>
+    <string name="settings_fade_unit" translatable="false">s</string>
+    <string name="settings_timer_fade_label">Timer fade</string>
+    <string name="settings_timer_fade_description">Timer-specific fade out duration used when the timer ends playback.</string>
 
     <!-- Settings: appearance section -->
     <string name="settings_section_appearance">Appearance</string>

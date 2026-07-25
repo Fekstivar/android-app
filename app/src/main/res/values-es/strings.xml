@@ -45,6 +45,11 @@ Guarda tu propia mezcla con “Guardar mezcla” y usa el icono de la papelera p
     <string name="settings_warmth_description">Atenúa los agudos para suavizar los colores de ruido ásperos. No afecta a los sonidos ambientales.</string>
     <string name="settings_warmth_bright">Brillante</string>
     <string name="settings_warmth_warm">Cálido</string>
+    <string name="settings_fade_label">Fundido</string>
+    <string name="settings_fade_description">Cuánto tardan los sonidos en aparecer y desaparecer al iniciar, detener o cambiar.</string>
+    <string name="settings_fade_unit" translatable="false">s</string>
+    <string name="settings_timer_fade_label">Fundido del temporizador</string>
+    <string name="settings_timer_fade_description">Duración de fundido específica del temporizador, usada cuando el temporizador termina la reproducción.</string>
 
     <string name="settings_section_appearance">Apariencia</string>
     <string name="settings_particles_label">Partículas de fondo</string>

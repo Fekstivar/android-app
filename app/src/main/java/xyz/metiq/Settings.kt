@@ -28,6 +28,8 @@ data class Settings(
     val languageTag: String?,
     val customMixes: List<CustomMix>,
     val warmth: Float,
+    val fadeSeconds: Float,
+    val timerFadeSeconds: Float,
 )
 
 val DEFAULT_SETTINGS = Settings(
@@ -38,11 +40,19 @@ val DEFAULT_SETTINGS = Settings(
     languageTag = null,
     customMixes = emptyList(),
     warmth = 0f,
+    fadeSeconds = 0.5f,
+    timerFadeSeconds = 2f,
 )
 
 const val MAX_TIMER_PRESETS = 4
 const val MAX_CUSTOM_MIXES = 6
 const val MAX_CUSTOM_MIX_NAME_LENGTH = 24
+const val MAX_FADE_SECONDS = 30f
+
+fun clampFadeSeconds(value: Float): Float {
+    val rounded = Math.round(value.coerceIn(0f, MAX_FADE_SECONDS) * 10f) / 10f
+    return rounded.coerceIn(0f, MAX_FADE_SECONDS)
+}
 
 // One mix per line as "name|id:volume,id:volume". The name is sanitized of the
 // separator characters on save, so a plain split round-trips safely.
@@ -85,6 +95,8 @@ private val Context.dataStore by preferencesDataStore(name = "metiq_settings")
 private object Keys {
     val PARTICLES_ENABLED = booleanPreferencesKey("particles_enabled")
     val WARMTH = floatPreferencesKey("warmth")
+    val FADE_SECONDS = floatPreferencesKey("fade_seconds")
+    val TIMER_FADE_SECONDS = floatPreferencesKey("timer_fade_seconds")
     val TIMER_PRESETS = stringPreferencesKey("timer_presets")
     val CUSTOM_MIXES = stringPreferencesKey("custom_mixes")
     val LANGUAGE_TAG = stringPreferencesKey("language_tag")
@@ -106,6 +118,14 @@ class SettingsRepository(context: Context) {
 
     suspend fun setWarmth(warmth: Float) {
         store.edit { it[Keys.WARMTH] = warmth.coerceIn(0f, 1f) }
+    }
+
+    suspend fun setFadeSeconds(seconds: Float) {
+        store.edit { it[Keys.FADE_SECONDS] = clampFadeSeconds(seconds) }
+    }
+
+    suspend fun setTimerFadeSeconds(seconds: Float) {
+        store.edit { it[Keys.TIMER_FADE_SECONDS] = clampFadeSeconds(seconds) }
     }
 
     suspend fun setTimerPresetsSeconds(presets: List<Long>) {
@@ -164,12 +184,18 @@ class SettingsRepository(context: Context) {
             ?: DEFAULT_SETTINGS.timerPresetsSeconds
         val languageTag = this[Keys.LANGUAGE_TAG]?.takeIf { it in SUPPORTED_LANGUAGE_TAGS }
         val customMixes = this[Keys.CUSTOM_MIXES]?.let(::decodeCustomMixes).orEmpty()
+        val fadeSeconds = this[Keys.FADE_SECONDS]?.let(::clampFadeSeconds)
+            ?: DEFAULT_SETTINGS.fadeSeconds
+        val timerFadeSeconds = this[Keys.TIMER_FADE_SECONDS]?.let(::clampFadeSeconds)
+            ?: DEFAULT_SETTINGS.timerFadeSeconds
         return Settings(
             particlesEnabled = particles,
             timerPresetsSeconds = presets,
             languageTag = languageTag,
             customMixes = customMixes,
             warmth = warmth,
+            fadeSeconds = fadeSeconds,
+            timerFadeSeconds = timerFadeSeconds,
         )
     }
 }

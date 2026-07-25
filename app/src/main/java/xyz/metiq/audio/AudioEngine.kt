@@ -20,14 +20,15 @@ import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-// Asymmetric ramps, applied in FADE_STEP_MS-sized setVolume steps. Fade-in is
-// short with an equal-power (sqrt) curve so the sound is audible from the first
-// step — it just avoids the startle, never delays the start. Fade-out is longer
-// and dB-linear for a smooth tail; stopping keeps the track alive until the
-// fade-out finishes, which makes color switches crossfade.
-private const val FADE_IN_MS = 50L
-private const val FADE_OUT_MS = 250L
+// Ramps are applied in fixed FADE_STEP_MS-sized setVolume steps; the number of steps
+// scales with the user-configured fade duration (see setFadeMillis), so temporal
+// resolution stays constant at any duration. Fade-in uses an equal-power (sqrt) curve
+// so the sound is audible from the first step — responsive even at longer durations;
+// fade-out is dB-linear for a smooth tail, and stopping keeps the track alive until it
+// finishes, which makes color switches crossfade. A duration of 0 makes starts/stops
+// instant.
 private const val FADE_STEP_MS = 20L
+private const val MAX_FADE_MILLIS = 30_000L
 
 // Noise layers are streamed block-by-block through a live low-pass so Warmth can be
 // applied on top of continuous playback (no track rebuild / restart).
@@ -62,6 +63,19 @@ class AudioEngine(private val context: Context) {
     // block, so a change takes effect on the next ~23 ms without touching the track.
     @Volatile
     private var warmth: Float = 0f
+
+    // User-configured fade duration (ms) for normal start/stop/pause/resume ramps
+    // (0 = instant), plus a separate, usually longer fade used when the sleep timer
+    // ends playback. Read at the start of each ramp. Seeded to 0 (instant): the UI
+    // pushes the real value from Settings on connect, before any layer starts, so
+    // the product default lives only in DEFAULT_SETTINGS — never duplicated here.
+    @Volatile
+    private var fadeMillis: Long = 0L
+
+    @Volatile
+    private var timerFadeMillis: Long = 0L
+
+    private fun fadeSteps(ms: Long = fadeMillis): Int = (ms / FADE_STEP_MS).toInt()
 
     // Single-threaded so a pause fade and a subsequent resume can never
     // write track volumes concurrently.
@@ -108,12 +122,15 @@ class AudioEngine(private val context: Context) {
         l.fadeJob?.cancel()
         val job = fadeScope.launch {
             val from = l.fadeFactor
-            val steps = (FADE_IN_MS / FADE_STEP_MS).toInt().coerceAtLeast(1)
+            val steps = fadeSteps()
             for (i in 1..steps) {
                 l.fadeFactor = from + (1f - from) * fadeInGain(i.toFloat() / steps)
                 runCatching { l.track.setVolume(appliedVolume(l)) }
                 delay(FADE_STEP_MS)
             }
+            // Land exactly at full volume — also the instant path when steps == 0.
+            l.fadeFactor = 1f
+            runCatching { l.track.setVolume(appliedVolume(l)) }
         }
         l.fadeJob = job
         return job
@@ -232,14 +249,24 @@ class AudioEngine(private val context: Context) {
         warmth = value.coerceIn(0f, 1f)
     }
 
-    fun stopLayer(id: String) {
+    // Sets the fade duration for normal start/stop/pause/resume ramps. 0 = instant.
+    fun setFadeMillis(ms: Long) {
+        fadeMillis = ms.coerceIn(0L, MAX_FADE_MILLIS)
+    }
+
+    // Sets the fade used when the sleep timer ends playback (see stopAllTimerFade).
+    fun setTimerFadeMillis(ms: Long) {
+        timerFadeMillis = ms.coerceIn(0L, MAX_FADE_MILLIS)
+    }
+
+    fun stopLayer(id: String, fadeMs: Long = fadeMillis) {
         // Removed from the map immediately so a quick re-tap starts a fresh layer;
         // this one fades out detached and tears itself down at the end.
         val l = layers.remove(id) ?: return
         l.fadeJob?.cancel()
         fadeScope.launch {
             val from = l.fadeFactor
-            val steps = (FADE_OUT_MS / FADE_STEP_MS).toInt()
+            val steps = fadeSteps(fadeMs)
             for (i in 1..steps) {
                 l.fadeFactor = from * fadeOutGain(i.toFloat() / steps)
                 runCatching { l.track.setVolume(appliedVolume(l)) }
@@ -275,7 +302,7 @@ class AudioEngine(private val context: Context) {
             return
         }
         fadeJob = fadeScope.launch {
-            val steps = (FADE_OUT_MS / FADE_STEP_MS).toInt()
+            val steps = fadeSteps()
             for (i in 1..steps) {
                 val factor = fadeOutGain(i.toFloat() / steps)
                 for ((_, l) in layers) {
@@ -300,13 +327,17 @@ class AudioEngine(private val context: Context) {
                     l.track.play()
                 }
             }
-            val steps = (FADE_IN_MS / FADE_STEP_MS).toInt()
+            val steps = fadeSteps()
             for (i in 1..steps) {
                 val factor = fadeInGain(i.toFloat() / steps)
                 for ((_, l) in layers) {
                     runCatching { l.track.setVolume(appliedVolume(l) * factor) }
                 }
                 delay(FADE_STEP_MS)
+            }
+            // Land at full volume — also the instant path when steps == 0.
+            for ((_, l) in layers) {
+                runCatching { l.track.setVolume(appliedVolume(l)) }
             }
         }
     }
@@ -342,6 +373,12 @@ class AudioEngine(private val context: Context) {
 
     fun stopAll() {
         layers.keys.toList().forEach { stopLayer(it) }
+    }
+
+    // Stops everything with the longer sleep-timer fade — a gentle wind-down when
+    // the timer ends playback, independent of the normal start/stop fade.
+    fun stopAllTimerFade() {
+        layers.keys.toList().forEach { stopLayer(it, timerFadeMillis) }
     }
 
     private fun buildTrack(

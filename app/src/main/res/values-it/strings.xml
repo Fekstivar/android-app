@@ -45,6 +45,11 @@ Salva il tuo mix con “Salva mix” e usa l\'icona del cestino per eliminarlo.<
     <string name="settings_warmth_description">Attenua gli acuti per ammorbidire i colori di rumore aspri. Non influisce sui suoni ambientali.</string>
     <string name="settings_warmth_bright">Brillante</string>
     <string name="settings_warmth_warm">Caldo</string>
+    <string name="settings_fade_label">Dissolvenza</string>
+    <string name="settings_fade_description">Quanto durano le dissolvenze dei suoni all\'avvio, all\'arresto o al cambio.</string>
+    <string name="settings_fade_unit" translatable="false">s</string>
+    <string name="settings_timer_fade_label">Dissolvenza del timer</string>
+    <string name="settings_timer_fade_description">Durata di dissolvenza specifica del timer, usata quando il timer termina la riproduzione.</string>
 
     <string name="settings_section_appearance">Aspetto</string>
     <string name="settings_particles_label">Particelle di sfondo</string>

@@ -224,6 +224,8 @@ fun HomeScreen(
     settings: Settings,
     onParticlesEnabled: (Boolean) -> Unit,
     onWarmth: (Float) -> Unit,
+    onFadeSeconds: (Float) -> Unit,
+    onTimerFadeSeconds: (Float) -> Unit,
     onTimerPresets: (List<Long>) -> Unit,
     onCustomMixes: (List<CustomMix>) -> Unit,
     onLanguageTag: (String?) -> Unit,
@@ -263,7 +265,7 @@ fun HomeScreen(
             val c = controller
             val b = binder
             if (c != null && b != null) {
-                b.engine.stopAll()
+                b.engine.stopAllTimerFade()
                 b.setActiveColor(null, null)
                 c.stop()
                 activeId = null
@@ -348,6 +350,12 @@ fun HomeScreen(
     // and whenever the user moves the slider.
     LaunchedEffect(binder, settings.warmth) {
         binder?.engine?.setWarmth(settings.warmth)
+    }
+    LaunchedEffect(binder, settings.fadeSeconds) {
+        binder?.engine?.setFadeMillis((settings.fadeSeconds * 1000f).toLong())
+    }
+    LaunchedEffect(binder, settings.timerFadeSeconds) {
+        binder?.engine?.setTimerFadeMillis((settings.timerFadeSeconds * 1000f).toLong())
     }
 
     val activeColor = activeId?.let { id -> NOISE_COLORS.firstOrNull { it.id == id } }
@@ -502,6 +510,8 @@ fun HomeScreen(
                     onParticlesEnabled = onParticlesEnabled,
                     onWarmth = onWarmth,
                     onWarmthPreview = { w -> binder?.engine?.setWarmth(w) },
+                    onFadeSeconds = onFadeSeconds,
+                    onTimerFadeSeconds = onTimerFadeSeconds,
                     onTimerPresets = onTimerPresets,
                     onLanguageTag = onLanguageTag,
                     onOpenLicenses = { showLicenses = true },
@@ -1306,6 +1316,8 @@ private fun HomeScreenPreview() {
             settings = DEFAULT_SETTINGS,
             onParticlesEnabled = {},
             onWarmth = {},
+            onFadeSeconds = {},
+            onTimerFadeSeconds = {},
             onTimerPresets = {},
             onCustomMixes = {},
             onLanguageTag = {},
