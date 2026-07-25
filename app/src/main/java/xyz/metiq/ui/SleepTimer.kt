@@ -238,7 +238,7 @@ private fun presetLabel(seconds: Long): String {
 @Composable
 private fun StartStopButton(running: Boolean, enabled: Boolean, onClick: () -> Unit) {
     val tokens = LocalMetiqColors.current
-    val bg = if (running) tokens.textPrimary else tokens.textPrimary.copy(alpha = 0.12f)
+    val bg = if (running) tokens.textPrimary else tokens.cellBackground
     val fg = if (running) tokens.background else tokens.textPrimary
     Box(
         modifier = Modifier

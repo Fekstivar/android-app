@@ -3,12 +3,13 @@ package xyz.metiq
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import kotlinx.coroutines.launch
 import xyz.metiq.audio.PcmStore
 import xyz.metiq.ui.HomeScreen
@@ -24,7 +25,11 @@ class MainActivity : AppCompatActivity() {
                 SystemClock.uptimeMillis() - splashShownAt < SPLASH_MAX_HOLD_MS
         }
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
         val app = application as MetiqApp
         setContent {
             val settings by app.settings.flow.collectAsState(initial = DEFAULT_SETTINGS)
