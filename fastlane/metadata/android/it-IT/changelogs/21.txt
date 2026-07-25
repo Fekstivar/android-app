@@ -1,0 +1,1 @@
+• Correzioni: migliore visualizzazione da bordo a bordo e contrasto dei pulsanti su più dispositivi
