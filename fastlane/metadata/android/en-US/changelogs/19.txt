@@ -1,0 +1,1 @@
+• New: choose how long sounds fade in and out, with a separate, gentler fade for when the sleep timer ends

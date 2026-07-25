@@ -1,0 +1,1 @@
+• Novo: escolha a duração das transições dos sons, com uma transição mais suave quando o temporizador termina
