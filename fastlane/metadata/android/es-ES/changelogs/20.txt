@@ -1,0 +1,1 @@
+• Correcciones: mejor visualización de borde a borde y contraste de botones en más dispositivos

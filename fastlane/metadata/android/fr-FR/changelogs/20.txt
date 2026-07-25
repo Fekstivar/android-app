@@ -1,0 +1,1 @@
+• Corrections : meilleur affichage bord à bord et contraste des boutons sur plus d'appareils
