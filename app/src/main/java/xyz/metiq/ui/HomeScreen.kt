@@ -4,6 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import android.content.ComponentName
@@ -533,8 +535,8 @@ fun HomeScreen(
             // than overlaying the timer. Swiping it away gives the space back.
             AnimatedVisibility(
                 visible = ratePromptVisible && !showLicenses,
-                enter = slideInVertically { -it } + fadeIn(),
-                exit = slideOutVertically { -it } + fadeOut(),
+                enter = expandVertically() + slideInVertically { -it } + fadeIn(),
+                exit = shrinkVertically() + slideOutVertically { -it } + fadeOut(),
             ) {
                 RatePromptBanner(
                     showFeedback = BuildConfig.SHOW_FEEDBACK_CTA,
