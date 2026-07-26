@@ -47,5 +47,7 @@ body:
     attributes:
       label: One quick check
       options:
+        - label: I checked the app's settings in case this is already possible.
+          required: true
         - label: I had a quick look to see if someone already suggested this.
           required: false
