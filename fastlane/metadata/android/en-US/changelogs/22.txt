@@ -1,0 +1,2 @@
+• New: sounds now play alongside your music, podcasts or audiobooks — turn on "Request audio focus" in settings to pause them instead
+• Smoother animation when dismissing the support note

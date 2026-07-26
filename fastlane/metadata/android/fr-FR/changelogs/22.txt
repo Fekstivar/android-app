@@ -1,0 +1,2 @@
+• Nouveau : les sons se lisent maintenant en même temps que votre musique, vos podcasts ou vos livres audio — activez « Demander le focus audio » dans les paramètres pour les mettre en pause
+• Animation plus fluide à la fermeture de la note de soutien

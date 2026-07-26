@@ -1,0 +1,2 @@
+• Nuevo: los sonidos ahora se reproducen junto con tu música, pódcasts o audiolibros — activa "Solicitar el foco de audio" en ajustes para pausarlos
+• Animación más suave al descartar la nota de apoyo

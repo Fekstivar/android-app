@@ -1,0 +1,2 @@
+• Novo: os sons agora tocam junto com sua música, podcasts ou audiolivros — ative "Solicitar o foco de áudio" nas configurações para pausá-los
+• Animação mais suave ao dispensar a nota de apoio
