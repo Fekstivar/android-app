@@ -48,6 +48,8 @@
     <string name="settings_fade_unit" translatable="false">s</string>
     <string name="settings_timer_fade_label">Fondu du minuteur</string>
     <string name="settings_timer_fade_description">Durée de fondu spécifique au minuteur, utilisée lorsque le minuteur arrête la lecture.</string>
+    <string name="settings_request_focus_label">Demander le focus audio</string>
+    <string name="settings_request_focus_description">Met en pause les autres sons (musique, podcasts) pendant la lecture.</string>
 
     <string name="settings_section_appearance">Apparence</string>
     <string name="settings_particles_label">Particules d\'arrière-plan</string>

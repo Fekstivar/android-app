@@ -48,6 +48,8 @@
     <string name="settings_fade_unit" translatable="false">s</string>
     <string name="settings_timer_fade_label">Dissolvenza del timer</string>
     <string name="settings_timer_fade_description">Durata di dissolvenza specifica del timer, usata quando il timer termina la riproduzione.</string>
+    <string name="settings_request_focus_label">Richiedi il focus audio</string>
+    <string name="settings_request_focus_description">Mette in pausa altri audio come musica o podcast mentre i suoni sono in riproduzione.</string>
 
     <string name="settings_section_appearance">Aspetto</string>
     <string name="settings_particles_label">Particelle di sfondo</string>

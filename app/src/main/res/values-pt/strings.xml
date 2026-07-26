@@ -48,6 +48,8 @@
     <string name="settings_fade_unit" translatable="false">s</string>
     <string name="settings_timer_fade_label">Transição do temporizador</string>
     <string name="settings_timer_fade_description">Duração de transição específica do temporizador, usada quando o temporizador termina a reprodução.</string>
+    <string name="settings_request_focus_label">Solicitar o foco de áudio</string>
+    <string name="settings_request_focus_description">Pausa outros áudios como música ou podcasts enquanto os sons tocam.</string>
 
     <string name="settings_section_appearance">Aparência</string>
     <string name="settings_particles_label">Partículas de fundo</string>

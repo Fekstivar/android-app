@@ -48,6 +48,8 @@
     <string name="settings_fade_unit" translatable="false">s</string>
     <string name="settings_timer_fade_label">Fundido del temporizador</string>
     <string name="settings_timer_fade_description">Duración de fundido específica del temporizador, usada cuando el temporizador termina la reproducción.</string>
+    <string name="settings_request_focus_label">Solicitar el foco de audio</string>
+    <string name="settings_request_focus_description">Pausa otro audio como música o pódcasts mientras suenan los sonidos.</string>
 
     <string name="settings_section_appearance">Apariencia</string>
     <string name="settings_particles_label">Partículas de fondo</string>

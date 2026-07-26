@@ -104,6 +104,7 @@ fun SettingsScreen(
     onWarmthPreview: (Float) -> Unit = {},
     onFadeSeconds: (Float) -> Unit = {},
     onTimerFadeSeconds: (Float) -> Unit = {},
+    onRequestAudioFocus: (Boolean) -> Unit = {},
     onTimerPresets: (List<Long>) -> Unit,
     onLanguageTag: (String?) -> Unit,
     onBack: () -> Unit,
@@ -147,6 +148,7 @@ fun SettingsScreen(
             onWarmthPreview = onWarmthPreview,
             onFadeSeconds = onFadeSeconds,
             onTimerFadeSeconds = onTimerFadeSeconds,
+            onRequestAudioFocus = onRequestAudioFocus,
             onTimerPresets = onTimerPresets,
             onLanguageTag = onLanguageTag,
             onOpenLicenses = onOpenLicenses,
@@ -167,6 +169,7 @@ fun SettingsContent(
     onWarmthPreview: (Float) -> Unit = {},
     onFadeSeconds: (Float) -> Unit = {},
     onTimerFadeSeconds: (Float) -> Unit = {},
+    onRequestAudioFocus: (Boolean) -> Unit = {},
 ) {
     val context = LocalContext.current
     val version = remember {
@@ -198,6 +201,12 @@ fun SettingsContent(
                 description = stringResource(R.string.settings_timer_fade_description),
                 seconds = settings.timerFadeSeconds,
                 onCommit = onTimerFadeSeconds,
+            )
+            ToggleRow(
+                label = stringResource(R.string.settings_request_focus_label),
+                description = stringResource(R.string.settings_request_focus_description),
+                checked = settings.requestAudioFocus,
+                onToggle = onRequestAudioFocus,
             )
         }
         Section(stringResource(R.string.settings_section_appearance)) {

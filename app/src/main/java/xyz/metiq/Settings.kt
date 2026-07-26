@@ -30,6 +30,7 @@ data class Settings(
     val warmth: Float,
     val fadeSeconds: Float,
     val timerFadeSeconds: Float,
+    val requestAudioFocus: Boolean,
 )
 
 val DEFAULT_SETTINGS = Settings(
@@ -42,6 +43,7 @@ val DEFAULT_SETTINGS = Settings(
     warmth = 0f,
     fadeSeconds = 0.5f,
     timerFadeSeconds = 2f,
+    requestAudioFocus = false,
 )
 
 const val MAX_TIMER_PRESETS = 4
@@ -97,6 +99,7 @@ private object Keys {
     val WARMTH = floatPreferencesKey("warmth")
     val FADE_SECONDS = floatPreferencesKey("fade_seconds")
     val TIMER_FADE_SECONDS = floatPreferencesKey("timer_fade_seconds")
+    val REQUEST_AUDIO_FOCUS = booleanPreferencesKey("request_audio_focus")
     val TIMER_PRESETS = stringPreferencesKey("timer_presets")
     val CUSTOM_MIXES = stringPreferencesKey("custom_mixes")
     val LANGUAGE_TAG = stringPreferencesKey("language_tag")
@@ -126,6 +129,10 @@ class SettingsRepository(context: Context) {
 
     suspend fun setTimerFadeSeconds(seconds: Float) {
         store.edit { it[Keys.TIMER_FADE_SECONDS] = clampFadeSeconds(seconds) }
+    }
+
+    suspend fun setRequestAudioFocus(enabled: Boolean) {
+        store.edit { it[Keys.REQUEST_AUDIO_FOCUS] = enabled }
     }
 
     suspend fun setTimerPresetsSeconds(presets: List<Long>) {
@@ -188,6 +195,8 @@ class SettingsRepository(context: Context) {
             ?: DEFAULT_SETTINGS.fadeSeconds
         val timerFadeSeconds = this[Keys.TIMER_FADE_SECONDS]?.let(::clampFadeSeconds)
             ?: DEFAULT_SETTINGS.timerFadeSeconds
+        val requestAudioFocus = this[Keys.REQUEST_AUDIO_FOCUS]
+            ?: DEFAULT_SETTINGS.requestAudioFocus
         return Settings(
             particlesEnabled = particles,
             timerPresetsSeconds = presets,
@@ -196,6 +205,7 @@ class SettingsRepository(context: Context) {
             warmth = warmth,
             fadeSeconds = fadeSeconds,
             timerFadeSeconds = timerFadeSeconds,
+            requestAudioFocus = requestAudioFocus,
         )
     }
 }

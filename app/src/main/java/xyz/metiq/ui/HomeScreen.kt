@@ -226,6 +226,7 @@ fun HomeScreen(
     onWarmth: (Float) -> Unit,
     onFadeSeconds: (Float) -> Unit,
     onTimerFadeSeconds: (Float) -> Unit,
+    onRequestAudioFocus: (Boolean) -> Unit,
     onTimerPresets: (List<Long>) -> Unit,
     onCustomMixes: (List<CustomMix>) -> Unit,
     onLanguageTag: (String?) -> Unit,
@@ -356,6 +357,9 @@ fun HomeScreen(
     }
     LaunchedEffect(binder, settings.timerFadeSeconds) {
         binder?.engine?.setTimerFadeMillis((settings.timerFadeSeconds * 1000f).toLong())
+    }
+    LaunchedEffect(binder, settings.requestAudioFocus) {
+        binder?.setRequestAudioFocus(settings.requestAudioFocus)
     }
 
     val activeColor = activeId?.let { id -> NOISE_COLORS.firstOrNull { it.id == id } }
@@ -512,6 +516,7 @@ fun HomeScreen(
                     onWarmthPreview = { w -> binder?.engine?.setWarmth(w) },
                     onFadeSeconds = onFadeSeconds,
                     onTimerFadeSeconds = onTimerFadeSeconds,
+                    onRequestAudioFocus = onRequestAudioFocus,
                     onTimerPresets = onTimerPresets,
                     onLanguageTag = onLanguageTag,
                     onOpenLicenses = { showLicenses = true },
@@ -1318,6 +1323,7 @@ private fun HomeScreenPreview() {
             onWarmth = {},
             onFadeSeconds = {},
             onTimerFadeSeconds = {},
+            onRequestAudioFocus = {},
             onTimerPresets = {},
             onCustomMixes = {},
             onLanguageTag = {},

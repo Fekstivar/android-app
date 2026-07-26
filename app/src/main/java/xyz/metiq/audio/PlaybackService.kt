@@ -22,12 +22,17 @@ class PlaybackService : MediaSessionService() {
     private lateinit var focusRequest: AudioFocusRequest
     private var focusHeld = false
 
+    @Volatile
+    private var requestFocusEnabled = false
+
     inner class EngineBinder : Binder() {
         val engine: AudioEngine get() = this@PlaybackService.engine
         fun setActiveColor(label: String?, tintArgb: Int?) {
             this@PlaybackService.player.setActiveColor(label, tintArgb)
         }
         fun requestAudioFocusNow(): Boolean = this@PlaybackService.requestAudioFocus()
+        fun setRequestAudioFocus(enabled: Boolean) =
+            this@PlaybackService.setRequestAudioFocus(enabled)
     }
 
     private val engineBinder = EngineBinder()
@@ -112,6 +117,7 @@ class PlaybackService : MediaSessionService() {
     }
 
     private fun requestAudioFocus(): Boolean {
+        if (!requestFocusEnabled) return true
         if (focusHeld) return true
         val result = audioManager.requestAudioFocus(focusRequest)
         focusHeld = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
@@ -122,6 +128,16 @@ class PlaybackService : MediaSessionService() {
         if (!focusHeld) return
         audioManager.abandonAudioFocusRequest(focusRequest)
         focusHeld = false
+    }
+
+    private fun setRequestAudioFocus(enabled: Boolean) {
+        if (requestFocusEnabled == enabled) return
+        requestFocusEnabled = enabled
+        if (enabled) {
+            if (engine.activeLayerIds().isNotEmpty()) requestAudioFocus()
+        } else {
+            abandonAudioFocus()
+        }
     }
 
     companion object {
