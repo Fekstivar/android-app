@@ -282,7 +282,7 @@ private fun Section(title: String, content: @Composable () -> Unit) {
 }
 
 private val SECTION_HORIZONTAL_PADDING = 16.dp
-private val SETTING_TITLE_GAP = 2.dp
+private val SETTING_TITLE_GAP = 4.dp
 
 @Composable
 private fun <T> DropdownPickerRow(
