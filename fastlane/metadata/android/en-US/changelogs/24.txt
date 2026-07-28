@@ -1,0 +1,1 @@
+• Fixed distorted, stuck audio that could happen after tapping a sound very quickly

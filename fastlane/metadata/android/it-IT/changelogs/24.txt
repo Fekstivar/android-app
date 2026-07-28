@@ -1,0 +1,1 @@
+• Corretto un audio distorto e bloccato che poteva verificarsi toccando un suono molto rapidamente

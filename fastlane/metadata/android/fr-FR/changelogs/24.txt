@@ -1,0 +1,1 @@
+• Correction d'un son déformé et bloqué pouvant survenir après avoir touché un son très rapidement
