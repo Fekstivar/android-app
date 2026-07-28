@@ -52,6 +52,10 @@
     <string name="settings_request_focus_description">Mette in pausa altri audio come musica o podcast mentre i suoni sono in riproduzione.</string>
 
     <string name="settings_section_appearance">Aspetto</string>
+    <string name="settings_theme_label">Tema</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Chiaro</string>
+    <string name="settings_theme_dark">Scuro</string>
     <string name="settings_particles_label">Particelle di sfondo</string>
     <string name="settings_particles_description">Puntini animati dietro al colore attivo</string>
 

@@ -1,5 +1,6 @@
 package xyz.metiq.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -64,6 +65,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.res.Configuration
 import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -72,12 +74,21 @@ import xyz.metiq.DEFAULT_SETTINGS
 import xyz.metiq.MAX_TIMER_PRESETS
 import xyz.metiq.R
 import xyz.metiq.Settings
+import xyz.metiq.ThemePreference
 import xyz.metiq.clampFadeSeconds
 import xyz.metiq.ui.theme.LocalMetiqColors
 import xyz.metiq.ui.theme.MetiqTheme
 import xyz.metiq.ui.theme.Inter
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
+
+private val SECTION_HORIZONTAL_PADDING = 16.dp
+private val SETTING_TITLE_GAP = 4.dp
+private val SETTING_ACTION_GAP = 12.dp
+private val SECTION_TITLE_SIZE = 17.sp
+private val SETTING_TITLE_SIZE = 15.sp
+private val SETTING_DESCRIPTION_SIZE = 12.sp
+private val SETTING_DESCRIPTION_LINE_HEIGHT = 15.sp
 
 private data class LanguageOption(
     val tag: String?,
@@ -95,6 +106,12 @@ private val LANGUAGE_OPTIONS = listOf(
 
 private const val GH_SPONSORS_URL = "https://github.com/sponsors/metiq-xyz"
 
+private fun themeLabelRes(preference: ThemePreference): Int = when (preference) {
+    ThemePreference.SYSTEM -> R.string.settings_theme_system
+    ThemePreference.LIGHT -> R.string.settings_theme_light
+    ThemePreference.DARK -> R.string.settings_theme_dark
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -105,6 +122,7 @@ fun SettingsScreen(
     onFadeSeconds: (Float) -> Unit = {},
     onTimerFadeSeconds: (Float) -> Unit = {},
     onRequestAudioFocus: (Boolean) -> Unit = {},
+    onThemePreference: (ThemePreference) -> Unit = {},
     onTimerPresets: (List<Long>) -> Unit,
     onLanguageTag: (String?) -> Unit,
     onBack: () -> Unit,
@@ -149,6 +167,7 @@ fun SettingsScreen(
             onFadeSeconds = onFadeSeconds,
             onTimerFadeSeconds = onTimerFadeSeconds,
             onRequestAudioFocus = onRequestAudioFocus,
+            onThemePreference = onThemePreference,
             onTimerPresets = onTimerPresets,
             onLanguageTag = onLanguageTag,
             onOpenLicenses = onOpenLicenses,
@@ -170,6 +189,7 @@ fun SettingsContent(
     onFadeSeconds: (Float) -> Unit = {},
     onTimerFadeSeconds: (Float) -> Unit = {},
     onRequestAudioFocus: (Boolean) -> Unit = {},
+    onThemePreference: (ThemePreference) -> Unit = {},
 ) {
     val context = LocalContext.current
     val version = remember {
@@ -181,7 +201,7 @@ fun SettingsContent(
         modifier = modifier
             .imePadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         Section(stringResource(R.string.settings_section_sound)) {
@@ -210,6 +230,13 @@ fun SettingsContent(
             )
         }
         Section(stringResource(R.string.settings_section_appearance)) {
+            DropdownPickerRow(
+                label = stringResource(R.string.settings_theme_label),
+                options = ThemePreference.entries,
+                current = settings.themePreference,
+                labelFor = { stringResource(themeLabelRes(it)) },
+                onPick = onThemePreference,
+            )
             ToggleRow(
                 label = stringResource(R.string.settings_particles_label),
                 description = stringResource(R.string.settings_particles_description),
@@ -270,19 +297,16 @@ private fun Section(title: String, content: @Composable () -> Unit) {
         Text(
             text = title,
             color = tokens.textPrimary,
-            modifier = Modifier.padding(horizontal = SECTION_HORIZONTAL_PADDING, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = SECTION_HORIZONTAL_PADDING, vertical = 12.dp),
             style = TextStyle(
                 fontFamily = Inter,
-                fontSize = 16.sp,
+                fontSize = SECTION_TITLE_SIZE,
                 fontWeight = FontWeight.Bold,
             ),
         )
         content()
     }
 }
-
-private val SECTION_HORIZONTAL_PADDING = 16.dp
-private val SETTING_TITLE_GAP = 4.dp
 
 @Composable
 private fun <T> DropdownPickerRow(
@@ -306,8 +330,9 @@ private fun <T> DropdownPickerRow(
             text = label,
             color = tokens.textPrimary,
             modifier = Modifier.weight(1f),
-            style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+            style = TextStyle(fontFamily = Inter, fontSize = SETTING_TITLE_SIZE),
         )
+        Spacer(Modifier.width(SETTING_ACTION_GAP))
         Box {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (leadingFor != null) {
@@ -316,14 +341,14 @@ private fun <T> DropdownPickerRow(
                 }
                 Text(
                     text = labelFor(current),
-                    color = tokens.textPrimary.copy(alpha = 0.7f),
-                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+                    color = tokens.textSecondary,
+                    style = TextStyle(fontFamily = Inter, fontSize = SETTING_TITLE_SIZE),
                 )
                 Spacer(Modifier.width(4.dp))
                 Icon(
                     imageVector = Icons.Outlined.ExpandMore,
                     contentDescription = null,
-                    tint = tokens.textPrimary.copy(alpha = 0.6f),
+                    tint = tokens.textSecondary,
                     modifier = Modifier.size(18.dp),
                 )
             }
@@ -372,25 +397,26 @@ private fun ToggleRow(
             Text(
                 text = label,
                 color = tokens.textPrimary,
-                style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+                style = TextStyle(fontFamily = Inter, fontSize = SETTING_TITLE_SIZE),
             )
             if (description != null) {
                 Spacer(Modifier.height(SETTING_TITLE_GAP))
                 Text(
                     text = description,
-                    color = tokens.textPrimary.copy(alpha = 0.6f),
-                    style = TextStyle(fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp),
+                    color = tokens.textSecondary,
+                    style = TextStyle(fontFamily = Inter, fontSize = SETTING_DESCRIPTION_SIZE, lineHeight = SETTING_DESCRIPTION_LINE_HEIGHT),
                 )
             }
         }
+        Spacer(Modifier.width(SETTING_ACTION_GAP))
         Switch(
             checked = checked,
             onCheckedChange = onToggle,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = tokens.background,
                 checkedTrackColor = tokens.textPrimary,
-                uncheckedThumbColor = tokens.textPrimary.copy(alpha = 0.6f),
-                uncheckedTrackColor = tokens.textPrimary.copy(alpha = 0.15f),
+                uncheckedThumbColor = tokens.textSecondary,
+                uncheckedTrackColor = tokens.background,
                 uncheckedBorderColor = Color.Transparent,
             ),
         )
@@ -425,13 +451,13 @@ private fun WarmthRow(
         Text(
             text = stringResource(R.string.settings_warmth_label),
             color = tokens.textPrimary,
-            style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+            style = TextStyle(fontFamily = Inter, fontSize = SETTING_TITLE_SIZE),
         )
         Spacer(Modifier.height(SETTING_TITLE_GAP))
         Text(
             text = stringResource(R.string.settings_warmth_description),
-            color = tokens.textPrimary.copy(alpha = 0.6f),
-            style = TextStyle(fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp),
+            color = tokens.textSecondary,
+            style = TextStyle(fontFamily = Inter, fontSize = SETTING_DESCRIPTION_SIZE, lineHeight = SETTING_DESCRIPTION_LINE_HEIGHT),
         )
         Spacer(Modifier.height(12.dp))
         ThinSlider(
@@ -443,13 +469,13 @@ private fun WarmthRow(
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = stringResource(R.string.settings_warmth_bright),
-                color = tokens.textPrimary.copy(alpha = 0.5f),
+                color = tokens.textSecondary,
                 modifier = Modifier.weight(1f),
                 style = TextStyle(fontFamily = Inter, fontSize = 12.sp),
             )
             Text(
                 text = stringResource(R.string.settings_warmth_warm),
-                color = tokens.textPrimary.copy(alpha = 0.5f),
+                color = tokens.textSecondary,
                 style = TextStyle(fontFamily = Inter, fontSize = 12.sp),
             )
         }
@@ -489,16 +515,16 @@ private fun FadeNumberRow(
                 Text(
                     text = label,
                     color = tokens.textPrimary,
-                    style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+                    style = TextStyle(fontFamily = Inter, fontSize = SETTING_TITLE_SIZE),
                 )
                 Spacer(Modifier.height(SETTING_TITLE_GAP))
                 Text(
                     text = description,
-                    color = tokens.textPrimary.copy(alpha = 0.6f),
-                    style = TextStyle(fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp),
+                    color = tokens.textSecondary,
+                    style = TextStyle(fontFamily = Inter, fontSize = SETTING_DESCRIPTION_SIZE, lineHeight = SETTING_DESCRIPTION_LINE_HEIGHT),
                 )
             }
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(SETTING_ACTION_GAP))
             Box(
                 modifier = Modifier
                     .width(64.dp)
@@ -536,7 +562,7 @@ private fun FadeNumberRow(
             Spacer(Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.settings_fade_unit),
-                color = tokens.textPrimary.copy(alpha = 0.6f),
+                color = tokens.textSecondary,
                 style = TextStyle(fontFamily = Inter, fontSize = 13.sp),
             )
         }
@@ -551,8 +577,8 @@ private fun ThinSlider(
     modifier: Modifier = Modifier,
 ) {
     val tokens = LocalMetiqColors.current
-    val inactive = tokens.textPrimary.copy(alpha = 0.15f)
-    val activeFill = tokens.textPrimary.copy(alpha = 0.55f)
+    val inactive = tokens.subtleFill
+    val activeFill = tokens.sliderActiveFill
     val thumbColor = tokens.textPrimary
     Box(
         modifier = modifier
@@ -629,7 +655,7 @@ private fun TimerPresetsEditor(
             ) {
                 Text(
                     text = "#${idx + 1}",
-                    color = tokens.textPrimary.copy(alpha = 0.5f),
+                    color = tokens.textSecondary,
                     style = TextStyle(fontFamily = Inter, fontSize = 13.sp),
                     modifier = Modifier.width(28.dp),
                 )
@@ -664,7 +690,7 @@ private fun TimerPresetsEditor(
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.settings_timer_unit_min),
-                    color = tokens.textPrimary.copy(alpha = 0.6f),
+                    color = tokens.textSecondary,
                     style = TextStyle(fontFamily = Inter, fontSize = 13.sp),
                 )
             }
@@ -673,7 +699,7 @@ private fun TimerPresetsEditor(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(100.dp))
-                .background(tokens.textPrimary.copy(alpha = 0.12f))
+                .background(tokens.subtleFill)
                 .clickable { commit() }
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
@@ -706,14 +732,14 @@ private fun LinkRow(
         Text(
             text = label,
             color = tokens.textPrimary,
-            style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
+            style = TextStyle(fontFamily = Inter, fontSize = SETTING_TITLE_SIZE),
         )
         if (description != null) {
             Spacer(Modifier.height(SETTING_TITLE_GAP))
             Text(
                 text = description,
-                color = tokens.textPrimary.copy(alpha = 0.6f),
-                style = TextStyle(fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp),
+                color = tokens.textSecondary,
+                style = TextStyle(fontFamily = Inter, fontSize = SETTING_DESCRIPTION_SIZE, lineHeight = SETTING_DESCRIPTION_LINE_HEIGHT),
             )
         }
     }
@@ -730,7 +756,7 @@ private fun LabeledValue(label: String, value: String) {
     ) {
         Text(
             text = label,
-            color = tokens.textPrimary.copy(alpha = 0.6f),
+            color = tokens.textSecondary,
             modifier = Modifier.weight(1f),
             style = TextStyle(fontFamily = Inter, fontSize = 16.sp),
         )
@@ -742,10 +768,11 @@ private fun LabeledValue(label: String, value: String) {
     }
 }
 
-@Preview(name = "Settings", showBackground = true, backgroundColor = 0xFF111010)
+@Preview(name = "Settings · Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Settings · Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 private fun SettingsScreenPreview() {
-    MetiqTheme {
+    MetiqTheme(darkTheme = isSystemInDarkTheme()) {
         SettingsScreen(
             settings = DEFAULT_SETTINGS,
             onParticlesEnabled = {},

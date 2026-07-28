@@ -22,6 +22,8 @@ data class CustomMix(
     val layers: Map<String, Float>,
 )
 
+enum class ThemePreference { SYSTEM, LIGHT, DARK }
+
 data class Settings(
     val particlesEnabled: Boolean,
     val timerPresetsSeconds: List<Long>,
@@ -31,6 +33,7 @@ data class Settings(
     val fadeSeconds: Float,
     val timerFadeSeconds: Float,
     val requestAudioFocus: Boolean,
+    val themePreference: ThemePreference,
 )
 
 val DEFAULT_SETTINGS = Settings(
@@ -44,6 +47,7 @@ val DEFAULT_SETTINGS = Settings(
     fadeSeconds = 0.5f,
     timerFadeSeconds = 2f,
     requestAudioFocus = false,
+    themePreference = ThemePreference.SYSTEM,
 )
 
 const val MAX_TIMER_PRESETS = 4
@@ -100,6 +104,7 @@ private object Keys {
     val FADE_SECONDS = floatPreferencesKey("fade_seconds")
     val TIMER_FADE_SECONDS = floatPreferencesKey("timer_fade_seconds")
     val REQUEST_AUDIO_FOCUS = booleanPreferencesKey("request_audio_focus")
+    val THEME_PREFERENCE = stringPreferencesKey("theme_preference")
     val TIMER_PRESETS = stringPreferencesKey("timer_presets")
     val CUSTOM_MIXES = stringPreferencesKey("custom_mixes")
     val LANGUAGE_TAG = stringPreferencesKey("language_tag")
@@ -133,6 +138,10 @@ class SettingsRepository(context: Context) {
 
     suspend fun setRequestAudioFocus(enabled: Boolean) {
         store.edit { it[Keys.REQUEST_AUDIO_FOCUS] = enabled }
+    }
+
+    suspend fun setThemePreference(preference: ThemePreference) {
+        store.edit { it[Keys.THEME_PREFERENCE] = preference.name }
     }
 
     suspend fun setTimerPresetsSeconds(presets: List<Long>) {
@@ -197,6 +206,9 @@ class SettingsRepository(context: Context) {
             ?: DEFAULT_SETTINGS.timerFadeSeconds
         val requestAudioFocus = this[Keys.REQUEST_AUDIO_FOCUS]
             ?: DEFAULT_SETTINGS.requestAudioFocus
+        val themePreference = this[Keys.THEME_PREFERENCE]
+            ?.let { runCatching { ThemePreference.valueOf(it) }.getOrNull() }
+            ?: DEFAULT_SETTINGS.themePreference
         return Settings(
             particlesEnabled = particles,
             timerPresetsSeconds = presets,
@@ -206,6 +218,7 @@ class SettingsRepository(context: Context) {
             fadeSeconds = fadeSeconds,
             timerFadeSeconds = timerFadeSeconds,
             requestAudioFocus = requestAudioFocus,
+            themePreference = themePreference,
         )
     }
 }

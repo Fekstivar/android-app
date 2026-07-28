@@ -1,6 +1,7 @@
 package xyz.metiq.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,6 +13,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.Configuration
 import android.os.IBinder
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -74,6 +76,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.CornerRadius
@@ -89,6 +92,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -112,6 +116,7 @@ import xyz.metiq.MAX_CUSTOM_MIXES
 import xyz.metiq.MAX_CUSTOM_MIX_NAME_LENGTH
 import xyz.metiq.R
 import xyz.metiq.Settings
+import xyz.metiq.ThemePreference
 import xyz.metiq.audio.PlaybackService
 import xyz.metiq.ui.components.ParticleField
 import xyz.metiq.ui.components.RatePromptBanner
@@ -149,16 +154,16 @@ private data class AmbientSound(
 )
 
 private val AMBIENT_SOUNDS = listOf(
-    AmbientSound("seawaves", R.string.ambient_seawaves, Color(0xFF3A7BD5), iconVector = Icons.Outlined.Waves),
-    AmbientSound("rain", R.string.ambient_rain, Color(0xFF6C5CE7), iconVector = Icons.Outlined.WaterDrop),
-    AmbientSound("fire", R.string.ambient_fire, Color(0xFFE8662B), iconVector = Icons.Outlined.LocalFireDepartment),
-    AmbientSound("birds", R.string.ambient_birds, Color(0xFF4CAF7D), iconResId = R.drawable.ic_ambient_birds),
-    AmbientSound("cafe", R.string.ambient_cafe, Color(0xFFB8862B), iconVector = Icons.Outlined.Storefront),
-    AmbientSound("wind", R.string.ambient_wind, Color(0xFF3AA6B9), iconVector = Icons.Outlined.Air),
+    AmbientSound("seawaves", R.string.ambient_seawaves, MetiqColors.AmbientSeawaves, iconVector = Icons.Outlined.Waves),
+    AmbientSound("rain", R.string.ambient_rain, MetiqColors.AmbientRain, iconVector = Icons.Outlined.WaterDrop),
+    AmbientSound("fire", R.string.ambient_fire, MetiqColors.AmbientFire, iconVector = Icons.Outlined.LocalFireDepartment),
+    AmbientSound("birds", R.string.ambient_birds, MetiqColors.AmbientBirds, iconResId = R.drawable.ic_ambient_birds),
+    AmbientSound("cafe", R.string.ambient_cafe, MetiqColors.AmbientCafe, iconVector = Icons.Outlined.Storefront),
+    AmbientSound("wind", R.string.ambient_wind, MetiqColors.AmbientWind, iconVector = Icons.Outlined.Air),
 )
 
 private const val AMBIENT_DEFAULT_VOLUME = 0.7f
-private val AMBIENT_TILE_ARGB = Color(0xFF3A7BD5).toArgb()
+private val AMBIENT_TILE_ARGB = MetiqColors.AmbientSeawaves.toArgb()
 
 private data class MixPreset(
     val id: String,
@@ -211,14 +216,12 @@ private val BUTTON_HEIGHT: Dp = 94.dp
 private val AMBIENT_CELL_WIDTH: Dp = 104.dp
 private const val WAVE_OVERSHOOT = 1.8f
 
-// Mixer bar morphs out of the "Off" pill: pill thins into a slim track, widens to the full
-// cell, and a large light thumb scales in. Container height = thumb so it never clips.
 private val MIXER_THUMB_SIZE: Dp = 16.dp
 private val MIXER_TRACK_HEIGHT: Dp = 6.dp
 private val MIXER_PILL_HEIGHT: Dp = 26.dp
 private const val MIXER_OFF_WIDTH_FRACTION = 0.42f
+private val MIXER_OFF_LABEL_PADDING: Dp = 10.dp
 
-// Total animated dots shared across all active ambient force fields (split evenly per sound).
 private const val AMBIENT_PARTICLE_TOTAL = 90
 
 @Composable
@@ -229,6 +232,7 @@ fun HomeScreen(
     onFadeSeconds: (Float) -> Unit,
     onTimerFadeSeconds: (Float) -> Unit,
     onRequestAudioFocus: (Boolean) -> Unit,
+    onThemePreference: (ThemePreference) -> Unit,
     onTimerPresets: (List<Long>) -> Unit,
     onCustomMixes: (List<CustomMix>) -> Unit,
     onLanguageTag: (String?) -> Unit,
@@ -237,6 +241,7 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
     var showLicenses by remember { mutableStateOf(false) }
     var binder by remember { mutableStateOf<PlaybackService.EngineBinder?>(null) }
     var controller by remember { mutableStateOf<MediaController?>(null) }
@@ -491,7 +496,13 @@ fun HomeScreen(
             )
         },
     ) { padding ->
-      Box(modifier = Modifier.fillMaxSize()) {
+      Box(
+          modifier = Modifier
+              .fillMaxSize()
+              .pointerInput(Unit) {
+                  detectTapGestures { focusManager.clearFocus() }
+              },
+      ) {
         if (tab == HomeTab.SETTINGS) {
             Column(
                 modifier = Modifier
@@ -519,6 +530,7 @@ fun HomeScreen(
                     onFadeSeconds = onFadeSeconds,
                     onTimerFadeSeconds = onTimerFadeSeconds,
                     onRequestAudioFocus = onRequestAudioFocus,
+                    onThemePreference = onThemePreference,
                     onTimerPresets = onTimerPresets,
                     onLanguageTag = onLanguageTag,
                     onOpenLicenses = { showLicenses = true },
@@ -572,7 +584,7 @@ fun HomeScreen(
                 val perField = (AMBIENT_PARTICLE_TOTAL / activeAmbient.size).coerceAtLeast(1)
                 activeAmbient.forEach { sound ->
                     ParticleField(
-                        color = lerp(sound.accent, Color.White, 0.40f),
+                        color = lerp(sound.accent, tokens.accentHighlight, 0.40f),
                         count = perField,
                         seed = sound.id.hashCode().toLong(),
                         modifier = Modifier.fillMaxSize(),
@@ -583,11 +595,12 @@ fun HomeScreen(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 20.dp),
+                    .padding(start = CONTENT_HORIZONTAL_PADDING, end = CONTENT_HORIZONTAL_PADDING, top = 20.dp),
             ) {
                 Image(
                     painter = painterResource(R.drawable.logo_metiq),
                     contentDescription = stringResource(R.string.app_name),
+                    colorFilter = ColorFilter.tint(tokens.logo),
                     modifier = Modifier
                         .align(Alignment.Center)
                         .height(32.dp),
@@ -611,7 +624,7 @@ fun HomeScreen(
                     .fillMaxSize()
                     .padding(top = 72.dp)
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
+                    .padding(start = CONTENT_HORIZONTAL_PADDING, end = CONTENT_HORIZONTAL_PADDING, bottom = 24.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -813,7 +826,7 @@ private fun ColorButton(
     ) {
         if (waveOn) {
             WaveRings(
-                color = palette.fill,
+                color = palette.wave,
                 diameter = BUTTON_HEIGHT,
                 modifier = Modifier
                     .wrapContentSize(align = Alignment.Center, unbounded = true)
@@ -892,8 +905,8 @@ private fun MetiqBottomBar(
     val itemColors = NavigationBarItemDefaults.colors(
         selectedIconColor = tokens.background,
         selectedTextColor = tokens.textPrimary,
-        unselectedIconColor = tokens.textPrimary.copy(alpha = 0.6f),
-        unselectedTextColor = tokens.textPrimary.copy(alpha = 0.6f),
+        unselectedIconColor = tokens.textSecondary,
+        unselectedTextColor = tokens.textSecondary,
         indicatorColor = tokens.textPrimary,
     )
     NavigationBar(containerColor = tokens.background) {
@@ -950,9 +963,7 @@ private fun TabIcon(vector: ImageVector, playing: Boolean, accent: Color) {
     }
 }
 
-// Horizontal padding the parent scroll column applies to its children; the preset
-// row escapes it so its scroll viewport reaches the foreground card edges.
-private val CONTENT_HORIZONTAL_PADDING = 20.dp
+private val CONTENT_HORIZONTAL_PADDING = 12.dp
 private val MIX_EDGE_FADE_WIDTH = 24.dp
 
 @Composable
@@ -984,7 +995,7 @@ private fun MixPresets(
                 if (scroll.value > 0) {
                     drawRect(
                         brush = Brush.horizontalGradient(
-                            0f to Color.Transparent, 1f to Color.Black,
+                            0f to Color.Transparent, 1f to tokens.scrim,
                             startX = 0f, endX = fade,
                         ),
                         size = Size(fade, size.height),
@@ -994,7 +1005,7 @@ private fun MixPresets(
                 if (scroll.value < scroll.maxValue) {
                     drawRect(
                         brush = Brush.horizontalGradient(
-                            0f to Color.Black, 1f to Color.Transparent,
+                            0f to tokens.scrim, 1f to Color.Transparent,
                             startX = size.width - fade, endX = size.width,
                         ),
                         topLeft = Offset(size.width - fade, 0f),
@@ -1068,7 +1079,7 @@ private fun MixChip(
             Icon(
                 imageVector = trailingIcon,
                 contentDescription = stringResource(R.string.mix_delete_confirm),
-                tint = content.copy(alpha = 0.7f),
+                tint = content.copy(alpha = tokens.accentIconAlpha),
                 modifier = Modifier
                     .size(18.dp)
                     .clip(CircleShape)
@@ -1084,22 +1095,20 @@ private fun SaveMixButton(
     onClick: () -> Unit,
 ) {
     val tokens = LocalMetiqColors.current
-    val contentAlpha = if (enabled) 1f else 0.4f
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (enabled) 1f else tokens.disabledAlpha,
+        animationSpec = tween(durationMillis = ALPHA_ANIM_MS),
+        label = "saveMixAlpha",
+    )
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(100.dp))
-            .background(tokens.textPrimary.copy(alpha = 0.12f))
+            .background(tokens.cellBackground)
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Icon(
-            imageVector = Icons.Outlined.Add,
-            contentDescription = null,
-            tint = tokens.textPrimary.copy(alpha = contentAlpha),
-            modifier = Modifier.size(16.dp),
-        )
         Text(
             text = stringResource(R.string.mix_save_chip),
             color = tokens.textPrimary.copy(alpha = contentAlpha),
@@ -1108,6 +1117,12 @@ private fun SaveMixButton(
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
             ),
+        )
+        Icon(
+            imageVector = Icons.Outlined.Add,
+            contentDescription = null,
+            tint = tokens.textPrimary.copy(alpha = contentAlpha),
+            modifier = Modifier.size(16.dp),
         )
     }
 }
@@ -1166,9 +1181,10 @@ private fun AmbientOrb(
     onVolume: (Float) -> Unit,
     onVolumeSettled: () -> Unit,
 ) {
+    val tokens = LocalMetiqColors.current
     val label = stringResource(sound.labelRes)
-    val orbFill = lerp(sound.accent, Color.White, 0.40f)
-    val iconTint = lerp(sound.accent, Color.Black, 0.55f)
+    val orbFill = lerp(sound.accent, tokens.accentHighlight, 0.40f)
+    val iconTint = lerp(sound.accent, tokens.accentShade, 0.55f)
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1238,7 +1254,10 @@ private fun MixerControl(
 ) {
     val tokens = LocalMetiqColors.current
     val trackColor = tokens.cellBackground
-    val thumbColor = lerp(accent, Color.White, 0.40f)
+    val thumbColor = lerp(accent, tokens.accentHighlight, 0.40f)
+    val offLabel = stringResource(R.string.ambient_off)
+    val offLabelStyle = TextStyle(fontFamily = Inter, fontSize = 12.sp)
+    val textMeasurer = rememberTextMeasurer()
     val t by animateFloatAsState(
         targetValue = if (active) 1f else 0f,
         animationSpec = tween(durationMillis = 320),
@@ -1257,6 +1276,7 @@ private fun MixerControl(
         modifier = Modifier
             .fillMaxWidth()
             .height(MIXER_THUMB_SIZE)
+            .padding(horizontal = 4.dp)
             .pointerInput(active) {
                 if (!active) return@pointerInput
                 detectTapGestures { offset ->
@@ -1281,7 +1301,12 @@ private fun MixerControl(
             // Pill (off) thins down to a slim track (on) and widens to the full cell.
             val barH = MIXER_PILL_HEIGHT.toPx() +
                 (MIXER_TRACK_HEIGHT.toPx() - MIXER_PILL_HEIGHT.toPx()) * t
-            val barW = (MIXER_OFF_WIDTH_FRACTION + (1f - MIXER_OFF_WIDTH_FRACTION) * t) * w
+            // Off pill is at least wide enough for the label + padding, so long
+            // translations don't spill past its edges; it still widens to full on.
+            val labelW = textMeasurer.measure(offLabel, offLabelStyle).size.width +
+                MIXER_OFF_LABEL_PADDING.toPx() * 2f
+            val offW = maxOf(MIXER_OFF_WIDTH_FRACTION * w, labelW)
+            val barW = offW + (w - offW) * t
             val barLeft = (w - barW) / 2f
             val corner = CornerRadius(barH / 2f, barH / 2f)
             drawRoundRect(
@@ -1307,18 +1332,19 @@ private fun MixerControl(
         }
         if (t < 0.999f) {
             Text(
-                text = stringResource(R.string.ambient_off),
-                color = tokens.textPrimary.copy(alpha = 0.5f * (1f - t)),
-                style = TextStyle(fontFamily = Inter, fontSize = 12.sp),
+                text = offLabel,
+                color = tokens.textPrimary.copy(alpha = tokens.disabledAlpha * (1f - t)),
+                style = offLabelStyle,
             )
         }
     }
 }
 
-@Preview(name = "Home", showBackground = true, backgroundColor = 0xFF111010)
+@Preview(name = "Home · Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Home · Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 private fun HomeScreenPreview() {
-    MetiqTheme {
+    MetiqTheme(darkTheme = isSystemInDarkTheme()) {
         HomeScreen(
             settings = DEFAULT_SETTINGS,
             onParticlesEnabled = {},
@@ -1326,6 +1352,7 @@ private fun HomeScreenPreview() {
             onFadeSeconds = {},
             onTimerFadeSeconds = {},
             onRequestAudioFocus = {},
+            onThemePreference = {},
             onTimerPresets = {},
             onCustomMixes = {},
             onLanguageTag = {},

@@ -1,5 +1,6 @@
 package xyz.metiq.ui.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -85,7 +86,7 @@ fun RatePromptBanner(
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
-                    tint = Color(0xFFFFC65A),
+                    tint = tokens.ratingStar,
                     modifier = Modifier.size(24.dp),
                 )
                 Spacer(Modifier.width(14.dp))
@@ -102,7 +103,7 @@ fun RatePromptBanner(
                     Spacer(Modifier.height(6.dp))
                     Text(
                         text = message,
-                        color = tokens.textPrimary.copy(alpha = 0.6f),
+                        color = tokens.textSecondary,
                         style = TextStyle(fontFamily = Inter, fontSize = 12.sp, lineHeight = 16.sp),
                     )
                 }
@@ -116,7 +117,7 @@ fun RatePromptBanner(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(R.string.rate_prompt_dismiss_cd),
-                        tint = tokens.textPrimary.copy(alpha = 0.5f),
+                        tint = tokens.textSecondary,
                         modifier = Modifier.size(18.dp),
                     )
                 }
@@ -136,14 +137,14 @@ fun RatePromptBanner(
                 if (showFeedback) {
                     ActionPill(
                         label = stringResource(R.string.rate_prompt_feedback_cta),
-                        background = tokens.textPrimary.copy(alpha = 0.12f),
+                        background = tokens.subtleFill,
                         foreground = tokens.textPrimary,
                         onClick = onFeedback,
                     )
                 }
                 ActionPill(
                     label = stringResource(R.string.rate_prompt_donate_cta),
-                    background = tokens.textPrimary.copy(alpha = 0.12f),
+                    background = tokens.subtleFill,
                     foreground = tokens.textPrimary,
                     onClick = onDonate,
                 )
@@ -155,7 +156,7 @@ fun RatePromptBanner(
 @Preview(name = "Rate prompt · Play", showBackground = true, backgroundColor = 0xFF222121)
 @Composable
 private fun RatePromptBannerPlayPreview() {
-    MetiqTheme {
+    MetiqTheme(darkTheme = isSystemInDarkTheme()) {
         RatePromptBanner(
             showFeedback = false,
             message = "Rate on Play Store or donate to keep it free.",
@@ -172,7 +173,7 @@ private fun RatePromptBannerPlayPreview() {
 @Preview(name = "Rate prompt · F-Droid", showBackground = true, backgroundColor = 0xFF222121)
 @Composable
 private fun RatePromptBannerFdroidPreview() {
-    MetiqTheme {
+    MetiqTheme(darkTheme = isSystemInDarkTheme()) {
         RatePromptBanner(
             showFeedback = true,
             message = "Star us on GitHub, tell us what you miss, or donate.",

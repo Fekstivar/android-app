@@ -1,5 +1,6 @@
 package xyz.metiq.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -84,7 +85,7 @@ fun LicensesScreen(onBack: () -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.licenses_intro),
-                color = tokens.textPrimary.copy(alpha = 0.7f),
+                color = tokens.textSecondary,
                 style = TextStyle(fontFamily = Inter, fontSize = 14.sp, lineHeight = 18.sp),
             )
             Spacer(Modifier.height(4.dp))
@@ -110,15 +111,15 @@ private fun LicenseCard(entry: LicenseEntry) {
             color = tokens.textPrimary,
             style = TextStyle(
                 fontFamily = Inter,
-                fontSize = 16.sp,
+                fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
             ),
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = stringResource(entry.bodyRes),
-            color = tokens.textPrimary.copy(alpha = 0.75f),
-            style = TextStyle(fontFamily = Inter, fontSize = 15.sp, lineHeight = 18.sp),
+            color = tokens.textSecondary,
+            style = TextStyle(fontFamily = Inter, fontSize = 14.sp, lineHeight = 18.sp),
         )
     }
 }
@@ -126,7 +127,7 @@ private fun LicenseCard(entry: LicenseEntry) {
 @Preview(name = "Licenses — dark", showBackground = true, backgroundColor = 0xFF111010)
 @Composable
 private fun LicensesScreenDarkPreview() {
-    MetiqTheme {
+    MetiqTheme(darkTheme = isSystemInDarkTheme()) {
         LicensesScreen(onBack = {})
     }
 }

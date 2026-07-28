@@ -9,7 +9,7 @@
     <style name="Theme.Metiq" parent="Theme.Metiq.Base" />
 
     <style name="Theme.Metiq.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#111010</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="postSplashScreenTheme">@style/Theme.Metiq</item>
     </style>

@@ -52,6 +52,10 @@
     <string name="settings_request_focus_description">Pausa otro audio como música o pódcasts mientras suenan los sonidos.</string>
 
     <string name="settings_section_appearance">Apariencia</string>
+    <string name="settings_theme_label">Tema</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
     <string name="settings_particles_label">Partículas de fondo</string>
     <string name="settings_particles_description">Puntos animados detrás del color activo</string>
 
