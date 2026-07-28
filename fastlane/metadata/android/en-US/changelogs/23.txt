@@ -1,0 +1,2 @@
+• New: light theme, with a system/light/dark switcher in settings
+• Various visual polish and fixes

@@ -20,8 +20,8 @@ android {
         applicationId = "xyz.metiq"
         minSdk = 28
         targetSdk = 36
-        versionCode = 22
-        versionName = "0.11.0"
+        versionCode = 23
+        versionName = "0.12.0"
 
         vectorDrawables {
             useSupportLibrary = true
