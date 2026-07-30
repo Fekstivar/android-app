@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Metiq</string>
+
+    <!-- Help modal (opened from the circled question mark on the Noise/Ambient screens) -->
+    <string name="help_cd">Помощь</string>
+    <string name="help_title">Руководство</string>
+    <string name="home_helper">Тапните на цвет шума, чтобы начать воспроизведение, и ещё раз, чтобы остановить.\nУстановите таймер, если хотите, чтобы шум прервался автоматически.\nШум слишком звонкий? Смягчите его, добавив температуры в настройках.\nПредпочитаете более плавное начало и конец? Установите длину затухания в настройках.</string>
+    <string name="ambient_helper">Тапните на цветной круг, чтобы начать воспроизведение (в этот момент можно перетащить ползунок, чтобы установить уровень звука), и ещё раз, чтобы остановить.\nСохраните свой собственный микс с помощью "Сохранить микс", а для его удаления используйте значок корзины.\nПредпочитаете более плавное начало и конец? Установите длину затухания в настройках.</string>
+    <string name="dialog_ok" translatable="false">OK</string>
+
+    <!-- Bottom navigation tabs -->
+    <string name="tab_noise">Шум</string>
+    <string name="tab_ambient">Эмбиент</string>
+    <string name="tab_settings">Настройки</string>
+
+    <!-- Ambient mixer -->
+    <string name="ambient_off">Off</string>
+    <string name="ambient_now_playing">Эмбиент-микс</string>
+    <string name="ambient_seawaves">Морские волны</string>
+    <string name="ambient_rain">Дождь</string>
+    <string name="ambient_fire">Треск огня</string>
+    <string name="ambient_birds">Щебетание птиц</string>
+    <string name="ambient_cafe">Кафе</string>
+    <string name="ambient_wind">Ветер</string>
+
+    <!-- Mix presets -->
+    <string name="mix_cabin">Уютная хижина</string>
+    <string name="mix_beach">Тропический пляж</string>
+    <string name="mix_bar">Переполненный бар</string>
+
+    <!-- Custom mixes -->
+    <string name="mix_save_chip">Сохранить микс</string>
+    <string name="mix_save_title">Сохранить микс</string>
+    <string name="mix_save_name_hint">Название</string>
+    <string name="mix_save_confirm">Сохранить</string>
+    <string name="mix_delete_title">Удалить микс?</string>
+    <string name="mix_delete_message">Микс “%1$s” будет удалён.</string>
+    <string name="mix_delete_confirm">Удалить</string>
+    <string name="dialog_cancel">Отмена</string>
+
+    <!-- Noise colors (used in UI labels and default-color picker) -->
+    <string name="color_pink">Розовый</string>
+    <string name="color_brown">Коричневый</string>
+    <string name="color_white">Белый</string>
+    <string name="color_grey">Серый</string>
+
+    <!-- Notification / lock-screen title per color (full localized phrase, not "%s noise") -->
+    <string name="noise_title_pink">Розовый шум</string>
+    <string name="noise_title_brown">Коричневый шум</string>
+    <string name="noise_title_white">Белый шум</string>
+    <string name="noise_title_grey">Серый шум</string>
+    <string name="noise_title_idle" translatable="false">Metiq</string>
+
+    <!-- Timer cells + preset chip formatters -->
+    <string name="timer_label">Таймер</string>
+    <string name="timer_start">Запустить таймер</string>
+    <string name="timer_stop">Остановить таймер</string>
+    <string name="timer_hours">Часы</string>
+    <string name="timer_minutes">Минуты</string>
+    <string name="timer_seconds">Секунды</string>
+    <string name="timer_preset_minutes" translatable="false">%1$dm</string>
+    <string name="timer_preset_hours" translatable="false">%1$dh</string>
+    <string name="timer_preset_hours_minutes" translatable="false">%1$dh %2$dm</string>
+
+    <!-- Settings: top bar -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_back_cd">Назад</string>
+
+    <!-- Settings: sound section -->
+    <string name="settings_section_sound">Звук</string>
+    <string name="settings_warmth_label">Температура</string>
+    <string name="settings_warmth_description">Снижает высокие частоты, чтобы смягчить резкость шума. Не влияет на эмбиент.</string>
+    <string name="settings_warmth_bright">Холодная</string>
+    <string name="settings_warmth_warm">Тёплая</string>
+    <string name="settings_fade_label">Затухание</string>
+    <string name="settings_fade_description">Плавность начала и окончания звуков.</string>
+    <string name="settings_fade_unit" translatable="false">s</string>
+    <string name="settings_timer_fade_label">Затухание после таймера</string>
+    <string name="settings_timer_fade_description">Длительность затухания, используемая при завершении воспроизведения окончанием таймера.</string>
+    <string name="settings_request_focus_label">Аудио-концентрация</string>
+    <string name="settings_request_focus_description">Ставит на паузу воспроизведение иных аудио на устройстве, таких как музыка или подкасты, если Metiq воспроизводит аудио.</string>
+
+    <!-- Settings: appearance section -->
+    <string name="settings_section_appearance">Внешний вид</string>
+    <string name="settings_theme_label">Тема</string>
+    <string name="settings_theme_system">Как в системе</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
+    <string name="settings_particles_label">Частицы</string>
+    <string name="settings_particles_description">Анимированные точки, появляющиеся на фоне при воспроизведении шума или эмбиента.</string>
+
+    <!-- Settings: language section -->
+    <string name="settings_section_language">Язык</string>
+    <string name="settings_language_label">Язык</string>
+    <string name="settings_language_system">Язык системы</string>
+    <string name="settings_language_english" translatable="false">English</string>
+    <string name="settings_language_italian" translatable="false">Italiano</string>
+    <string name="settings_language_spanish" translatable="false">Español</string>
+    <string name="settings_language_french" translatable="false">Français</string>
+    <string name="settings_language_portuguese" translatable="false">Português</string>
+     <string name="settings_language_russian" translatable="false">Русский</string>
+
+    <!-- Settings: timer presets section -->
+    <string name="settings_section_timer_presets">Пресеты для таймера (минуты)</string>
+    <string name="settings_timer_unit_min">мин.</string>
+    <string name="settings_timer_save">Сохранить пресеты</string>
+
+    <!-- Settings: support section -->
+    <string name="settings_section_support">Поддержка</string>
+    <string name="settings_rate_label">Оцените Metiq в %1$s</string>
+    <string name="settings_donate_description">Metiq бесплатен навсегда благодаря чаевым.</string>
+    <string name="settings_donate_kofi_label">Купите нам кофе с помощью Ko-fi</string>
+    <string name="settings_donate_github_label">Поддержите нас на GitHub</string>
+
+    <!-- Rate prompt (swipeable note) -->
+    <string name="rate_prompt_title">Нравится Metiq?</string>
+    <string name="rate_prompt_message">Оцените Metiq в %1$s или поддержите монетой, чтобы Metiq продолжал оставаться бесплатным.</string>
+    <string name="rate_prompt_cta">Оценить</string>
+    <string name="rate_prompt_feedback_cta">Обратная связь</string>
+    <string name="rate_prompt_donate_cta">Поддержать</string>
+    <string name="rate_prompt_dismiss_cd">Скрыть</string>
+
+    <!-- Settings: about section -->
+    <string name="settings_section_about">О приложении</string>
+    <string name="settings_about_version">Версия</string>
+    <string name="settings_about_open_licenses">Лицензии с открытым исходным кодом</string>
+
+    <!-- Licenses screen -->
+    <string name="licenses_title">Лицензии с открытым исходным кодом</string>
+    <string name="licenses_intro">Metiq основан на чужих работах. Их лицензии прилагаются.</string>
+    <string name="licenses_inter_title" translatable="false">Inter</string>
+    <string name="licenses_inter_body" translatable="false">Variable font by Rasmus Andersson, used as the app\'s display + body typeface. Licensed under the SIL Open Font License 1.1. Full license text: https://openfontlicense.org</string>
+    <string name="licenses_apache2_title" translatable="false">Apache License 2.0</string>
+    <string name="licenses_apache2_body" translatable="false">Used by Jetpack Compose, Material 3, AndroidX Lifecycle, AndroidX DataStore, AndroidX AppCompat and AndroidX Media3. Full license text: https://www.apache.org/licenses/LICENSE-2.0</string>
+    <string name="licenses_kotlin_title" translatable="false">Kotlin standard library</string>
+    <string name="licenses_kotlin_body" translatable="false">Apache License 2.0. © JetBrains s.r.o. and Kotlin Programming Language contributors.</string>
+</resources>
+
