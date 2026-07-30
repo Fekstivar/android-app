@@ -1,0 +1,2 @@
+• Nuevo: tema claro, con un selector sistema/claro/oscuro en ajustes
+• Varios retoques visuales y correcciones

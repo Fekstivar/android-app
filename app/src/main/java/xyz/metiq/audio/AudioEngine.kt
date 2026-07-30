@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,6 +57,12 @@ class AudioEngine(private val context: Context) {
 
     private val layers = ConcurrentHashMap<String, Layer>()
 
+    // In-flight startLayer coroutines keyed by id. Registered synchronously so a
+    // second tap can't spin up a duplicate, and a stop can cancel a start that
+    // hasn't finished registering its Layer yet (otherwise it becomes an orphan
+    // track that keeps playing and can't be stopped).
+    private val startJobs = ConcurrentHashMap<String, Job>()
+
     private val feederScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var masterVolume: Float = 1f
 
@@ -94,26 +101,45 @@ class AudioEngine(private val context: Context) {
     private fun appliedVolume(l: Layer): Float =
         (l.volume * masterVolume * l.fadeFactor).coerceIn(0f, 1f)
 
-    suspend fun startLayer(
+    // Fire-and-forget: the engine owns the coroutine so a stop can cancel it. Returns
+    // immediately without starting a duplicate if the id is already playing or a start
+    // is already in flight.
+    fun startLayer(
         id: String,
         assetPath: String,
         volume: Float = 1f,
         warmthEligible: Boolean = false,
     ) {
-        if (layers.containsKey(id)) return
-        val pcm = PcmStore.awaitPcm(context, id, assetPath)
-        // Every layer streams through a small (~85 ms) buffer: playback begins
-        // after one block instead of waiting for a full static-track upload —
-        // a 45 s ambient loop as a MODE_STATIC track needs a multi-MB AudioFlinger
-        // allocation plus a blocking copy of the whole PCM, which added hundreds
-        // of milliseconds between tap and sound. Noise layers additionally run
-        // through the live warmth low-pass.
-        val track = withContext(Dispatchers.IO) { buildStreamTrack(pcm, 0f) }
-        val feeder = launchFeeder(track, pcm, filtered = warmthEligible)
-        val layer = Layer(track, volume, warmthEligible, feeder)
-        layer.fadeFactor = 0f
-        layers[id] = layer
-        rampIn(layer)
+        if (layers.containsKey(id) || startJobs.containsKey(id)) return
+        val job = feederScope.launch {
+            // Tolerate missing/undecodable assets: the layer just stays unstarted.
+            val pcm = try {
+                PcmStore.awaitPcm(context, id, assetPath)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Throwable) {
+                return@launch
+            }
+            // Every layer streams through a small (~85 ms) buffer: playback begins
+            // after one block instead of waiting for a full static-track upload —
+            // a 45 s ambient loop as a MODE_STATIC track needs a multi-MB AudioFlinger
+            // allocation plus a blocking copy of the whole PCM, which added hundreds
+            // of milliseconds between tap and sound. Noise layers additionally run
+            // through the live warmth low-pass.
+            val track = withContext(Dispatchers.IO) { buildStreamTrack(pcm, 0f) }
+            // A stop cancelled us during the async work — never register the track.
+            if (!isActive) {
+                runCatching { track.release() }
+                return@launch
+            }
+            val feeder = launchFeeder(track, pcm, filtered = warmthEligible)
+            val layer = Layer(track, volume, warmthEligible, feeder)
+            layer.fadeFactor = 0f
+            layers[id] = layer
+            rampIn(layer)
+        }
+        job.invokeOnCompletion { startJobs.remove(id, job) }
+        startJobs[id] = job
     }
 
     // Ramps the layer's gain from wherever it currently is up to full,
@@ -260,6 +286,9 @@ class AudioEngine(private val context: Context) {
     }
 
     fun stopLayer(id: String, fadeMs: Long = fadeMillis) {
+        // Cancel any in-flight start so a stop that races the start doesn't leave an
+        // orphaned track playing (the start aborts before registering its Layer).
+        startJobs.remove(id)?.cancel()
         // Removed from the map immediately so a quick re-tap starts a fresh layer;
         // this one fades out detached and tears itself down at the end.
         val l = layers.remove(id) ?: return
@@ -346,6 +375,8 @@ class AudioEngine(private val context: Context) {
     // cancel the in-flight jobs — never the scopes.
     fun release() {
         fadeJob?.cancel()
+        startJobs.values.forEach { it.cancel() }
+        startJobs.clear()
         for ((_, l) in layers) {
             l.fadeJob?.cancel()
             if (l.feeder != null) {

@@ -1,7 +1,6 @@
 package xyz.metiq
 
 import android.app.Application
-import androidx.appcompat.app.AppCompatDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,7 +14,6 @@ class MetiqApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         settings = SettingsRepository(this)
         PcmStore.preloadAll(this)
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate).launch {

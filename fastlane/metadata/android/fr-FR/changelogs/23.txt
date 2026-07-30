@@ -1,0 +1,2 @@
+• Nouveau : thème clair, avec un sélecteur système/clair/sombre dans les paramètres
+• Diverses améliorations visuelles et corrections

@@ -1,5 +1,7 @@
 package xyz.metiq.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,8 +50,9 @@ import kotlinx.coroutines.delay
 import xyz.metiq.R
 import xyz.metiq.ui.theme.Inter
 import xyz.metiq.ui.theme.LocalMetiqColors
-import xyz.metiq.ui.theme.MetiqColors
 import kotlin.time.Duration.Companion.seconds
+
+internal const val ALPHA_ANIM_MS = 300
 
 internal enum class TimerField {
     HOURS, MINUTES, SECONDS
@@ -157,14 +160,21 @@ fun SleepTimer(
     presetsSeconds: List<Long>,
     modifier: Modifier = Modifier,
 ) {
-    val blockAlpha = if (enabled) 1f else MetiqColors.DisabledAlpha
+    val tokens = LocalMetiqColors.current
+    val blockAlpha by animateFloatAsState(
+        targetValue = if (enabled) 1f else tokens.disabledAlpha,
+        animationSpec = tween(durationMillis = ALPHA_ANIM_MS),
+        label = "timerBlockAlpha",
+    )
     Column(
-        modifier = modifier.alpha(blockAlpha).fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.alpha(blockAlpha),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             TimerCell(
-                modifier = Modifier.weight(1f),
                 label = stringResource(R.string.timer_hours),
                 liveValue = hoursFor(state.remainingSeconds),
                 isEditing = state.editField == TimerField.HOURS,
@@ -175,7 +185,6 @@ fun SleepTimer(
                 enabled = enabled && !state.running,
             )
             TimerCell(
-                modifier = Modifier.weight(1f),
                 label = stringResource(R.string.timer_minutes),
                 liveValue = minutesFor(state.remainingSeconds),
                 isEditing = state.editField == TimerField.MINUTES,
@@ -186,7 +195,6 @@ fun SleepTimer(
                 enabled = enabled && !state.running,
             )
             TimerCell(
-                modifier = Modifier.weight(1f),
                 label = stringResource(R.string.timer_seconds),
                 liveValue = secondsFor(state.remainingSeconds),
                 isEditing = state.editField == TimerField.SECONDS,
@@ -199,7 +207,7 @@ fun SleepTimer(
         }
         Spacer(Modifier.height(12.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().alpha(blockAlpha),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -238,18 +246,22 @@ private fun presetLabel(seconds: Long): String {
 @Composable
 private fun StartStopButton(running: Boolean, enabled: Boolean, onClick: () -> Unit) {
     val tokens = LocalMetiqColors.current
-    val bg = if (running) tokens.textPrimary else tokens.cellBackground
-    val fg = if (running) tokens.background else tokens.textPrimary
+    val buttonAlpha by animateFloatAsState(
+        targetValue = if (enabled) 1f else tokens.disabledAlpha,
+        animationSpec = tween(durationMillis = ALPHA_ANIM_MS),
+        label = "startStopAlpha",
+    )
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(100.dp))
-            .background(bg)
+            .alpha(buttonAlpha)
+            .background(tokens.textPrimary)
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Text(
             text = stringResource(if (running) R.string.timer_stop else R.string.timer_start),
-            color = fg,
+            color = tokens.foreground,
             style = TextStyle(fontFamily = Inter, fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
         )
     }
@@ -333,7 +345,7 @@ private fun TimerCell(
         Spacer(Modifier.height(4.dp))
         Text(
             text = label,
-            color = tokens.textPrimary.copy(alpha = 0.7f),
+            color = tokens.textSecondary,
             style = TextStyle(fontFamily = Inter, fontSize = 14.sp),
         )
     }

@@ -19,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import xyz.metiq.ui.theme.LocalMetiqColors
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -40,6 +41,7 @@ fun WaveRings(
         ),
         label = "phase",
     )
+    val maxAlpha = LocalMetiqColors.current.waveMaxAlpha
     Canvas(modifier = modifier) {
         val center = Offset(size.width / 2f, size.height / 2f)
         val baseRadius = diameter.toPx() / 2f
@@ -47,7 +49,7 @@ fun WaveRings(
         repeat(ringCount) { i ->
             val p = (phase + i.toFloat() / ringCount) % 1f
             val scale = 1f + p * 0.6f
-            val alpha = (1f - p) * 0.9f
+            val alpha = (1f - p) * maxAlpha
             drawCircle(
                 color = color.copy(alpha = alpha),
                 radius = baseRadius * scale,
@@ -65,11 +67,11 @@ private class Particle(
     val speed: Float,
 )
 
-private fun newParticle(rng: Random): Particle = Particle(
+private fun newParticle(rng: Random, baseAlpha: Float, alphaJitter: Float): Particle = Particle(
     x = rng.nextFloat(),
     y = rng.nextFloat(),
     radiusDp = 1.2f + rng.nextFloat() * 1.2f,
-    alpha = 0.2f + rng.nextFloat() * 0.4f,
+    alpha = baseAlpha + rng.nextFloat() * alphaJitter,
     speed = 0.012f + rng.nextFloat() * 0.018f,
 )
 
@@ -93,8 +95,11 @@ fun ParticleField(
     seed: Long = 0xC0FFEE,
     intensity: Float = 1f,
 ) {
+    val tokens = LocalMetiqColors.current
     val rng = remember(seed) { Random(seed) }
-    val particles = remember(count, seed) { List(count) { newParticle(rng) } }
+    val particles = remember(count, seed) {
+        List(count) { newParticle(rng, tokens.particleBaseAlpha, tokens.particleAlphaJitter) }
+    }
     var frameTime by remember { mutableLongStateOf(0L) }
     LaunchedEffect(Unit) {
         var last = 0L

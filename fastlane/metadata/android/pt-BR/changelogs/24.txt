@@ -1,0 +1,1 @@
+• Corrigido um áudio distorcido e travado que podia ocorrer ao tocar num som muito rapidamente

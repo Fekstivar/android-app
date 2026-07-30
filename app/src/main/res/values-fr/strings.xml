@@ -52,6 +52,10 @@
     <string name="settings_request_focus_description">Met en pause les autres sons (musique, podcasts) pendant la lecture.</string>
 
     <string name="settings_section_appearance">Apparence</string>
+    <string name="settings_theme_label">Thème</string>
+    <string name="settings_theme_system">Système</string>
+    <string name="settings_theme_light">Clair</string>
+    <string name="settings_theme_dark">Sombre</string>
     <string name="settings_particles_label">Particules d\'arrière-plan</string>
     <string name="settings_particles_description">Points animés derrière la couleur active</string>
 

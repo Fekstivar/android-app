@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.os.SystemClock
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,17 +28,24 @@ class MainActivity : AppCompatActivity() {
         }
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
-        }
         val app = application as MetiqApp
         setContent {
             val settings by app.settings.flow.collectAsState(initial = DEFAULT_SETTINGS)
             val ratePromptVisible by app.settings.ratePromptVisible.collectAsState(initial = false)
             val scope = rememberCoroutineScope()
             val repo = app.settings
-            MetiqTheme {
+            val darkTheme = when (settings.themePreference) {
+                ThemePreference.DARK -> true
+                ThemePreference.LIGHT -> false
+                ThemePreference.SYSTEM -> isSystemInDarkTheme()
+            }
+            LaunchedEffect(darkTheme) {
+                WindowInsetsControllerCompat(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !darkTheme
+                    isAppearanceLightNavigationBars = !darkTheme
+                }
+            }
+            MetiqTheme(darkTheme = darkTheme) {
                 HomeScreen(
                     settings = settings,
                     onParticlesEnabled = { scope.launch { repo.setParticlesEnabled(it) } },
@@ -44,6 +53,7 @@ class MainActivity : AppCompatActivity() {
                     onFadeSeconds = { scope.launch { repo.setFadeSeconds(it) } },
                     onTimerFadeSeconds = { scope.launch { repo.setTimerFadeSeconds(it) } },
                     onRequestAudioFocus = { scope.launch { repo.setRequestAudioFocus(it) } },
+                    onThemePreference = { scope.launch { repo.setThemePreference(it) } },
                     onTimerPresets = { scope.launch { repo.setTimerPresetsSeconds(it) } },
                     onCustomMixes = { scope.launch { repo.setCustomMixes(it) } },
                     onLanguageTag = { scope.launch { repo.setLanguageTag(it) } },
